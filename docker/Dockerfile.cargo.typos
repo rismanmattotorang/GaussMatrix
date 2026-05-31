@@ -1,0 +1,21 @@
+# syntax = docker/dockerfile:1.11-labs
+
+FROM input AS typos
+ARG rust_toolchain="nightly"
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG typos_args=""
+
+WORKDIR /usr/src/tuwunel
+RUN <<EOF
+    set -eux
+    rustup run ${rust_toolchain} \
+        typos \
+            --color always \
+            --exclude docker \
+            --exclude nix \
+            --exclude RELEASE.md \
+            --exclude 'tests/complement/*.jsonl' \
+            --exclude 'docs/development/compliance/msc.md' \
+            ${typos_args}
+EOF

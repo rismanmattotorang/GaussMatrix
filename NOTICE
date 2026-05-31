@@ -1,0 +1,57 @@
+GaussMatrix
+Copyright (c) 2026 Gaussian Technologies
+
+This product is licensed under the Apache License, Version 2.0 (the "License").
+You may obtain a copy of the License in the accompanying LICENSE file or at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+================================================================================
+ATTRIBUTION
+================================================================================
+
+GaussMatrix is a derivative work built on the Tuwunel codebase. GaussMatrix
+adopts Tuwunel's architecture, protocol behaviour, and on-disk compatibility as
+its specification and extends it toward a sovereign, horizontally-scalable,
+agentic-AI-ready Matrix homeserver.
+
+  Tuwunel — High Performance Matrix Homeserver in Rust
+  https://github.com/matrix-construct/tuwunel
+  Licensed under the Apache License, Version 2.0.
+
+Tuwunel is itself the successor to conduwuit and Conduit. GaussMatrix gratefully
+acknowledges the contributors of the entire lineage:
+
+  - Tuwunel Contributors
+  - conduwuit Contributors      (https://github.com/girlbossceo/conduwuit)
+  - Conduit Contributors        (https://gitlab.com/famedly/conduit)
+  - Timo Kösters
+  - June Clementine Strawberry
+  - Jason Volk
+
+In accordance with Section 4 of the Apache License 2.0, files modified by
+Gaussian Technologies carry the GaussMatrix branding while retaining the
+original copyright, patent, trademark, and attribution notices of the upstream
+work.
+
+================================================================================
+THIRD-PARTY / ECOSYSTEM COMPONENTS
+================================================================================
+
+GaussMatrix builds on the broader Matrix ecosystem, including but not limited to:
+
+  - The Matrix Specification    https://spec.matrix.org/        (Matrix.org Foundation)
+  - ruma                        https://github.com/ruma/ruma
+  - vodozemac                   https://github.com/matrix-org/vodozemac
+
+Each third-party dependency is distributed under its own license; see the
+respective project and the Cargo dependency tree for details.
+
+================================================================================
+TRADEMARKS
+================================================================================
+
+"Matrix" is a trademark of The Matrix.org Foundation C.I.C. GaussMatrix is an
+independent implementation of the Matrix protocol and is not endorsed by or
+affiliated with The Matrix.org Foundation. "GaussMatrix", "GaussInteract", and
+"Gaussian Technologies" are marks of Gaussian Technologies.

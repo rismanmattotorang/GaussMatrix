@@ -1,0 +1,10 @@
+use ruma::OwnedRoomId;
+use tuwunel_core::Result;
+
+use crate::admin_command;
+
+#[admin_command]
+pub(super) async fn directory_unpublish(&self, room_id: OwnedRoomId) -> Result {
+	self.services.directory.set_not_public(&room_id);
+	self.write_str("Room unpublished").await
+}

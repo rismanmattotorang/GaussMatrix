@@ -1,0 +1,1051 @@
+#cargo-features = ["profile-rustflags"]
+
+[workspace]
+resolver = "2"
+members = ["src/*"]
+default-members = ["src/*"]
+
+[workspace.package]
+authors = [
+	"Gaussian Technologies <engineering@gaussian.tech>",
+	"GaussMatrix Platform Engineering Group",
+	# Upstream lineage — GaussMatrix builds on the Tuwunel codebase (Apache-2.0).
+	"Tuwunel Contributors",
+	"Conduwuit Contributors",
+	"Conduit Contributors",
+	"Timo Kösters <timo@koesters.xyz>",
+	"June Clementine Strawberry <june@girlboss.ceo>",
+	"Jason Volk <jason@zemos.net>",
+]
+categories = ["network-programming"]
+description = "GaussMatrix — a sovereign, agentic-AI-ready Matrix homeserver in Rust by Gaussian Technologies."
+# also update edition in rustfmt.toml
+edition = "2024"
+homepage = "https://gaussmatrix.dev"
+keywords = [
+	"matrix",
+	"homeserver",
+	"agentic-ai",
+	"federation",
+	"sovereign",
+]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/rismanmattotorang/gaussmatrix"
+rust-version = "1.94.0"
+version = "1.7.0"
+
+[workspace.metadata.crane]
+name = "tuwunel"
+
+#
+# Dependencies
+#
+
+[workspace.dependencies.argon2]
+version = "0.5"
+default-features = false
+features = [
+	"alloc",
+	"rand",
+]
+
+[workspace.dependencies.arrayvec]
+version = "0.7"
+features = ["serde"]
+
+[workspace.dependencies.async-channel]
+version = "2.3.1"
+
+[workspace.dependencies.async-trait]
+version = "0.1"
+
+[workspace.dependencies.axum]
+version = "0.8"
+default-features = false
+features = [
+	"form",
+	"http1",
+	"http2",
+	"json",
+	"matched-path",
+	"tokio",
+	"tracing",
+]
+
+[workspace.dependencies.axum-extra]
+version = "0.12"
+default-features = false
+features = [
+	"cookie",
+	"typed-header",
+	"tracing",
+]
+
+[workspace.dependencies.axum-server]
+version = "0.8"
+default-features = false
+
+[workspace.dependencies.axum-server-dual-protocol]
+git = "https://github.com/matrix-construct/axum-server-dual-protocol"
+rev = "76c782fa6f129f83ffdca59e903093e798d4a82f"
+default-features = false
+
+[workspace.dependencies.base64]
+version = "0.22"
+default-features = false
+
+[workspace.dependencies.blurhash]
+version = "0.2"
+default-features = false
+features = [
+	"fast-linear-to-srgb",
+	"image",
+]
+
+[workspace.dependencies.bytes]
+version = "1.11"
+
+[workspace.dependencies.bytesize]
+version = "2.3"
+default-features = false
+features = ["serde", "std"]
+
+[workspace.dependencies.cargo_toml]
+version = "0.22"
+default-features = false
+features = ["features"]
+
+[workspace.dependencies.checked_ops]
+version = "0.1"
+
+[workspace.dependencies.chrono]
+version = "0.4"
+features = ["alloc", "std"]
+default-features = false
+
+[workspace.dependencies.clap]
+version = "4.6"
+default-features = false
+features = [
+	"derive",
+	"env",
+	"error-context",
+	"help",
+	"std",
+	"string",
+	"usage",
+]
+
+[workspace.dependencies.console-subscriber]
+version = "0.5"
+
+[workspace.dependencies.core_affinity]
+version = "0.8.3"
+
+[workspace.dependencies.const-str]
+version = "1.1"
+features = ["proc"]
+
+[workspace.dependencies.criterion]
+version = "0.8"
+default-features = false
+features = [
+	"cargo_bench_support",
+	"async_futures",
+	"async_tokio",
+]
+
+[workspace.dependencies.ctor]
+version = "1.0"
+
+[workspace.dependencies.dtor]
+version = "1.0"
+
+[workspace.dependencies.cyborgtime]
+version = "2.1"
+
+[workspace.dependencies.derive_more]
+version = "2.1"
+default-features = false
+features = ["debug"]
+
+[workspace.dependencies.either]
+version = "1.15"
+default-features = false
+features = ["serde"]
+
+[workspace.dependencies.figment]
+version = "0.10"
+default-features = false
+features = ["env", "toml"]
+
+[workspace.dependencies.futures]
+version = "0.3"
+default-features = false
+features = [
+	"async-await",
+	"std",
+]
+
+[workspace.dependencies.hickory-resolver]
+version = "0.26"
+default-features = false
+features = [
+	"serde",
+	"system-config",
+	"tokio",
+]
+
+[workspace.dependencies.hmac]
+version = "0.12"
+default-features = false
+
+[workspace.dependencies.http]
+version = "1.4"
+
+[workspace.dependencies.http-body-util]
+version = "0.1"
+
+[workspace.dependencies.hyper]
+version = "1.8"
+default-features = false
+features = [
+	"server",
+	"http1",
+	"http2",
+]
+
+[workspace.dependencies.image]
+version = "0.25"
+default-features = false
+features = [
+	"jpeg",
+	"png",
+	"gif",
+	"webp",
+]
+
+[workspace.dependencies.insta]
+version = "1.47"
+features = [
+	"json",
+]
+
+[workspace.dependencies.ipaddress]
+version = "0.1"
+
+[workspace.dependencies.ipnet]
+version = "2.12"
+features = [
+	"serde",
+]
+
+[workspace.dependencies.itertools]
+version = "0.14"
+
+[workspace.dependencies.jevmalloc]
+git = "https://github.com/matrix-construct/jevmalloc"
+rev = "93795449913f65ab533b7fa482333eef63fc3ae0"
+
+[workspace.dependencies.jsonwebtoken]
+version = "10.3"
+default-features = false
+features = [
+	"aws_lc_rs",
+	"ed25519-dalek",
+	"hmac",
+	"sha2",
+	"use_pem",
+]
+
+[workspace.dependencies.ldap3]
+git = "https://github.com/matrix-construct/ldap3"
+rev = "fdfbba2bf916b53e5f73cdb1a495ebb649978079"
+default-features = false
+features = ["sync", "tls-rustls"]
+
+[workspace.dependencies.libc]
+version = "0.2"
+
+[workspace.dependencies.libloading]
+version = "0.9"
+
+[workspace.dependencies.log]
+version = "0.4"
+default-features = false
+
+[workspace.dependencies.loole]
+version = "0.4"
+
+[workspace.dependencies.lru-cache]
+version = "0.1"
+
+[workspace.dependencies.maplit]
+version = "1.0"
+
+[workspace.dependencies.minicbor]
+version = "2.2"
+features = ["std"]
+
+[workspace.dependencies.minicbor-serde]
+version = "0.6"
+features = ["std"]
+
+[workspace.dependencies.nix]
+version = "0"
+default-features = false
+features = [
+	"resource",
+	"socket",
+	"user",
+]
+
+[workspace.dependencies.num_cpus]
+version = "1"
+
+[workspace.dependencies.num-traits]
+version = "0.2"
+
+[workspace.dependencies.object_store]
+version = "0.13"
+default-features = false
+features = [
+	"aws",
+	"fs",
+	"tls-webpki-roots",
+]
+
+[workspace.dependencies.opentelemetry]
+version = "0.32"
+
+[workspace.dependencies.opentelemetry-otlp]
+version = "0.32"
+default-features = false
+features = [
+	"grpc-tonic",
+	"trace",
+]
+
+[workspace.dependencies.opentelemetry_sdk]
+version = "0.32"
+
+[workspace.dependencies.pin-project-lite]
+version = "0.2"
+
+[workspace.dependencies.proc-macro2]
+version = "1.0"
+
+[workspace.dependencies.quote]
+version = "1.0"
+
+[workspace.dependencies.rand]
+version = "0.10"
+
+[workspace.dependencies.regex]
+version = "1.12"
+
+[workspace.dependencies.reqwest]
+version = "0.13"
+default-features = false
+features = [
+	"charset",
+	"http2",
+	"json",
+	"rustls",
+	"socks",
+]
+
+[workspace.dependencies.ring]
+version = "0.17"
+default-features = false
+
+[workspace.dependencies.ruma]
+git = "https://github.com/matrix-construct/ruma"
+rev = "439210cf2b07f8c5aa6de98f3ae1575abe8762b8"
+features = [
+    "__compat",
+    "appservice-api-c",
+    "client-api",
+    "client-api-s",
+    "compat-upload-signatures",
+    "federation-api",
+    "identifiers-validation",
+    "identity-service-api",
+    "markdown",
+    "push-gateway-api-c",
+    "rand",
+    "ring-compat",
+    "unstable-msc2448",
+    "unstable-msc2666",
+    "unstable-msc2815",
+    "unstable-msc2867",
+    "unstable-msc2870",
+    "unstable-msc3026",
+    "unstable-msc3061",
+    "unstable-msc3391",
+    "unstable-msc3814",
+    "unstable-msc3824",
+    "unstable-msc3245",
+    "unstable-msc3381", # polls
+    "unstable-msc3489", # beacon / live location
+    "unstable-msc3930", # polls push rules
+    "unstable-msc4075",
+    "unstable-msc4095",
+    "unstable-msc4121",
+    "unstable-msc4125",
+    "unstable-msc4133",
+    "unstable-msc4143",
+    "unstable-msc4186",
+    "unstable-msc4195",
+    "unstable-msc4203", # sending to-device events to appservices
+    "unstable-msc4265",
+    "unstable-msc4266",
+    "unstable-msc4310",
+    "unstable-msc4311",
+    "unstable-msc4383",
+    "unstable-msc4439",
+    "unstable-msc4466",
+    "unstable-extensible-events",
+]
+
+[workspace.dependencies.rustls]
+version = "0.23"
+default-features = false
+features = ["aws_lc_rs", "logging", "tls12", "prefer-post-quantum"]
+
+[workspace.dependencies.rustyline-async]
+version = "0.4.6"
+default-features = false
+
+[workspace.dependencies.rust-rocksdb]
+git = "https://github.com/matrix-construct/rust-rocksdb"
+rev = "c11395350bc1f2090a0152f2d15c8c5847821eba"
+default-features = false
+features = [
+	"bzip2",
+	"lto",
+	"lz4",
+	"multi-threaded-cf",
+	"serde1",
+	"zstd",
+	"zstd-static-linking-only",
+]
+
+[workspace.dependencies.sanitize-filename]
+version = "0.6"
+
+[workspace.dependencies.sd-notify]
+version = "0.5"
+default-features = false
+
+[workspace.dependencies.sentry]
+version = "0.48"
+default-features = false
+features = [
+    "backtrace",
+    "contexts",
+    "debug-images",
+    "panic",
+    "rustls",
+    "tower",
+    "tower-http",
+    "tracing",
+    "reqwest",
+    "log",
+]
+
+[workspace.dependencies.sentry-tower]
+version = "0.48"
+
+[workspace.dependencies.sentry-tracing]
+version = "0.48"
+
+[workspace.dependencies.serde]
+version = "1.0"
+default-features = false
+features = ["rc"]
+
+[workspace.dependencies.serde_core]
+version = "1.0"
+default-features = false
+
+[workspace.dependencies.serde_html_form]
+version = "0.4"
+
+[workspace.dependencies.serde_json]
+version = "1.0"
+default-features = false
+features = ["raw_value"]
+
+[workspace.dependencies.serde_regex]
+version = "1.1"
+
+[workspace.dependencies.serde_yaml]
+version = "0.9"
+
+[workspace.dependencies.sha1]
+version = "0.10"
+default-features = false
+
+[workspace.dependencies.sha2]
+version = "0.10"
+default-features = false
+
+[workspace.dependencies.similar]
+version = "3.1"
+
+[workspace.dependencies.smallstr]
+version = "0.3"
+features = [
+	"ffi",
+	"serde",
+	"std",
+	"union",
+]
+
+[workspace.dependencies.smallvec]
+version = "1.15"
+features = [
+	"const_generics",
+	"const_new",
+	"serde",
+	"union",
+	"write",
+]
+
+[workspace.dependencies.syn]
+version = "2.0"
+default-features = false
+features = [
+	"extra-traits",
+	"full",
+	"parsing",
+	"proc-macro",
+	"printing",
+]
+
+[workspace.dependencies.termimad]
+version = "0.34"
+default-features = false
+
+[workspace.dependencies.thiserror]
+version = "2.0"
+default-features = false
+
+[workspace.dependencies.tokio]
+version = "1.52"
+default-features = false
+features = [
+	"fs",
+	"net",
+	"macros",
+	"sync",
+	"signal",
+	"time",
+	"rt-multi-thread",
+	"io-util",
+	"tracing",
+]
+
+[workspace.dependencies.tokio-metrics]
+version = "0.5"
+
+[workspace.dependencies.toml]
+version = "1.0"
+default-features = false
+features = ["parse", "serde"]
+
+[workspace.dependencies.tower]
+version = "0.5"
+default-features = false
+features = ["util"]
+
+[workspace.dependencies.tower-http]
+version = "0.6"
+default-features = false
+features = [
+    "add-extension",
+    "catch-panic",
+    "cors",
+    "sensitive-headers",
+    "set-header",
+    "timeout",
+    "trace",
+    "util",
+]
+
+[workspace.dependencies.tracing]
+version = "=0.1.43"
+default-features = false
+
+[workspace.dependencies.tracing-core]
+version = "0.1"
+default-features = false
+
+[workspace.dependencies.tracing-flame]
+version = "0.2"
+
+[workspace.dependencies.tracing-opentelemetry]
+version = "0.33"
+
+[workspace.dependencies.tracing-subscriber]
+version = "0.3"
+default-features = false
+features = [
+	"ansi",
+	"env-filter",
+	"fmt",
+	"tracing",
+	"tracing-log",
+]
+
+[workspace.dependencies.url]
+version = "2.5"
+default-features = false
+features = ["serde"]
+
+[workspace.dependencies.webpage]
+version = "2.0"
+default-features = false
+
+[workspace.dependencies.webpki-root-certs]
+version = "1.0"
+
+#
+# Patches
+#
+
+# adds a tab completion callback:
+# https://github.com/girlbossceo/rustyline-async/commit/de26100b0db03e419a3d8e1dd26895d170d1fe50
+# adds event for CTRL+\:
+# https://github.com/girlbossceo/rustyline-async/commit/67d8c49aeac03a5ef4e818f663eaa94dd7bf339b
+[patch.crates-io.rustyline-async]
+git = "https://github.com/matrix-construct/rustyline-async"
+rev = "ba743cae940659e95d7b8604bbd6fdd755171c8c"
+
+# adds LIFO queue scheduling; this should be updated with PR progress.
+[patch.crates-io.event-listener]
+git = "https://github.com/matrix-construct/event-listener"
+rev = "fe4aebeeaae435af60087ddd56b573a2e0be671d"
+[patch.crates-io.async-channel]
+git = "https://github.com/matrix-construct/async-channel"
+rev = "92e5e74063bf2a3b10414bcc8a0d68b235644280"
+
+# adds affinity masks for selecting more than one core at a time
+[patch.crates-io.core_affinity]
+git = "https://github.com/matrix-construct/core_affinity_rs"
+rev = "ff148c2985cbaff3e6e953d45cda4d7696f38d75"
+
+# reverts hyperium#148 conflicting with our delicate federation resolver hooks
+[patch.crates-io.hyper-util]
+git = "https://github.com/matrix-construct/hyper-util"
+rev = "a3f59c4e51af19570a9f92839ecfe0ad6482e9e5"
+
+# allows no-aaaa option in resolv.conf
+# bumps rust edition and toolchain to 1.86.0 and 2024
+# use sat_add on line number errors
+[patch.crates-io.resolv-conf]
+git = "https://github.com/matrix-construct/resolv-conf"
+rev = "200e958941d522a70c5877e3d846f55b5586c68d"
+
+#
+# Our crates
+#
+
+[workspace.dependencies.tuwunel-router]
+package = "tuwunel_router"
+path = "src/router"
+default-features = false
+
+[workspace.dependencies.tuwunel-admin]
+package = "tuwunel_admin"
+path = "src/admin"
+default-features = false
+
+[workspace.dependencies.tuwunel-api]
+package = "tuwunel_api"
+path = "src/api"
+default-features = false
+
+[workspace.dependencies.tuwunel-service]
+package = "tuwunel_service"
+path = "src/service"
+default-features = false
+
+[workspace.dependencies.tuwunel-database]
+package = "tuwunel_database"
+path = "src/database"
+default-features = false
+
+[workspace.dependencies.tuwunel-core]
+package = "tuwunel_core"
+path = "src/core"
+default-features = false
+
+[workspace.dependencies.tuwunel-macros]
+package = "tuwunel_macros"
+path = "src/macros"
+default-features = false
+
+###############################################################################
+#
+# Release profiles
+#
+
+[profile.release]
+strip = "symbols"
+lto = "thin"
+
+# release profile with debug symbols
+[profile.release-debuginfo]
+inherits = "release"
+debug = "full"
+strip = "none"
+
+[profile.release-debuginfo.package.'*']
+debug = "limited"
+
+# do not use without profile-rustflags enabled. uncomment ALL the sections for
+# profile.release-native
+[profile.release-native]
+inherits = "release"
+lto = "fat"
+#rustflags = [
+#	'-Ctarget-cpu=native',
+#	'-Ztune-cpu=native',
+#	'-Ctarget-feature=+crt-static',
+#	'-Crelocation-model=static',
+#	'-Ztls-model=local-exec',
+#	'-Zinline-mir=true',
+#	'-Zmir-opt-level=3',
+#	'-Ztime-passes',
+#	'-Ztime-llvm-passes',
+#]
+
+[profile.release-native.build-override]
+inherits = "release-native"
+opt-level = 0
+codegen-units = 32
+#rustflags = [
+#	'-Crelocation-model=pic',
+#	'-Ctarget-feature=-crt-static',
+#	'-Clink-arg=-Wl,--no-gc-sections',
+#]
+
+[profile.release-native.package.tuwunel_macros]
+inherits = "release-native.build-override"
+#rustflags = [
+#	'-Crelocation-model=pic',
+#	'-Ctarget-feature=-crt-static',
+#]
+
+[profile.bench]
+strip = "none"
+#rustflags = [
+#	"-Cremark=all",
+#	'-Ztime-passes',
+#	'-Ztime-llvm-passes',
+#]
+
+###############################################################################
+#
+# Developer profile
+#
+
+# To enable hot-reloading:
+# 1. Uncomment all of the rustflags here.
+# 2. Uncomment crate-type=dylib in src/*/Cargo.toml
+#
+# opt-level, mir-opt-level, validate-mir are not known to interfere with reloading
+# and can be raised if build times are tolerable.
+
+[profile.dev]
+debug = 0
+#rustflags = [
+#	'--cfg', 'tuwunel_mods',
+#	'-Ztime-passes',
+#	'-Zmir-opt-level=0',
+#	'-Zvalidate-mir=false',
+#	'-Ztls-model=global-dynamic',
+#	'-Cprefer-dynamic=true',
+#	'-Zstaticlib-prefer-dynamic=true',
+#	'-Zstaticlib-allow-rdylib-deps=true',
+#	'-Zpacked-bundled-libs=false',
+#	'-Zplt=true',
+#	'-Crpath=true',
+#	'-Clink-arg=-Wl,--as-needed',
+#	'-Clink-arg=-Wl,--allow-shlib-undefined',
+#	'-Clink-arg=-Wl,-z,keep-text-section-prefix',
+#	'-Clink-arg=-Wl,-z,lazy',
+#]
+
+[profile.dev.package.tuwunel_core]
+incremental = false
+#rustflags = [
+#	'--cfg', 'tuwunel_mods',
+#	'-Ztime-passes',
+#	'-Zmir-opt-level=0',
+#	'-Ztls-model=initial-exec',
+#	'-Cprefer-dynamic=true',
+#	'-Zstaticlib-prefer-dynamic=true',
+#	'-Zstaticlib-allow-rdylib-deps=true',
+#	'-Zpacked-bundled-libs=false',
+#	'-Zplt=true',
+#	'-Clink-arg=-Wl,--as-needed',
+#	'-Clink-arg=-Wl,--allow-shlib-undefined',
+#	'-Clink-arg=-Wl,-z,lazy',
+#	'-Clink-arg=-Wl,-z,unique',
+#	'-Clink-arg=-Wl,-z,nodlopen',
+#	'-Clink-arg=-Wl,-z,nodelete',
+#]
+
+[profile.dev.package.tuwunel]
+#rustflags = [
+#	'--cfg', 'tuwunel_mods',
+#	'-Ztime-passes',
+#	'-Zmir-opt-level=0',
+#	'-Zvalidate-mir=false',
+#	'-Ztls-model=global-dynamic',
+#	'-Cprefer-dynamic=true',
+#	'-Zexport-executable-symbols=true',
+#	'-Zplt=true',
+#	'-Crpath=true',
+#	'-Clink-arg=-Wl,--as-needed',
+#	'-Clink-arg=-Wl,--allow-shlib-undefined',
+#	'-Clink-arg=-Wl,--export-dynamic',
+#	'-Clink-arg=-Wl,-z,lazy',
+#]
+
+[profile.dev.package.'*']
+debug = 0
+strip = "symbols"
+opt-level = 'z'
+incremental = false
+#rustflags = [
+#	'--cfg', 'tuwunel_mods',
+#	'-Ztls-model=global-dynamic',
+#	'-Cprefer-dynamic=true',
+#	'-Zstaticlib-prefer-dynamic=true',
+#	'-Zstaticlib-allow-rdylib-deps=true',
+#	'-Zpacked-bundled-libs=true',
+#	'-Zplt=true',
+#	'-Clink-arg=-Wl,--as-needed',
+#	'-Clink-arg=-Wl,-z,lazy',
+#	'-Clink-arg=-Wl,-z,nodelete',
+#]
+
+# same as dev but slower.
+[profile.dbg]
+inherits = "dev"
+debug = "full"
+incremental = false
+
+[profile.dbg.package.'*']
+debug = "limited"
+codegen-units = 1
+opt-level = 'z'
+
+# primarily used for CI
+[profile.test]
+debug = "limited"
+incremental = false
+
+[profile.test.package.'*']
+debug = 0
+strip = "symbols"
+opt-level = 'z'
+
+###############################################################################
+#
+# Linting
+#
+
+[workspace.lints.rust]
+absolute-paths-not-starting-with-crate = "warn"
+#box-pointers = "warn"
+deprecated-in-future = "warn"
+elided-lifetimes-in-paths = "warn"
+explicit-outlives-requirements = "warn"
+ffi-unwind-calls = "warn"
+keyword-idents = "warn"
+macro-extended-temporary-scopes = "warn"
+macro-use-extern-crate = "warn"
+meta-variable-misuse = "warn"
+missing-abi = "warn"
+#missing-copy-implementations = "warn"                               # TODO
+#missing-debug-implementations = "warn"                              # TODO
+non-ascii-idents = "warn"
+rust-2021-incompatible-closure-captures = "warn"
+rust-2021-incompatible-or-patterns = "warn"
+rust-2021-prefixes-incompatible-syntax = "warn"
+rust-2021-prelude-collisions = "warn"
+semicolon-in-expressions-from-macros = "warn"
+single-use-lifetimes = "warn"
+trivial-casts = "warn"
+trivial-numeric-casts = "warn"
+unit-bindings = "warn"
+#unnameable-types = "warn"                                           # TODO
+unreachable-pub = "warn"
+unsafe-op-in-unsafe-fn = "warn"
+unstable-features = "warn"
+unused-extern-crates = "warn"
+unused-import-braces = "warn"
+unused-lifetimes = "warn"
+unused-macro-rules = "warn"
+unused-must-use = "warn"
+unused-qualifications = "warn"
+#unused-results = "warn"                                             # TODO
+
+## some sadness
+elided_named_lifetimes = "allow"                                     # TODO!
+mismatched_lifetime_syntaxes = "allow"                               # TODO!
+let_underscore_drop = "allow"
+missing_docs = "allow"
+# cfgs cannot be limited to expected cfgs or their de facto non-transitive/opt-in use-case e.g.
+# tokio_unstable will warn.
+unexpected_cfgs = "allow"
+# this seems to suggest broken code and is not working correctly
+unused_braces = "allow"
+# buggy, but worth checking on occasionally
+unused_crate_dependencies = "allow"
+unsafe_code = "allow"
+variant_size_differences = "allow"
+
+# we check nightly clippy lints
+unknown_lints = "allow"
+
+# rust claims elided_named_lifetimes has been replaced by
+# mismatched_lifetime_syntaxes but it actually has not.
+renamed_and_removed_lints = "allow"
+
+# nightly has a new lint that conflicts with our BoolExt trait at
+# src/core/utils/bool.rs:68:48
+# <https://github.com/rust-lang/rust/issues/142748>
+unstable_name_collisions = "allow"                                   # TODO
+
+#######################################
+#
+# Clippy lints
+#
+
+[workspace.lints.clippy]
+
+###################
+cargo = { level = "warn", priority = -1 }
+
+## some sadness
+multiple_crate_versions = { level = "allow", priority = 1 }
+
+###################
+complexity = { level = "warn", priority = -1 }
+
+# promotes forward-compat for literal ..default() construction
+needless_update = { level = "allow", priority = 1 }
+
+###################
+correctness = { level = "warn", priority = -1 }
+
+###################
+nursery = { level = "warn", priority = -1 }
+
+## some sadness
+missing_const_for_fn = { level = "allow", priority = 1 }             # TODO
+option_if_let_else = { level = "allow", priority = 1 }               # TODO
+redundant_pub_crate = { level = "allow", priority = 1 }              # TODO
+significant_drop_in_scrutinee = { level = "allow", priority = 1 }    # TODO
+significant_drop_tightening = { level = "allow", priority = 1 }      # TODO
+tuple_array_conversions = { level = "allow", priority = 1 }
+
+###################
+pedantic = { level = "warn", priority = -1 }
+
+## some sadness
+too_long_first_doc_paragraph = { level = "allow", priority = 1 }
+default_trait_access = { level = "allow", priority = 1 }
+doc_markdown = { level = "allow", priority = 1 }
+elidable_lifetime_names = { level = "allow", priority = 1 }
+enum_glob_use = { level = "allow", priority = 1 }
+if_not_else = { level = "allow", priority = 1 }
+if_then_some_else_none = { level = "allow", priority = 1 }
+inline_always = { level = "allow", priority = 1 }
+map_unwrap_or = { level = "allow", priority = 1 }
+match_bool = { level = "allow", priority = 1 }
+missing_docs_in_private_items = { level = "allow", priority = 1 }
+missing_errors_doc = { level = "allow", priority = 1 }
+missing_panics_doc = { level = "allow", priority = 1 }
+module_name_repetitions = { level = "allow", priority = 1 }
+needless_continue = { level = "allow", priority = 1 }
+no_effect_underscore_binding = { level = "allow", priority = 1 }
+similar_names = { level = "allow", priority = 1 }
+single_match_else = { level = "allow", priority = 1 }
+struct_excessive_bools = { level = "allow", priority = 1 }
+struct_field_names = { level = "allow", priority = 1 }
+unnecessary_wraps = { level = "allow", priority = 1 }
+
+###################
+perf = { level = "warn", priority = -1 }
+
+###################
+#restriction = "warn"
+
+arithmetic_side_effects = "warn"
+as_conversions = "warn"
+as_underscore = "warn"
+assertions_on_result_states = "warn"
+dbg_macro = "warn"
+default_union_representation = "warn"
+deref_by_slicing = "warn"
+empty_drop = "warn"
+empty_structs_with_brackets = "warn"
+exit = "warn"
+filetype_is_file = "warn"
+float_cmp_const = "warn"
+fn_to_numeric_cast_any = "warn"
+format_push_string = "warn"
+get_unwrap = "warn"
+impl_trait_in_params = "warn"
+let_underscore_untyped = "warn"
+lossy_float_literal = "warn"
+mem_forget = "warn"
+missing_assert_message = "warn"
+mutex_atomic = "warn"
+pub_without_shorthand = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+redundant_type_annotations = "warn"
+semicolon_outside_block = "warn"
+str_to_string = "warn"
+string_lit_chars_any = "warn"
+string_slice = "warn"
+implicit_clone = "warn"
+suspicious_xor_used_as_pow = "warn"
+tests_outside_test_module = "warn"
+try_err = "warn"
+undocumented_unsafe_blocks = "warn"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+unnecessary_self_imports = "warn"
+unneeded_field_pattern = "warn"
+unseparated_literal_suffix = "warn"
+unwrap_used = "warn"
+verbose_file_reads = "warn"
+
+###################
+style = { level = "warn", priority = -1 }
+
+## some sadness
+# trivial assertions are quite alright
+assertions_on_constants = { level = "allow", priority = 1 }
+module_inception = { level = "allow", priority = 1 }
+obfuscated_if_else = { level = "allow", priority = 1 }
+toplevel-ref-arg = { level = "allow", priority = 1 }
+
+###################
+suspicious = { level = "warn", priority = -1 }
+
+## some sadness
+let_underscore_future = { level = "allow", priority = 1 }
+
+# rust doesnt understand tuwunel's custom log macros
+literal_string_with_formatting_args = { level = "allow", priority = 1 }

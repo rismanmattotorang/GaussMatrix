@@ -1,0 +1,31 @@
+[book]
+authors = [
+	"Gaussian Technologies",
+]
+description = "GaussMatrix — a sovereign, agentic-AI-ready Matrix homeserver in Rust (built on the Tuwunel codebase)"
+language = "en"
+src = "docs"
+title = "GaussMatrix"
+text-direction = "ltr"
+
+[build]
+build-dir = "public"
+create-missing = true
+extra-watch-dirs = [
+	"debian",
+	"docker",
+	"docs",
+	"rpm",
+]
+
+[rust]
+edition = "2024"
+
+[output.html]
+git-repository-url = "https://github.com/rismanmattotorang/gaussmatrix"
+edit-url-template = "https://github.com/rismanmattotorang/gaussmatrix/edit/main/{path}"
+git-repository-icon = "fab-github"
+additional-css = ["docs/override.css"]
+
+[output.html.search]
+limit-results = 15

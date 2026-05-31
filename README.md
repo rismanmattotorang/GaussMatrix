@@ -1,0 +1,202 @@
+# GaussMatrix
+
+![License](https://img.shields.io/badge/license-Apache--2.0-8A2BE2?style=flat-square)
+![Language](https://img.shields.io/badge/built%20with-Rust-8A2BE2?style=flat-square&logo=rust&logoColor=white)
+![Protocol](https://img.shields.io/badge/protocol-Matrix-098A09?style=flat-square)
+![Status](https://img.shields.io/badge/status-Phase%200%20%C2%B7%20foundation-8A2BE2?style=flat-square)
+
+<!-- ANCHOR: catchphrase -->
+
+## The sovereign, agentic-AI-native messaging server. By Gaussian Technologies.
+
+<!-- ANCHOR_END: catchphrase -->
+
+<!-- ANCHOR: body -->
+
+**GaussMatrix** is a Rust-native, federated communication server engineered for the
+era of agentic AI. It is the homeserver half of the GaussMatrix / GaussInteract
+platform — a clean-room, enterprise-grade evolution of the
+[Matrix](https://matrix.org/) protocol stack designed to outclass the centralised
+commercial field (Slack, Microsoft Teams, Discord) on the axes those products
+*structurally cannot move*: **data sovereignty, end-to-end encryption, memory
+safety, footprint, and a first-class, auditable agentic surface.**
+
+Where the incumbents bolt a cloud assistant onto a closed silo, GaussMatrix treats
+AI agents as **governed, cross-signed protocol participants** — scoped, mediated,
+E2EE-bound, and recorded in a tamper-evident audit log. An agent admitted to a room
+never enlarges that room's trust boundary beyond the humans who admitted it.
+
+> **Built on the shoulders of [Tuwunel](https://github.com/matrix-construct/tuwunel).**
+> A companion benchmark selected Tuwunel as the strongest open-source Rust Matrix
+> homeserver (aggregate 8.88/10). GaussMatrix adopts Tuwunel's architecture,
+> protocol behaviour, and on-disk compatibility as its specification, then hardens
+> and extends it toward an eleven-crate, horizontally-scalable, agentic platform.
+> Tuwunel is Apache-2.0 licensed; see [`NOTICE`](./NOTICE) for full attribution.
+
+### Why GaussMatrix
+
+| Pillar | What it means |
+| --- | --- |
+| 🛡️ **Sovereign** | Self-hosted and federated. Your data, your keys, your infrastructure — no third party holds the plaintext, ever. |
+| 🔒 **Audited E2EE** | End-to-end encryption delegated entirely to [`vodozemac`](https://github.com/matrix-org/vodozemac) (Olm/Megolm, cross-signing, secure key backup). No hand-rolled cryptography. |
+| 🦀 **Memory-safe by design** | Built in Rust with `forbid(unsafe_code)` across the workspace except small, isolated, audited storage/crypto crates. |
+| 🤖 **Agentic-native** | A native [Model Context Protocol](https://modelcontextprotocol.io/) gateway with capability scoping, human-in-the-loop approval, E2EE-aware mediation, and a hash-chained audit log. |
+| ⚡ **Horizontally scalable** | A room-sharded scaling model that lifts the single-process ceiling of the Conduit lineage — while the same binary collapses to a single-node deployment. |
+| 📦 **Operationally mature** | First-party container images, packages (Deb/RPM/Arch/Alpine/Nix), Helm charts, Prometheus metrics, and OpenTelemetry tracing. |
+
+### Architecture at a glance
+
+GaussMatrix is specified as an **eleven-crate Rust workspace** with a pluggable
+storage abstraction, a parallelised state-resolution engine, partial-state
+federation, and a consistent-hash room-sharding layer. The agentic gateway is a
+first-class ingress alongside the Client–Server / Server–Server / Application
+Service HTTP surfaces.
+
+```
+        Clients      ·      Federation peers      ·      AI agents (MCP)
+   ┌──────────────────────────────────────────────────────────────────┐
+   │  gm-http (CS/SS/AS)   gm-api (typed model)   gm-agent (MCP gw)     │
+   │  gm-svc:  rooms · sync · devices · push · admin                    │
+   │  gm-stateres (parallel RV1–12)  gm-fed (partial-state)  gm-e2ee    │
+   │  gm-shard: consistent-hash room placement & rebalancing            │
+   │  gm-store: pluggable trait · per-domain column families            │
+   │     Tuned RocksDB (single-node)   │   Distributed KV (sharded)     │
+   └──────────────────────────────────────────────────────────────────┘
+```
+
+> **Note on the current tree.** This repository currently contains the adopted
+> Tuwunel codebase, rebranded to GaussMatrix and prepared as the Phase-1
+> foundation. The eleven-crate `gm-*` decomposition above is the *target*
+> architecture delivered incrementally per the [roadmap](#development-roadmap)
+> and the full technical specification in
+> [`GaussMatrix-SPECS.pdf`](./GaussMatrix-SPECS.pdf).
+
+### Getting started
+
+GaussMatrix runs the full Matrix Client–Server, Server–Server, Application
+Service, and push surfaces, and federates with the public Matrix network.
+
+```sh
+# Clone
+git clone https://github.com/rismanmattotorang/gaussmatrix.git
+cd gaussmatrix
+
+# Build (Rust toolchain pinned via rust-toolchain.toml)
+cargo build --release
+
+# Configure: copy and edit the generated example config.
+# At minimum set `server_name` and `database_path`.
+cp gaussmatrix-example.toml gaussmatrix.toml
+$EDITOR gaussmatrix.toml
+
+# Run
+./target/release/tuwunel -c gaussmatrix.toml
+```
+
+> ℹ️ The compiled binary and internal crate names retain the `tuwunel` identifier
+> for now. A full crate/binary rename to the `gm-*` namespace is **Phase 0** of the
+> [roadmap](#development-roadmap); on-disk and protocol compatibility with the
+> Tuwunel/Conduit family is preserved so a Tuwunel data directory migrates by
+> binary swap.
+
+See the [documentation](./docs/introduction.md) for deployment guides (Docker,
+Podman, Kubernetes, Debian, Arch, NixOS, Red Hat, FreeBSD), reverse-proxy setup,
+and configuration reference.
+
+<!-- ANCHOR_END: body -->
+
+## Development roadmap
+
+GaussMatrix is delivered against the four-phase plan in the technical
+specification ([`GaussMatrix-SPECS.pdf`](./GaussMatrix-SPECS.pdf), §VII). Each
+phase is independently shippable; the linear, documented dependency between phases
+preserves auditability.
+
+### Phase 0 — Foundation & rebrand *(current)*
+- [x] Adopt the Tuwunel codebase as the GaussMatrix Phase-1 baseline.
+- [x] Rebrand public identity & metadata (README, workspace/package metadata,
+      mdBook config, generated configuration) to GaussMatrix / Gaussian Technologies.
+- [x] Establish attribution to Tuwunel and upstream lineage ([`NOTICE`](./NOTICE)).
+- [ ] Complete crate/binary rename from `tuwunel*` → `gm-*` / `gaussmatrix`,
+      including the `TUWUNEL_` environment-variable prefix and packaging units.
+- [ ] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
+
+### Phase 1 — Server core *(drop-in homeserver)*
+- [ ] `gm-store` pluggable storage trait with per-domain column families, generalising
+      Tuwunel's tuned RocksDB integration.
+- [ ] `gm-api` typed request/response model (extending `ruma`).
+- [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
+      Tuwunel/conduwuit data directory.
+- [ ] Full Client–Server / Server–Server conformance against the spec test suite.
+- [ ] `gm-stateres` parallel state-resolution engine (room versions 1–12) with a
+      resolved-state cache.
+
+### Phase 2 — Horizontal scale
+- [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.
+- [ ] Distributed KV storage backend behind the `gm-store` trait.
+- [ ] Sharded federation sender (per-destination, no head-of-line blocking) and
+      partial-state joins in `gm-fed`.
+- [ ] Shared object store for media addressed by content hash.
+
+### Phase 3 — Agentic AI layer
+- [ ] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge).
+- [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
+- [ ] Capability scoping (least-privilege grants as versioned room state) with
+      `auto` / `review` / `forbidden` action classification.
+- [ ] Human-in-the-loop approval surfaced in GaussInteract; E2EE-aware mediation.
+- [ ] Tamper-evident, hash-chained audit log in a dedicated storage column family.
+- [ ] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
+      `m.gauss.agent.tool_result`) for replayable, auditable interactions.
+
+### Phase 4 — Client parity (GaussInteract) & enterprise surface
+- [ ] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
+- [ ] One Flutter presentation layer over `gauss-core` via `uniffi` across Android,
+      iOS, Web (WASM), and Linux/macOS/Windows.
+- [ ] Agent surface in the client: agent membership, inline tool calls/results,
+      approval prompts, read-only audit view.
+- [ ] Enterprise features: SSO/OIDC, MDM configuration profiles, enforced key backup
+      & cross-signing, UnifiedPush, white-labelling.
+
+### Cross-cutting non-functional targets
+*(objectives from the specification, to be validated on the measurement harness — §VIII)*
+
+| Attribute | Target |
+| --- | --- |
+| Server scaling | Linear horizontal scaling by room shard; single-node mode preserved |
+| Server footprint | < 256 MB RSS idle on a single-node small deployment |
+| Send latency | p95 local send-to-sync < 150 ms; federation propagation p95 < 800 ms |
+| Memory safety | No `unsafe` outside audited, isolated crates; `forbid(unsafe_code)` elsewhere |
+| E2EE core | `vodozemac` only; no hand-rolled cryptography |
+| Agentic mediation | Agents never bypass room access control or E2EE; every action auditable |
+| Supply chain | Reproducible builds; `cargo deny` / `cargo audit` gates in CI |
+
+## Credits & attribution
+
+GaussMatrix is a derivative of **[Tuwunel](https://github.com/matrix-construct/tuwunel)**
+(the official successor to [conduwuit](https://github.com/girlbossceo/conduwuit) and
+[Conduit](https://gitlab.com/famedly/conduit)), used under the Apache License 2.0.
+We gratefully acknowledge the Tuwunel, conduwuit, and Conduit contributors, whose
+work forms the architectural and protocol foundation of this project. See
+[`NOTICE`](./NOTICE) for the complete attribution and license details.
+
+GaussMatrix also stands on the broader Matrix ecosystem — the
+[Matrix.org Foundation](https://matrix.org/), [`ruma`](https://github.com/ruma/ruma),
+and [`vodozemac`](https://github.com/matrix-org/vodozemac).
+
+## License
+
+GaussMatrix is licensed under the **Apache License 2.0**. See [`LICENSE`](./LICENSE)
+and [`NOTICE`](./NOTICE).
+
+---
+
+<!-- ANCHOR: footer -->
+
+<sub>GaussMatrix is a product of **Gaussian Technologies**, built on the
+[Tuwunel](https://github.com/matrix-construct/tuwunel) codebase (Apache-2.0). The
+Matrix trademark and specification belong to the Matrix.org Foundation;
+GaussMatrix is an independent implementation and is not endorsed by or affiliated
+with the Foundation.</sub>
+
+<!-- ANCHOR_END: footer -->
+
