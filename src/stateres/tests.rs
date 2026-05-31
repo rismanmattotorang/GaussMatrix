@@ -3,15 +3,16 @@
 use std::{cell::Cell, collections::BTreeSet};
 
 use crate::{
-	ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap, auth_difference,
-	conflicting_event_ids, mainline_ordering, partition, resolve,
-	reverse_topological_power_sort,
+	AuthRules, ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap,
+	auth_difference, conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition,
+	resolve, reverse_topological_power_sort,
 };
 
 /// A test event carrying just the fields the ordering needs.
 struct TestEvent {
 	id: EventId,
 	kind: String,
+	state_key: String,
 	power: i64,
 	ts: u64,
 	auth: Vec<EventId>,
@@ -26,8 +27,20 @@ impl TestEvent {
 		Self {
 			id: id.to_owned(),
 			kind: kind.to_owned(),
+			state_key: String::new(),
 			power,
 			ts,
+			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
+		}
+	}
+
+	fn state_event(id: &str, kind: &str, state_key: &str, auth: &[&str]) -> Self {
+		Self {
+			id: id.to_owned(),
+			kind: kind.to_owned(),
+			state_key: state_key.to_owned(),
+			power: 0,
+			ts: 0,
 			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
 		}
 	}
@@ -37,6 +50,8 @@ impl Event for TestEvent {
 	fn event_id(&self) -> &str { &self.id }
 
 	fn event_type(&self) -> &str { &self.kind }
+
+	fn state_key(&self) -> &str { &self.state_key }
 
 	fn power_level(&self) -> i64 { self.power }
 
@@ -309,4 +324,74 @@ fn mainline_without_power_levels_orders_by_ts_then_id() {
 	// No mainline → all depth zero → ordered by ts.
 	let order = mainline_ordering(None, &ids(&["$y", "$x"]), &s);
 	assert_eq!(order, vec!["$x", "$y"]);
+}
+
+/// Authorise every event.
+struct AcceptAll;
+impl AuthRules<TestEvent> for AcceptAll {
+	fn is_authorized(&self, _event: &TestEvent, _state: &StateMap) -> bool { true }
+}
+
+#[test]
+fn iterative_auth_checks_folds_authorized_events_into_state() {
+	let s = store(vec![
+		TestEvent::state_event("$pl", "m.room.power_levels", "", &[]),
+		TestEvent::state_event("$name", "m.room.name", "", &["$pl"]),
+	]);
+	let resolved = iterative_auth_checks(&ids(&["$pl", "$name"]), StateMap::new(), &s, &AcceptAll);
+	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
+	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$name"));
+}
+
+#[test]
+fn iterative_auth_checks_skips_rejected_events() {
+	struct RejectBad;
+	impl AuthRules<TestEvent> for RejectBad {
+		fn is_authorized(&self, event: &TestEvent, _state: &StateMap) -> bool {
+			event.event_id() != "$bad"
+		}
+	}
+
+	let s = store(vec![
+		TestEvent::state_event("$good", "m.room.name", "", &[]),
+		TestEvent::state_event("$bad", "m.room.topic", "", &[]),
+	]);
+	let resolved = iterative_auth_checks(&ids(&["$good", "$bad"]), StateMap::new(), &s, &RejectBad);
+	assert!(resolved.contains_key(&key("m.room.name", "")));
+	assert!(!resolved.contains_key(&key("m.room.topic", "")));
+}
+
+#[test]
+fn iterative_auth_checks_sees_state_resolved_so_far() {
+	// "$child" is only authorised once a power-levels event is in the state.
+	struct NeedsPowerLevels;
+	impl AuthRules<TestEvent> for NeedsPowerLevels {
+		fn is_authorized(&self, event: &TestEvent, state: &StateMap) -> bool {
+			event.event_id() != "$child"
+				|| state.contains_key(&key("m.room.power_levels", ""))
+		}
+	}
+
+	let s = store(vec![
+		TestEvent::state_event("$pl", "m.room.power_levels", "", &[]),
+		TestEvent::state_event("$child", "m.room.name", "", &[]),
+	]);
+
+	// Power levels first → child is authorised.
+	let ok = iterative_auth_checks(&ids(&["$pl", "$child"]), StateMap::new(), &s, &NeedsPowerLevels);
+	assert!(ok.contains_key(&key("m.room.name", "")));
+
+	// Child first → power levels not yet present → child is rejected.
+	let bad = iterative_auth_checks(&ids(&["$child", "$pl"]), StateMap::new(), &s, &NeedsPowerLevels);
+	assert!(!bad.contains_key(&key("m.room.name", "")));
+}
+
+#[test]
+fn iterative_auth_checks_preserves_base_state() {
+	let s = store(vec![TestEvent::state_event("$new", "m.room.name", "", &[])]);
+	let mut base = StateMap::new();
+	base.insert(key("m.room.topic", ""), "$existing".to_owned());
+	let resolved = iterative_auth_checks(&ids(&["$new"]), base, &s, &AcceptAll);
+	assert_eq!(resolved.get(&key("m.room.topic", "")).map(String::as_str), Some("$existing"));
+	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$new"));
 }

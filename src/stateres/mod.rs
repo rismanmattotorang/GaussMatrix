@@ -37,6 +37,7 @@
 
 #![forbid(unsafe_code)]
 
+mod auth;
 mod cache;
 mod event;
 mod order;
@@ -45,12 +46,13 @@ mod state_map;
 mod tests;
 
 pub use self::{
+	auth::{AuthRules, iterative_auth_checks},
 	cache::ResolvedStateCache,
 	event::Event,
 	order::{auth_difference, mainline_ordering, reverse_topological_power_sort},
 	state_map::{
-		ConflictedState, EventId, Partitioned, StateKey, StateMap, conflicting_event_ids,
-		partition,
+		ConflictedState, EventId, EventStore, Partitioned, StateKey, StateMap,
+		conflicting_event_ids, partition,
 	},
 };
 

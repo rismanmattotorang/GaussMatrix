@@ -11,14 +11,14 @@ use std::{
 	collections::{BTreeMap, BTreeSet, BinaryHeap},
 };
 
-use crate::{event::Event, state_map::EventId};
+use crate::{
+	event::Event,
+	state_map::{EventId, EventStore},
+};
 
 /// Events that depend on a given auth event (the reverse of the auth edges),
 /// used to drive Kahn's algorithm.
 type Dependents = BTreeMap<EventId, Vec<EventId>>;
-
-/// A by-id lookup of the events relevant to a resolution.
-type EventStore<E> = BTreeMap<EventId, E>;
 
 /// Mainline order index: each power-levels event on the mainline mapped to its
 /// position, counting from the mainline root (0) toward the resolved event.

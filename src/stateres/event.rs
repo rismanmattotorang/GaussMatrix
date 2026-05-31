@@ -16,6 +16,11 @@ pub trait Event {
 	/// This event's type (e.g. `m.room.power_levels`).
 	fn event_type(&self) -> &str;
 
+	/// This event's state key. State resolution only ever resolves state events,
+	/// so this is always present (the empty string for state events without a
+	/// meaningful key, such as `m.room.power_levels`).
+	fn state_key(&self) -> &str;
+
 	/// The effective power level of this event's sender, as determined by the
 	/// authorisation state against which the event is being ordered.
 	fn power_level(&self) -> i64;

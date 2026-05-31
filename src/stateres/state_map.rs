@@ -5,6 +5,10 @@ use std::collections::{BTreeMap, BTreeSet};
 /// A Matrix event identifier (e.g. `$abc:example.org`).
 pub type EventId = String;
 
+/// A by-id lookup of the events relevant to a resolution. Callers populate this
+/// with the conflicted events and the auth events along their chains.
+pub type EventStore<E> = BTreeMap<EventId, E>;
+
 /// A state key: the `(event_type, state_key)` pair that names one slot of room
 /// state (for example `("m.room.member", "@alice:example.org")`).
 pub type StateKey = (String, String);
