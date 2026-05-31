@@ -134,7 +134,8 @@ preserves auditability.
       RocksDB roundtrip and reopen-persistence tests. The service core now **holds a
       backend-agnostic `gm-store::DynStore`** (`Services.store`), opened by
       `store_provider` as a tuned RocksDB engine at `<database_path>/gm-store` for the
-      single-node profile. Next: migrating individual consumers onto the trait, then the
+      single-node profile. The first consumer — an append-only **`audit` service**
+      (`Domain::AuditLog`) — is wired onto it end-to-end. Next: more consumers, then the
       Phase-2 distributed backend.
 - [ ] `gm-api` typed request/response model (extending `ruma`).
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a

@@ -48,6 +48,7 @@ pub(crate) struct Args<'a> {
 	pub(crate) server: &'a Arc<Server>,
 	pub(crate) db: &'a Arc<Database>,
 	pub(crate) services: &'a Arc<OnceServices>,
+	pub(crate) store: &'a gm_store::DynStore,
 }
 
 /// Utility for service implementations; see Service::name() in the trait.
