@@ -9,7 +9,8 @@ use gaussmatrix_database::Database;
 
 pub(crate) use crate::OnceServices;
 use crate::{
-	account_data, admin, appservice, client, config, deactivate, emergency, federation, globals,
+	account_data, admin, appservice, audit, client, config, deactivate, emergency, federation,
+	globals,
 	key_backups,
 	manager::Manager,
 	media, membership, oauth, presence, pusher, registration_tokens, resolver,
