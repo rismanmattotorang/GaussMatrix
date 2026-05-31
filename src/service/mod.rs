@@ -5,10 +5,12 @@ mod migrations;
 mod once_services;
 mod service;
 pub mod services;
+mod store_provider;
 
 pub mod account_data;
 pub mod admin;
 pub mod appservice;
+pub mod audit;
 pub mod client;
 pub mod config;
 pub mod deactivate;

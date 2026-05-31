@@ -1,0 +1,28 @@
+[package]
+name = "gm-store"
+categories.workspace = true
+description = "GaussMatrix pluggable storage abstraction (gm-store): a backend-agnostic key/value trait with explicit per-domain column families."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gm_store"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[features]
+# The durable, tuned single-node RocksDB backend. Off by default so the
+# abstraction and its in-memory reference backend build without the native
+# RocksDB toolchain.
+rocksdb = ["dep:rust-rocksdb"]
+
+[dependencies]
+rust-rocksdb = { workspace = true, optional = true }
+
+[lints]
+workspace = true

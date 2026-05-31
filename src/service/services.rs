@@ -9,7 +9,8 @@ use gaussmatrix_database::Database;
 
 pub(crate) use crate::OnceServices;
 use crate::{
-	account_data, admin, appservice, client, config, deactivate, emergency, federation, globals,
+	account_data, admin, appservice, audit, client, config, deactivate, emergency, federation,
+	globals,
 	key_backups,
 	manager::Manager,
 	media, membership, oauth, presence, pusher, registration_tokens, resolver,
@@ -23,6 +24,7 @@ pub struct Services {
 	pub account_data: Arc<account_data::Service>,
 	pub admin: Arc<admin::Service>,
 	pub appservice: Arc<appservice::Service>,
+	pub audit: Arc<audit::Service>,
 	pub config: Arc<config::Service>,
 	pub client: Arc<client::Service>,
 	pub emergency: Arc<emergency::Service>,
@@ -68,22 +70,30 @@ pub struct Services {
 	manager: Mutex<Option<Arc<Manager>>>,
 	pub server: Arc<Server>,
 	pub db: Arc<Database>,
+
+	/// The Phase-1 pluggable storage handle (gm-store). Backend-agnostic;
+	/// backed by a tuned RocksDB engine in the single-node profile. Consumers
+	/// are migrated onto this incrementally; see `store_provider`.
+	pub store: gm_store::DynStore,
 }
 
 #[implement(Services)]
 pub async fn build(server: Arc<Server>) -> Result<Arc<Self>> {
 	let db = Database::open(&server).await?;
+	let store = crate::store_provider::open(&server)?;
 	let services = Arc::new(OnceServices::default());
 	let args = Args {
 		db: &db,
 		server: &server,
 		services: &services,
+		store: &store,
 	};
 
 	let res = Arc::new(Self {
 		account_data: account_data::Service::build(&args)?,
 		admin: admin::Service::build(&args)?,
 		appservice: appservice::Service::build(&args)?,
+		audit: audit::Service::build(&args)?,
 		resolver: resolver::Service::build(&args)?,
 		client: client::Service::build(&args)?,
 		config: config::Service::build(&args)?,
@@ -129,6 +139,7 @@ pub async fn build(server: Arc<Server>) -> Result<Arc<Self>> {
 		manager: Mutex::new(None),
 		server,
 		db,
+		store,
 	});
 
 	Ok(services.set(res))
@@ -146,6 +157,7 @@ pub(crate) fn services(&self) -> impl Iterator<Item = Arc<dyn Service>> + Send {
 		cast!(self.account_data),
 		cast!(self.admin),
 		cast!(self.appservice),
+		cast!(self.audit),
 		cast!(self.resolver),
 		cast!(self.client),
 		cast!(self.config),

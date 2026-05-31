@@ -131,6 +131,8 @@ blurhash.workspace = true
 blurhash.optional = true
 gaussmatrix-core.workspace = true
 gaussmatrix-database.workspace = true
+gm-store.workspace = true
+gm-store.features = ["rocksdb"]
 
 [dev-dependencies]
 criterion.workspace = true

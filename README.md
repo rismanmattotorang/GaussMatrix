@@ -124,9 +124,19 @@ preserves auditability.
       quadlets, install paths).
 - [ ] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
 
-### Phase 1 — Server core *(drop-in homeserver)*
-- [ ] `gm-store` pluggable storage trait with per-domain column families, generalising
-      Tuwunel's tuned RocksDB integration.
+### Phase 1 — Server core *(drop-in homeserver — in progress)*
+- [~] `gm-store` pluggable storage trait with per-domain column families, generalising
+      Tuwunel's tuned RocksDB integration. **Landed** (`src/store`): the backend-agnostic
+      `KvBackend` trait, the nine-domain column-family model, atomic `WriteBatch` commits,
+      the `Store` facade, an in-memory reference backend, and the durable single-node
+      **`RocksBackend`** (feature `rocksdb`) opening one column family per domain with
+      crash-consistent batch commits — covered by a unit/doctest suite plus
+      RocksDB roundtrip and reopen-persistence tests. The service core now **holds a
+      backend-agnostic `gm-store::DynStore`** (`Services.store`), opened by
+      `store_provider` as a tuned RocksDB engine at `<database_path>/gm-store` for the
+      single-node profile. The first consumer — an append-only **`audit` service**
+      (`Domain::AuditLog`) — is wired onto it end-to-end. Next: more consumers, then the
+      Phase-2 distributed backend.
 - [ ] `gm-api` typed request/response model (extending `ruma`).
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
