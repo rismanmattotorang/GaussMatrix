@@ -44,3 +44,8 @@ impl fmt::Display for StoreError {
 }
 
 impl Error for StoreError {}
+
+#[cfg(feature = "rocksdb")]
+impl From<rust_rocksdb::Error> for StoreError {
+	fn from(err: rust_rocksdb::Error) -> Self { Self::Backend(err.to_string()) }
+}

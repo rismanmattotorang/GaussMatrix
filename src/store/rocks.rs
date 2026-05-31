@@ -14,7 +14,7 @@ use std::{path::Path, sync::Arc};
 
 use rust_rocksdb::{
 	BoundColumnFamily, ColumnFamilyDescriptor, DBCompressionType, DBWithThreadMode, Direction,
-	Error as RocksError, IteratorMode, MultiThreaded, Options, WriteBatch as RocksWriteBatch,
+	IteratorMode, MultiThreaded, Options, WriteBatch as RocksWriteBatch,
 };
 
 use crate::{Domain, Entry, KvBackend, Op, Result, StoreError, WriteBatch};
@@ -39,8 +39,7 @@ impl RocksBackend {
 			.into_iter()
 			.map(|domain| ColumnFamilyDescriptor::new(domain.name(), cf_options()));
 
-		let db =
-			Db::open_cf_descriptors(&db_opts, path, cfds).map_err(map_backend_err)?;
+		let db = Db::open_cf_descriptors(&db_opts, path, cfds)?;
 
 		Ok(Self { db })
 	}
@@ -61,15 +60,12 @@ fn cf_options() -> Options {
 	opts
 }
 
-/// Map a native RocksDB error onto the backend-neutral [`StoreError`].
-fn map_backend_err(err: RocksError) -> StoreError { StoreError::Backend(err.to_string()) }
-
 impl KvBackend for RocksBackend {
 	type Value = Vec<u8>;
 
 	fn get(&self, domain: Domain, key: &[u8]) -> Result<Option<Self::Value>> {
 		let cf = self.cf(domain)?;
-		let got = self.db.get_pinned_cf(&cf, key).map_err(map_backend_err)?;
+		let got = self.db.get_pinned_cf(&cf, key)?;
 		Ok(got.map(|slice| slice.as_ref().to_vec()))
 	}
 
@@ -83,7 +79,7 @@ impl KvBackend for RocksBackend {
 
 		let mut out = Vec::new();
 		for item in self.db.iterator_cf(&cf, mode) {
-			let (key, val) = item.map_err(map_backend_err)?;
+			let (key, val) = item?;
 			if !key.starts_with(prefix) {
 				break;
 			}
@@ -108,6 +104,7 @@ impl KvBackend for RocksBackend {
 			}
 		}
 
-		self.db.write(wb).map_err(map_backend_err)
+		self.db.write(&wb)?;
+		Ok(())
 	}
 }

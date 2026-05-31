@@ -145,7 +145,9 @@ mod rocksdb_backend {
 	}
 
 	impl Drop for TempDir {
-		fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.path); }
+		fn drop(&mut self) {
+			let _: std::io::Result<()> = std::fs::remove_dir_all(&self.path);
+		}
 	}
 
 	#[test]
@@ -184,12 +186,12 @@ mod rocksdb_backend {
 	#[test]
 	fn data_persists_across_reopen() {
 		let dir = TempDir::new();
-		{
-			let store = Store::new(RocksBackend::open(&dir.path).unwrap());
-			store.put(Domain::AccountData, b"k".to_vec(), b"v".to_vec()).unwrap();
-		}
-		// Reopen the same path; the value must still be there.
 		let store = Store::new(RocksBackend::open(&dir.path).unwrap());
-		assert_eq!(store.get(Domain::AccountData, b"k").unwrap().as_deref(), Some(&b"v"[..]));
+		store.put(Domain::AccountData, b"k".to_vec(), b"v".to_vec()).unwrap();
+		drop(store); // close the database before reopening the same path
+
+		// Reopen the same path; the value must still be there.
+		let reopened = Store::new(RocksBackend::open(&dir.path).unwrap());
+		assert_eq!(reopened.get(Domain::AccountData, b"k").unwrap().as_deref(), Some(&b"v"[..]));
 	}
 }
