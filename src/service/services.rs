@@ -68,11 +68,17 @@ pub struct Services {
 	manager: Mutex<Option<Arc<Manager>>>,
 	pub server: Arc<Server>,
 	pub db: Arc<Database>,
+
+	/// The Phase-1 pluggable storage handle (gm-store). Backend-agnostic;
+	/// backed by a tuned RocksDB engine in the single-node profile. Consumers
+	/// are migrated onto this incrementally; see `store_provider`.
+	pub store: gm_store::DynStore,
 }
 
 #[implement(Services)]
 pub async fn build(server: Arc<Server>) -> Result<Arc<Self>> {
 	let db = Database::open(&server).await?;
+	let store = crate::store_provider::open(&server)?;
 	let services = Arc::new(OnceServices::default());
 	let args = Args {
 		db: &db,
@@ -129,6 +135,7 @@ pub async fn build(server: Arc<Server>) -> Result<Arc<Self>> {
 		manager: Mutex::new(None),
 		server,
 		db,
+		store,
 	});
 
 	Ok(services.set(res))

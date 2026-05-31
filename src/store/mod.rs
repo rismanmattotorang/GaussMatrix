@@ -53,6 +53,7 @@
 
 mod backend;
 mod domain;
+mod dyn_store;
 mod error;
 mod mem;
 #[cfg(feature = "rocksdb")]
@@ -66,6 +67,7 @@ pub use self::rocks::RocksBackend;
 pub use self::{
 	backend::{Entry, KvBackend, Op, WriteBatch},
 	domain::Domain,
+	dyn_store::{DynBackend, DynStore},
 	error::{Result, StoreError},
 	mem::MemBackend,
 	store::Store,

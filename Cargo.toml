@@ -688,6 +688,11 @@ package = "gaussmatrix_macros"
 path = "src/macros"
 default-features = false
 
+[workspace.dependencies.gm-store]
+package = "gm-store"
+path = "src/store"
+default-features = false
+
 ###############################################################################
 #
 # Release profiles

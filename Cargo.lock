@@ -1935,6 +1935,7 @@ dependencies = [
  "futures",
  "gaussmatrix_core",
  "gaussmatrix_database",
+ "gm-store",
  "hickory-resolver",
  "http",
  "image",

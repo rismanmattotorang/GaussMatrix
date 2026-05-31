@@ -5,6 +5,7 @@ mod migrations;
 mod once_services;
 mod service;
 pub mod services;
+mod store_provider;
 
 pub mod account_data;
 pub mod admin;

@@ -131,8 +131,11 @@ preserves auditability.
       the `Store` facade, an in-memory reference backend, and the durable single-node
       **`RocksBackend`** (feature `rocksdb`) opening one column family per domain with
       crash-consistent batch commits — covered by a unit/doctest suite plus
-      RocksDB roundtrip and reopen-persistence tests. Next: migrating the service core
-      onto the trait, then the Phase-2 distributed backend.
+      RocksDB roundtrip and reopen-persistence tests. The service core now **holds a
+      backend-agnostic `gm-store::DynStore`** (`Services.store`), opened by
+      `store_provider` as a tuned RocksDB engine at `<database_path>/gm-store` for the
+      single-node profile. Next: migrating individual consumers onto the trait, then the
+      Phase-2 distributed backend.
 - [ ] `gm-api` typed request/response model (extending `ruma`).
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.

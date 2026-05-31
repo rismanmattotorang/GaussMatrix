@@ -1,6 +1,6 @@
 //! Unit tests for the storage abstraction and the in-memory reference backend.
 
-use crate::{Domain, MemBackend, Store, WriteBatch};
+use crate::{Domain, DynStore, MemBackend, Store, WriteBatch};
 
 fn store() -> Store<MemBackend> { Store::new(MemBackend::new()) }
 
@@ -111,6 +111,33 @@ fn auth_chain_index_prefix_isolation() {
 	s.put(Domain::AuthChainIndex, b"room1:a".to_vec(), b"_".to_vec()).unwrap();
 	s.put(Domain::AuthChainIndex, b"room2:a".to_vec(), b"_".to_vec()).unwrap();
 	assert_eq!(s.prefix_scan(Domain::AuthChainIndex, b"room1:").unwrap().len(), 1);
+}
+
+#[test]
+fn dyn_store_erases_backend_and_works() {
+	// A DynStore over an in-memory backend exposes the same surface without a
+	// generic backend parameter — what the service core holds.
+	let store: DynStore = DynStore::new(MemBackend::new());
+
+	let mut batch = WriteBatch::new();
+	batch
+		.put(Domain::Events, b"$e".to_vec(), b"pdu".to_vec())
+		.put(Domain::AuditLog, b"a:1".to_vec(), b"entry".to_vec());
+	store.commit(batch).unwrap();
+
+	assert_eq!(store.get(Domain::Events, b"$e").unwrap().as_deref(), Some(&b"pdu"[..]));
+	store.put(Domain::AccountData, b"k".to_vec(), b"v".to_vec()).unwrap();
+	store.delete(Domain::AccountData, b"k".to_vec()).unwrap();
+	assert!(!store.contains(Domain::AccountData, b"k").unwrap());
+	assert_eq!(store.prefix_scan(Domain::AuditLog, b"a:").unwrap().len(), 1);
+}
+
+#[test]
+fn dyn_store_clone_shares_backend() {
+	let store = DynStore::new(MemBackend::new());
+	let clone = store.clone();
+	store.put(Domain::KeyStore, b"k".to_vec(), b"v".to_vec()).unwrap();
+	assert_eq!(clone.get(Domain::KeyStore, b"k").unwrap().as_deref(), Some(&b"v"[..]));
 }
 
 #[cfg(feature = "rocksdb")]
