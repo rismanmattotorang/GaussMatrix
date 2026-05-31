@@ -124,9 +124,13 @@ preserves auditability.
       quadlets, install paths).
 - [ ] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
 
-### Phase 1 — Server core *(drop-in homeserver)*
-- [ ] `gm-store` pluggable storage trait with per-domain column families, generalising
-      Tuwunel's tuned RocksDB integration.
+### Phase 1 — Server core *(drop-in homeserver — in progress)*
+- [~] `gm-store` pluggable storage trait with per-domain column families, generalising
+      Tuwunel's tuned RocksDB integration. **Foundation landed** (`src/store`): the
+      backend-agnostic `KvBackend` trait, the nine-domain column-family model, atomic
+      `WriteBatch` commits, the `Store` facade, and an in-memory reference backend with
+      a full unit/doctest suite. Next: the tuned-RocksDB backend over the existing
+      engine, then migrating the service core onto the trait.
 - [ ] `gm-api` typed request/response model (extending `ruma`).
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
