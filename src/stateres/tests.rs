@@ -1,21 +1,29 @@
 //! Unit tests for partitioning, the resolved-state cache, and resolution.
 
-use std::{cell::Cell, collections::BTreeSet};
-
-use crate::{
-	AuthRules, ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap,
-	auth_difference, conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition,
-	resolve, reverse_topological_power_sort,
+use std::{
+	cell::Cell,
+	collections::{BTreeMap, BTreeSet},
 };
 
-/// A test event carrying just the fields the ordering needs.
+use crate::{
+	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, MembershipRules,
+	PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference,
+	conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition, resolve,
+	reverse_topological_power_sort,
+};
+
+/// A test event carrying just the fields the ordering and auth rules need.
 struct TestEvent {
 	id: EventId,
 	kind: String,
 	state_key: String,
+	sender: String,
 	power: i64,
 	ts: u64,
 	auth: Vec<EventId>,
+	power_levels: Option<PowerLevels>,
+	membership: Option<String>,
+	join_rule: Option<String>,
 }
 
 impl TestEvent {
@@ -28,21 +36,50 @@ impl TestEvent {
 			id: id.to_owned(),
 			kind: kind.to_owned(),
 			state_key: String::new(),
+			sender: String::new(),
 			power,
 			ts,
 			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
+			power_levels: None,
+			membership: None,
+			join_rule: None,
 		}
 	}
 
+	/// An `m.room.member` event setting `target`'s membership, sent by `sender`.
+	fn member(id: &str, sender: &str, target: &str, membership: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.member", 0, 0, auth);
+		event.sender = sender.to_owned();
+		event.state_key = target.to_owned();
+		event.membership = Some(membership.to_owned());
+		event
+	}
+
+	/// An `m.room.join_rules` event setting the room's join rule.
+	fn joinrules(id: &str, rule: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.join_rules", 0, 0, auth);
+		event.join_rule = Some(rule.to_owned());
+		event
+	}
+
 	fn state_event(id: &str, kind: &str, state_key: &str, auth: &[&str]) -> Self {
-		Self {
-			id: id.to_owned(),
-			kind: kind.to_owned(),
-			state_key: state_key.to_owned(),
-			power: 0,
-			ts: 0,
-			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
-		}
+		let mut event = Self::typed(id, kind, 0, 0, auth);
+		event.state_key = state_key.to_owned();
+		event
+	}
+
+	/// An event of `kind` sent by `sender`.
+	fn by(id: &str, kind: &str, sender: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, kind, 0, 0, auth);
+		event.sender = sender.to_owned();
+		event
+	}
+
+	/// An `m.room.power_levels` event carrying `levels`.
+	fn powerlevels(id: &str, levels: PowerLevels, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.power_levels", 0, 0, auth);
+		event.power_levels = Some(levels);
+		event
 	}
 }
 
@@ -58,10 +95,18 @@ impl Event for TestEvent {
 	fn origin_server_ts(&self) -> u64 { self.ts }
 
 	fn auth_event_ids(&self) -> &[EventId] { &self.auth }
+
+	fn sender(&self) -> &str { &self.sender }
+
+	fn power_levels(&self) -> Option<&PowerLevels> { self.power_levels.as_ref() }
+
+	fn membership(&self) -> Option<&str> { self.membership.as_deref() }
+
+	fn join_rule(&self) -> Option<&str> { self.join_rule.as_deref() }
 }
 
 /// Build a by-id store from a set of events.
-fn store(events: Vec<TestEvent>) -> std::collections::BTreeMap<EventId, TestEvent> {
+fn store(events: Vec<TestEvent>) -> BTreeMap<EventId, TestEvent> {
 	events.into_iter().map(|e| (e.id.clone(), e)).collect()
 }
 
@@ -329,7 +374,14 @@ fn mainline_without_power_levels_orders_by_ts_then_id() {
 /// Authorise every event.
 struct AcceptAll;
 impl AuthRules<TestEvent> for AcceptAll {
-	fn is_authorized(&self, _event: &TestEvent, _state: &StateMap) -> bool { true }
+	fn is_authorized(
+		&self,
+		_event: &TestEvent,
+		_state: &StateMap,
+		_store: &EventStore<TestEvent>,
+	) -> bool {
+		true
+	}
 }
 
 #[test]
@@ -347,7 +399,12 @@ fn iterative_auth_checks_folds_authorized_events_into_state() {
 fn iterative_auth_checks_skips_rejected_events() {
 	struct RejectBad;
 	impl AuthRules<TestEvent> for RejectBad {
-		fn is_authorized(&self, event: &TestEvent, _state: &StateMap) -> bool {
+		fn is_authorized(
+			&self,
+			event: &TestEvent,
+			_state: &StateMap,
+			_store: &EventStore<TestEvent>,
+		) -> bool {
 			event.event_id() != "$bad"
 		}
 	}
@@ -366,7 +423,12 @@ fn iterative_auth_checks_sees_state_resolved_so_far() {
 	// "$child" is only authorised once a power-levels event is in the state.
 	struct NeedsPowerLevels;
 	impl AuthRules<TestEvent> for NeedsPowerLevels {
-		fn is_authorized(&self, event: &TestEvent, state: &StateMap) -> bool {
+		fn is_authorized(
+			&self,
+			event: &TestEvent,
+			state: &StateMap,
+			_store: &EventStore<TestEvent>,
+		) -> bool {
 			event.event_id() != "$child"
 				|| state.contains_key(&key("m.room.power_levels", ""))
 		}
@@ -394,4 +456,283 @@ fn iterative_auth_checks_preserves_base_state() {
 	let resolved = iterative_auth_checks(&ids(&["$new"]), base, &s, &AcceptAll);
 	assert_eq!(resolved.get(&key("m.room.topic", "")).map(String::as_str), Some("$existing"));
 	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$new"));
+}
+
+fn levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@admin".to_owned(), 100_i64)]),
+		users_default: 10,
+		events: BTreeMap::from([("m.room.name".to_owned(), 60_i64)]),
+		events_default: 0,
+		state_default: 50,
+		invite: 0,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+/// Power levels giving `@admin` 100 and `@mod` 60, with default `users_default`
+/// 0 and the standard invite/kick/ban gates.
+fn membership_levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@admin".to_owned(), 100_i64), ("@mod".to_owned(), 60_i64)]),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default: 50,
+		invite: 50,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+#[test]
+fn power_levels_lookups_fall_back_to_defaults() {
+	let pl = levels();
+	assert_eq!(pl.for_user("@admin"), 100);
+	assert_eq!(pl.for_user("@nobody"), 10);
+	assert_eq!(pl.required_for("m.room.name", true), 60); // explicit
+	assert_eq!(pl.required_for("m.room.topic", true), 50); // state_default
+	assert_eq!(pl.required_for("m.room.message", false), 0); // events_default
+}
+
+#[test]
+fn power_level_rules_authorize_by_sender_level() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		// @admin (100) may send a topic (needs state_default 50).
+		TestEvent::by("$ok", "m.room.topic", "@admin", &["$pl"]),
+		// @bob (default 10) may not (needs 50).
+		TestEvent::by("$no", "m.room.topic", "@bob", &["$pl"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let rules = PowerLevelRules;
+	assert!(rules.is_authorized(&s["$ok"], &state, &s));
+	assert!(!rules.is_authorized(&s["$no"], &state, &s));
+}
+
+#[test]
+fn power_level_rules_drive_iterative_auth_checks() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		TestEvent::by("$ok", "m.room.topic", "@admin", &["$pl"]),
+		TestEvent::by("$no", "m.room.guest_access", "@bob", &["$pl"]),
+	]);
+	let mut base = StateMap::new();
+	base.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let resolved = iterative_auth_checks(&ids(&["$ok", "$no"]), base, &s, &PowerLevelRules);
+	assert!(resolved.contains_key(&key("m.room.topic", "")), "@admin authorised");
+	assert!(!resolved.contains_key(&key("m.room.guest_access", "")), "@bob rejected");
+}
+
+#[test]
+fn power_level_rules_default_to_permissive_without_power_levels() {
+	// No power-levels event in state → default (all-zero) levels → authorised.
+	let s = store(vec![TestEvent::by("$e", "m.room.name", "@anyone", &[])]);
+	let rules = PowerLevelRules;
+	assert!(rules.is_authorized(&s["$e"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_authorize_the_room_root() {
+	let s = store(vec![TestEvent::state_event("$create", "m.room.create", "", &[])]);
+	// A create event with no auth events and an empty state key is the root.
+	assert!(CreateRules.is_authorized(&s["$create"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_reject_create_with_auth_events() {
+	let s = store(vec![TestEvent::state_event("$bad", "m.room.create", "", &["$x"])]);
+	assert!(!CreateRules.is_authorized(&s["$bad"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_require_the_room_to_exist_for_other_events() {
+	let s = store(vec![TestEvent::state_event("$name", "m.room.name", "", &[])]);
+	let rules = CreateRules;
+
+	// No create event in state → rejected.
+	assert!(!rules.is_authorized(&s["$name"], &StateMap::new(), &s));
+
+	// Create event present → accepted.
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$create".to_owned());
+	assert!(rules.is_authorized(&s["$name"], &state, &s));
+}
+
+#[test]
+fn all_of_requires_every_rule_to_pass() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		TestEvent::by("$admin_evt", "m.room.topic", "@admin", &["$create", "$pl"]),
+		TestEvent::by("$bob_evt", "m.room.topic", "@bob", &["$create", "$pl"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$create".to_owned());
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let components: [&dyn AuthRules<TestEvent>; 2] = [&CreateRules, &PowerLevelRules];
+	let rules = AllOf(&components);
+
+	// @admin passes both gates (room exists, power 100 >= 50).
+	assert!(rules.is_authorized(&s["$admin_evt"], &state, &s));
+	// @bob passes create but fails power (10 < 50) → overall rejected.
+	assert!(!rules.is_authorized(&s["$bob_evt"], &state, &s));
+
+	// Even @admin is rejected when the create gate fails (no create in state).
+	let mut without_create = StateMap::new();
+	without_create.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	assert!(!rules.is_authorized(&s["$admin_evt"], &without_create, &s));
+}
+
+#[test]
+fn membership_rules_pass_non_member_events() {
+	let s = store(vec![TestEvent::state_event("$name", "m.room.name", "", &[])]);
+	assert!(MembershipRules.is_authorized(&s["$name"], &StateMap::new(), &s));
+}
+
+#[test]
+fn membership_join_public_allowed_invite_requires_invitation() {
+	let s = store(vec![
+		TestEvent::joinrules("$public", "public", &[]),
+		TestEvent::joinrules("$invite", "invite", &[]),
+		TestEvent::member("$join", "@alice", "@alice", "join", &[]),
+		TestEvent::member("$inv", "@bob", "@alice", "invite", &[]),
+	]);
+
+	// Public room: anyone may join.
+	let mut public = StateMap::new();
+	public.insert(key("m.room.join_rules", ""), "$public".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$join"], &public, &s));
+
+	// Invite-only, alice not invited → rejected.
+	let mut invite_only = StateMap::new();
+	invite_only.insert(key("m.room.join_rules", ""), "$invite".to_owned());
+	assert!(!MembershipRules.is_authorized(&s["$join"], &invite_only, &s));
+
+	// Invite-only, alice invited → allowed.
+	let mut invited = invite_only.clone();
+	invited.insert(key("m.room.member", "@alice"), "$inv".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$join"], &invited, &s));
+}
+
+#[test]
+fn membership_invite_requires_joined_sender_with_power() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", membership_levels(), &[]),
+		TestEvent::member("$adminjoin", "@admin", "@admin", "join", &[]),
+		TestEvent::member("$bobjoin", "@bob", "@bob", "join", &[]),
+		TestEvent::member("$inv_ok", "@admin", "@carol", "invite", &[]),
+		TestEvent::member("$inv_low", "@bob", "@dave", "invite", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	state.insert(key("m.room.member", "@admin"), "$adminjoin".to_owned());
+	state.insert(key("m.room.member", "@bob"), "$bobjoin".to_owned());
+
+	// @admin (joined, power 100 >= invite 50) invites carol.
+	assert!(MembershipRules.is_authorized(&s["$inv_ok"], &state, &s));
+	// @bob (joined, power 0 < invite 50) cannot invite.
+	assert!(!MembershipRules.is_authorized(&s["$inv_low"], &state, &s));
+}
+
+#[test]
+fn membership_leave_self_and_kick_and_ban_by_power() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", membership_levels(), &[]),
+		TestEvent::member("$alicejoin", "@alice", "@alice", "join", &[]),
+		TestEvent::member("$modjoin", "@mod", "@mod", "join", &[]),
+		TestEvent::member("$aliceleave", "@alice", "@alice", "leave", &[]),
+		TestEvent::member("$kick", "@mod", "@alice", "leave", &[]),
+		TestEvent::member("$kick_fail", "@alice", "@mod", "leave", &[]),
+		TestEvent::member("$ban", "@mod", "@alice", "ban", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	state.insert(key("m.room.member", "@alice"), "$alicejoin".to_owned());
+	state.insert(key("m.room.member", "@mod"), "$modjoin".to_owned());
+
+	// Alice (joined) leaves herself.
+	assert!(MembershipRules.is_authorized(&s["$aliceleave"], &state, &s));
+	// Mod (power 60 >= kick 50, 60 > 0) kicks alice.
+	assert!(MembershipRules.is_authorized(&s["$kick"], &state, &s));
+	// Alice (power 0) cannot kick the mod.
+	assert!(!MembershipRules.is_authorized(&s["$kick_fail"], &state, &s));
+	// Mod (power 60 >= ban 50, 60 > 0) bans alice.
+	assert!(MembershipRules.is_authorized(&s["$ban"], &state, &s));
+}
+
+#[test]
+fn membership_bootstrap_join_allows_only_the_creator() {
+	let s = store(vec![
+		TestEvent::by("$c", "m.room.create", "@creator", &[]),
+		// The creator's initial join depends only on the create event.
+		TestEvent::member("$creatorjoin", "@creator", "@creator", "join", &["$c"]),
+		// A non-creator joining the (invite-default) room the same way.
+		TestEvent::member("$bobjoin", "@bob", "@bob", "join", &["$c"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$c".to_owned());
+
+	// Creator bootstraps into the room (no join-rules/power-levels state yet).
+	assert!(MembershipRules.is_authorized(&s["$creatorjoin"], &state, &s));
+	// A non-creator cannot — the default join rule is invite and they have none.
+	assert!(!MembershipRules.is_authorized(&s["$bobjoin"], &state, &s));
+}
+
+/// Power levels giving `@creator` 100, everyone else 0, name needing 50.
+fn creator_levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@creator".to_owned(), 100_i64)]),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default: 50,
+		invite: 50,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+#[test]
+fn end_to_end_resolution_rejects_unauthorized_conflicting_event() {
+	// A small room: create, the creator's join, power levels, and two
+	// conflicting room-name events — one by the creator, one by an unprivileged
+	// user.
+	let s = store(vec![
+		TestEvent::by("$c", "m.room.create", "@creator", &[]),
+		TestEvent::member("$cj", "@creator", "@creator", "join", &["$c"]),
+		TestEvent::powerlevels("$pl", creator_levels(), &["$c", "$cj"]),
+		TestEvent::by("$n1", "m.room.name", "@creator", &["$c", "$pl"]),
+		TestEvent::by("$n2", "m.room.name", "@bob", &["$c", "$pl"]),
+	]);
+
+	// Two forks differing only on the room name.
+	let mut fork_a = StateMap::new();
+	fork_a.insert(key("m.room.create", ""), "$c".to_owned());
+	fork_a.insert(key("m.room.member", "@creator"), "$cj".to_owned());
+	fork_a.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	fork_a.insert(key("m.room.name", ""), "$n1".to_owned());
+	let mut fork_b = fork_a.clone();
+	fork_b.insert(key("m.room.name", ""), "$n2".to_owned());
+
+	let partitioned = partition(&[fork_a, fork_b]);
+	assert!(partitioned.conflicted.contains_key(&key("m.room.name", "")));
+
+	// Resolve the conflicted name events against the unconflicted base with the
+	// full composed rule set.
+	let components: [&dyn AuthRules<TestEvent>; 3] =
+		[&CreateRules, &PowerLevelRules, &MembershipRules];
+	let rules = AllOf(&components);
+	let resolved =
+		iterative_auth_checks(&ids(&["$n1", "$n2"]), partitioned.unconflicted, &s, &rules);
+
+	// The creator's name (power 100 >= 50) wins; @bob's (power 0) is rejected.
+	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$n1"));
+	// The unconflicted state is preserved.
+	assert_eq!(resolved.get(&key("m.room.create", "")).map(String::as_str), Some("$c"));
+	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
 }

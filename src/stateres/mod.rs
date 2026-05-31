@@ -41,15 +41,19 @@ mod auth;
 mod cache;
 mod event;
 mod order;
+mod power;
 mod state_map;
 #[cfg(test)]
 mod tests;
 
 pub use self::{
-	auth::{AuthRules, iterative_auth_checks},
+	auth::{
+		AllOf, AuthRules, CreateRules, MembershipRules, PowerLevelRules, iterative_auth_checks,
+	},
 	cache::ResolvedStateCache,
 	event::Event,
 	order::{auth_difference, mainline_ordering, reverse_topological_power_sort},
+	power::PowerLevels,
 	state_map::{
 		ConflictedState, EventId, EventStore, Partitioned, StateKey, StateMap,
 		conflicting_event_ids, partition,
