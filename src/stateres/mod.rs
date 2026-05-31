@@ -48,7 +48,8 @@ mod tests;
 
 pub use self::{
 	auth::{
-		AllOf, AuthRules, CreateRules, MembershipRules, PowerLevelRules, iterative_auth_checks,
+		AllOf, AuthRules, CreateRules, MembershipRules, PowerLevelMutationRules, PowerLevelRules,
+		iterative_auth_checks,
 	},
 	cache::ResolvedStateCache,
 	event::Event,

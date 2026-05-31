@@ -13,6 +13,8 @@
 //! concrete `AuthRules` for room versions 1–12 is the next increment and plugs
 //! in here unchanged.
 
+use std::collections::BTreeSet;
+
 use crate::{
 	event::Event,
 	power::PowerLevels,
@@ -189,6 +191,72 @@ fn current_join_rule<E: Event>(state: &StateMap, store: &EventStore<E>) -> Strin
 		.and_then(Event::join_rule)
 		.unwrap_or("invite")
 		.to_owned()
+}
+
+/// Power-level mutation constraints for `m.room.power_levels` events: a sender
+/// may not set any level higher than their own current level, nor change a
+/// level that is already higher than their own. This blocks privilege
+/// escalation via a power-levels change. Non-power-levels events pass through.
+///
+/// Scope: enforces the core "every changed level must be within the sender's
+/// reach" rule. The secondary constraint that a user may not act on another
+/// user whose level equals their own is not yet enforced.
+pub struct PowerLevelMutationRules;
+
+impl<E: Event> AuthRules<E> for PowerLevelMutationRules {
+	fn is_authorized(&self, event: &E, state: &StateMap, store: &EventStore<E>) -> bool {
+		if event.event_type() != POWER_LEVELS_KEY.0 {
+			return true;
+		}
+
+		let Some(new_levels) = event.power_levels() else {
+			return false;
+		};
+
+		let old_levels = current_power_levels(state, store);
+		let sender_level = old_levels.for_user(event.sender());
+
+		level_changes(&old_levels, new_levels)
+			.into_iter()
+			.all(|(old, new)| old <= sender_level && new <= sender_level)
+	}
+}
+
+/// The `(old, new)` value of every power level that differs between two
+/// power-levels contents — the scalar levels and each per-user and per-event
+/// entry (resolving omitted entries to their respective defaults).
+fn level_changes(old: &PowerLevels, new: &PowerLevels) -> Vec<(i64, i64)> {
+	let mut changes = Vec::new();
+
+	let scalars = [
+		(old.users_default, new.users_default),
+		(old.events_default, new.events_default),
+		(old.state_default, new.state_default),
+		(old.invite, new.invite),
+		(old.kick, new.kick),
+		(old.ban, new.ban),
+	];
+	changes.extend(scalars.into_iter().filter(|(o, n)| o != n));
+
+	let user_keys: BTreeSet<&String> = old.users.keys().chain(new.users.keys()).collect();
+	for key in user_keys {
+		let o = old.users.get(key).copied().unwrap_or(old.users_default);
+		let n = new.users.get(key).copied().unwrap_or(new.users_default);
+		if o != n {
+			changes.push((o, n));
+		}
+	}
+
+	let event_keys: BTreeSet<&String> = old.events.keys().chain(new.events.keys()).collect();
+	for key in event_keys {
+		let o = old.events.get(key).copied().unwrap_or(old.events_default);
+		let n = new.events.get(key).copied().unwrap_or(new.events_default);
+		if o != n {
+			changes.push((o, n));
+		}
+	}
+
+	changes
 }
 
 /// The power levels in effect in `state`, or the default when no power-levels

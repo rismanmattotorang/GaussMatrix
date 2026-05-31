@@ -7,9 +7,9 @@ use std::{
 
 use crate::{
 	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, MembershipRules,
-	PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference,
-	conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition, resolve,
-	reverse_topological_power_sort,
+	PowerLevelMutationRules, PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap,
+	auth_difference, conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition,
+	resolve, reverse_topological_power_sort,
 };
 
 /// A test event carrying just the fields the ordering and auth rules need.
@@ -77,7 +77,13 @@ impl TestEvent {
 
 	/// An `m.room.power_levels` event carrying `levels`.
 	fn powerlevels(id: &str, levels: PowerLevels, auth: &[&str]) -> Self {
+		Self::powerlevels_by(id, "", levels, auth)
+	}
+
+	/// An `m.room.power_levels` event sent by `sender`, carrying `levels`.
+	fn powerlevels_by(id: &str, sender: &str, levels: PowerLevels, auth: &[&str]) -> Self {
 		let mut event = Self::typed(id, "m.room.power_levels", 0, 0, auth);
+		event.sender = sender.to_owned();
 		event.power_levels = Some(levels);
 		event
 	}
@@ -735,4 +741,51 @@ fn end_to_end_resolution_rejects_unauthorized_conflicting_event() {
 	// The unconflicted state is preserved.
 	assert_eq!(resolved.get(&key("m.room.create", "")).map(String::as_str), Some("$c"));
 	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
+}
+
+/// Power levels with the given explicit user levels and `state_default`.
+fn pl(users: &[(&str, i64)], state_default: i64) -> PowerLevels {
+	PowerLevels {
+		users: users.iter().map(|(u, l)| ((*u).to_owned(), *l)).collect(),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default,
+		invite: 0,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+#[test]
+fn power_level_mutation_blocks_escalation_above_sender() {
+	let s = store(vec![
+		// Current levels: @mod has 60.
+		TestEvent::powerlevels("$pl0", pl(&[("@mod", 60)], 50), &[]),
+		// @mod tries to grant @evil 100 (above @mod's own 60).
+		TestEvent::powerlevels_by("$escalate", "@mod", pl(&[("@mod", 60), ("@evil", 100)], 50), &["$pl0"]),
+		// @mod grants @evil 50 (within reach).
+		TestEvent::powerlevels_by("$grant_ok", "@mod", pl(&[("@mod", 60), ("@evil", 50)], 50), &["$pl0"]),
+		// @mod raises state_default to 70 (above own level).
+		TestEvent::powerlevels_by("$raise_state", "@mod", pl(&[("@mod", 60)], 70), &["$pl0"]),
+		// @mod lowers their own level.
+		TestEvent::powerlevels_by("$lower_self", "@mod", pl(&[("@mod", 40)], 50), &["$pl0"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl0".to_owned());
+
+	let rules = PowerLevelMutationRules;
+	assert!(!rules.is_authorized(&s["$escalate"], &state, &s), "cannot grant above own level");
+	assert!(rules.is_authorized(&s["$grant_ok"], &state, &s), "may grant within own level");
+	assert!(
+		!rules.is_authorized(&s["$raise_state"], &state, &s),
+		"cannot raise a scalar level above own level"
+	);
+	assert!(rules.is_authorized(&s["$lower_self"], &state, &s), "may lower own level");
+}
+
+#[test]
+fn power_level_mutation_passes_non_power_levels_events() {
+	let s = store(vec![TestEvent::by("$name", "m.room.name", "@anyone", &[])]);
+	assert!(PowerLevelMutationRules.is_authorized(&s["$name"], &StateMap::new(), &s));
 }
