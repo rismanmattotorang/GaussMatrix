@@ -122,6 +122,11 @@ impl<E: Event> AuthRules<E> for MembershipRules {
 				if sender != target || target_membership == "ban" {
 					return false;
 				}
+				// Create-room bootstrap: the creator's initial join, whose only
+				// auth dependency is the create event.
+				if is_bootstrap_join(event, state, store) {
+					return true;
+				}
 				match current_join_rule(state, store).as_str() {
 					| "public" => true,
 					| "invite" => matches!(target_membership.as_str(), "invite" | "join"),
@@ -147,6 +152,20 @@ impl<E: Event> AuthRules<E> for MembershipRules {
 			| _ => false,
 		}
 	}
+}
+
+/// Whether `event` is the room creator's initial join: the joining user is the
+/// create event's sender, and this join's only auth dependency is that create
+/// event. This is the bootstrap that lets a freshly-created room be joined
+/// before any power-levels or join-rules state exists.
+fn is_bootstrap_join<E: Event>(event: &E, state: &StateMap, store: &EventStore<E>) -> bool {
+	let create_key = (CREATE_TYPE.to_owned(), String::new());
+	let Some(create_id) = state.get(&create_key) else {
+		return false;
+	};
+
+	let creator = store.get(create_id).map(Event::sender);
+	creator == Some(event.sender()) && event.auth_event_ids() == std::slice::from_ref(create_id)
 }
 
 /// The membership of `user` in `state` (`leave` when no member event is

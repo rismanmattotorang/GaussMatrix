@@ -664,3 +664,75 @@ fn membership_leave_self_and_kick_and_ban_by_power() {
 	// Mod (power 60 >= ban 50, 60 > 0) bans alice.
 	assert!(MembershipRules.is_authorized(&s["$ban"], &state, &s));
 }
+
+#[test]
+fn membership_bootstrap_join_allows_only_the_creator() {
+	let s = store(vec![
+		TestEvent::by("$c", "m.room.create", "@creator", &[]),
+		// The creator's initial join depends only on the create event.
+		TestEvent::member("$creatorjoin", "@creator", "@creator", "join", &["$c"]),
+		// A non-creator joining the (invite-default) room the same way.
+		TestEvent::member("$bobjoin", "@bob", "@bob", "join", &["$c"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$c".to_owned());
+
+	// Creator bootstraps into the room (no join-rules/power-levels state yet).
+	assert!(MembershipRules.is_authorized(&s["$creatorjoin"], &state, &s));
+	// A non-creator cannot — the default join rule is invite and they have none.
+	assert!(!MembershipRules.is_authorized(&s["$bobjoin"], &state, &s));
+}
+
+/// Power levels giving `@creator` 100, everyone else 0, name needing 50.
+fn creator_levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@creator".to_owned(), 100_i64)]),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default: 50,
+		invite: 50,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+#[test]
+fn end_to_end_resolution_rejects_unauthorized_conflicting_event() {
+	// A small room: create, the creator's join, power levels, and two
+	// conflicting room-name events — one by the creator, one by an unprivileged
+	// user.
+	let s = store(vec![
+		TestEvent::by("$c", "m.room.create", "@creator", &[]),
+		TestEvent::member("$cj", "@creator", "@creator", "join", &["$c"]),
+		TestEvent::powerlevels("$pl", creator_levels(), &["$c", "$cj"]),
+		TestEvent::by("$n1", "m.room.name", "@creator", &["$c", "$pl"]),
+		TestEvent::by("$n2", "m.room.name", "@bob", &["$c", "$pl"]),
+	]);
+
+	// Two forks differing only on the room name.
+	let mut fork_a = StateMap::new();
+	fork_a.insert(key("m.room.create", ""), "$c".to_owned());
+	fork_a.insert(key("m.room.member", "@creator"), "$cj".to_owned());
+	fork_a.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	fork_a.insert(key("m.room.name", ""), "$n1".to_owned());
+	let mut fork_b = fork_a.clone();
+	fork_b.insert(key("m.room.name", ""), "$n2".to_owned());
+
+	let partitioned = partition(&[fork_a, fork_b]);
+	assert!(partitioned.conflicted.contains_key(&key("m.room.name", "")));
+
+	// Resolve the conflicted name events against the unconflicted base with the
+	// full composed rule set.
+	let components: [&dyn AuthRules<TestEvent>; 3] =
+		[&CreateRules, &PowerLevelRules, &MembershipRules];
+	let rules = AllOf(&components);
+	let resolved =
+		iterative_auth_checks(&ids(&["$n1", "$n2"]), partitioned.unconflicted, &s, &rules);
+
+	// The creator's name (power 100 >= 50) wins; @bob's (power 0) is rejected.
+	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$n1"));
+	// The unconflicted state is preserved.
+	assert_eq!(resolved.get(&key("m.room.create", "")).map(String::as_str), Some("$c"));
+	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
+}
