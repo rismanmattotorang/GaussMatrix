@@ -126,11 +126,13 @@ preserves auditability.
 
 ### Phase 1 — Server core *(drop-in homeserver — in progress)*
 - [~] `gm-store` pluggable storage trait with per-domain column families, generalising
-      Tuwunel's tuned RocksDB integration. **Foundation landed** (`src/store`): the
-      backend-agnostic `KvBackend` trait, the nine-domain column-family model, atomic
-      `WriteBatch` commits, the `Store` facade, and an in-memory reference backend with
-      a full unit/doctest suite. Next: the tuned-RocksDB backend over the existing
-      engine, then migrating the service core onto the trait.
+      Tuwunel's tuned RocksDB integration. **Landed** (`src/store`): the backend-agnostic
+      `KvBackend` trait, the nine-domain column-family model, atomic `WriteBatch` commits,
+      the `Store` facade, an in-memory reference backend, and the durable single-node
+      **`RocksBackend`** (feature `rocksdb`) opening one column family per domain with
+      crash-consistent batch commits — covered by a unit/doctest suite plus
+      RocksDB roundtrip and reopen-persistence tests. Next: migrating the service core
+      onto the trait, then the Phase-2 distributed backend.
 - [ ] `gm-api` typed request/response model (extending `ruma`).
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.

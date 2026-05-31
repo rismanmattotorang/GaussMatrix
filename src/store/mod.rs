@@ -21,12 +21,14 @@
 //! * **Atomic, batched writes.** A request's mutations are gathered into a
 //!   single [`WriteBatch`] and committed all-or-nothing, so an accepted event
 //!   and its state-delta become visible together.
-//! * **Zero-copy reads where the backend permits.** Reads return the backend's
-//!   own value handle ([`KvBackend::Value`]); RocksDB can hand back a pinned
-//!   slice, the in-memory reference backend an `Arc<[u8]>`.
+//! * **Cheap value handles.** Reads return the backend's own value handle
+//!   ([`KvBackend::Value`]); the in-memory reference backend hands back a shared
+//!   `Arc<[u8]>`. (True pinned-slice zero-copy on RocksDB is a tracked
+//!   refinement that requires a lifetime-generic value type.)
 //! * **Pluggable backends.** [`KvBackend`] is the single seam. This crate ships
-//!   the [`MemBackend`] reference implementation; the production RocksDB backend
-//!   and the Phase-2 distributed backend implement the same trait.
+//!   the [`MemBackend`] reference implementation and the durable single-node
+//!   [`RocksBackend`] (feature `rocksdb`); the Phase-2 distributed backend
+//!   implements the same trait.
 //!
 //! ## Example
 //!
@@ -53,10 +55,14 @@ mod backend;
 mod domain;
 mod error;
 mod mem;
+#[cfg(feature = "rocksdb")]
+mod rocks;
 mod store;
 #[cfg(test)]
 mod tests;
 
+#[cfg(feature = "rocksdb")]
+pub use self::rocks::RocksBackend;
 pub use self::{
 	backend::{Entry, KvBackend, Op, WriteBatch},
 	domain::Domain,

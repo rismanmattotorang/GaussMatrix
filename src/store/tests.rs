@@ -112,3 +112,84 @@ fn auth_chain_index_prefix_isolation() {
 	s.put(Domain::AuthChainIndex, b"room2:a".to_vec(), b"_".to_vec()).unwrap();
 	assert_eq!(s.prefix_scan(Domain::AuthChainIndex, b"room1:").unwrap().len(), 1);
 }
+
+#[cfg(feature = "rocksdb")]
+mod rocksdb_backend {
+	use std::{
+		path::PathBuf,
+		sync::atomic::{AtomicU64, Ordering},
+		time::{SystemTime, UNIX_EPOCH},
+	};
+
+	use crate::{Domain, RocksBackend, Store, WriteBatch};
+
+	/// A unique temporary directory removed when dropped — avoids a dev
+	/// dependency on `tempfile` for a single test.
+	struct TempDir {
+		path: PathBuf,
+	}
+
+	impl TempDir {
+		fn new() -> Self {
+			static COUNTER: AtomicU64 = AtomicU64::new(0);
+			let nanos = SystemTime::now()
+				.duration_since(UNIX_EPOCH)
+				.unwrap()
+				.as_nanos();
+			let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
+			let mut path = std::env::temp_dir();
+			path.push(format!("gm_store_rocks_{}_{nanos}_{seq}", std::process::id()));
+			std::fs::create_dir_all(&path).unwrap();
+			Self { path }
+		}
+	}
+
+	impl Drop for TempDir {
+		fn drop(&mut self) { let _ = std::fs::remove_dir_all(&self.path); }
+	}
+
+	#[test]
+	fn open_put_get_batch_scan_delete_roundtrip() {
+		let dir = TempDir::new();
+		let store = Store::new(RocksBackend::open(&dir.path).unwrap());
+
+		// Single put/get.
+		store.put(Domain::Events, b"$e1".to_vec(), b"pdu1".to_vec()).unwrap();
+		assert_eq!(store.get(Domain::Events, b"$e1").unwrap().as_deref(), Some(&b"pdu1"[..]));
+
+		// Atomic multi-domain batch.
+		let mut batch = WriteBatch::new();
+		batch
+			.put(Domain::Events, b"$e2".to_vec(), b"pdu2".to_vec())
+			.put(Domain::RoomState, b"!r/name".to_vec(), b"$e2".to_vec())
+			.delete(Domain::Events, b"$e1".to_vec());
+		store.commit(batch).unwrap();
+
+		assert!(!store.contains(Domain::Events, b"$e1").unwrap());
+		assert_eq!(store.get(Domain::RoomState, b"!r/name").unwrap().as_deref(), Some(&b"$e2"[..]));
+
+		// Prefix scan stays within the domain and prefix, ascending.
+		for key in ["a:1", "a:2", "b:1"] {
+			store.put(Domain::AuditLog, key.as_bytes().to_vec(), b"_".to_vec()).unwrap();
+		}
+		let keys: Vec<_> = store
+			.prefix_scan(Domain::AuditLog, b"a:")
+			.unwrap()
+			.into_iter()
+			.map(|(k, _)| String::from_utf8(k.to_vec()).unwrap())
+			.collect();
+		assert_eq!(keys, vec!["a:1", "a:2"]);
+	}
+
+	#[test]
+	fn data_persists_across_reopen() {
+		let dir = TempDir::new();
+		{
+			let store = Store::new(RocksBackend::open(&dir.path).unwrap());
+			store.put(Domain::AccountData, b"k".to_vec(), b"v".to_vec()).unwrap();
+		}
+		// Reopen the same path; the value must still be there.
+		let store = Store::new(RocksBackend::open(&dir.path).unwrap());
+		assert_eq!(store.get(Domain::AccountData, b"k").unwrap().as_deref(), Some(&b"v"[..]));
+	}
+}
