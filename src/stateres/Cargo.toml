@@ -1,0 +1,19 @@
+[package]
+name = "gm-stateres"
+categories.workspace = true
+description = "GaussMatrix state-resolution engine (gm-stateres): conflict partitioning and the resolved-state cache for parallel state resolution."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gm_stateres"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[lints]
+workspace = true
