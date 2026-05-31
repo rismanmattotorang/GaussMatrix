@@ -4,7 +4,7 @@ use ruma::{
 	room_version_rules::AuthorizationRules,
 };
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::{Err, Result, arrayvec::ArrayVec, matrix::pdu::MAX_AUTH_EVENTS};
+use gaussmatrix_core::{Err, Result, arrayvec::ArrayVec, matrix::pdu::MAX_AUTH_EVENTS};
 
 use super::super::{TypeStateKey, events::member::RoomMemberEventContent};
 

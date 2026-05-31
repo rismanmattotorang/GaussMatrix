@@ -17,7 +17,7 @@ use object_store::{
 	Attributes, CopyMode, DynObjectStore, GetResult, MultipartUpload, ObjectMeta, ObjectStore,
 	ObjectStoreExt, PutPayload, PutResult, path::Path,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result,
 	config::StorageProvider,
 	debug, err, error,

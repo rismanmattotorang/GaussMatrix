@@ -1,6 +1,6 @@
 use ruma::{OwnedDeviceId, OwnedUserId};
-use tuwunel_core::{Err, Result, err};
-use tuwunel_service::{Services, appservice::RegistrationInfo};
+use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::{Services, appservice::RegistrationInfo};
 
 use super::{Auth, Request};
 

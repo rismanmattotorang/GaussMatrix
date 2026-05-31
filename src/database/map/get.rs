@@ -6,7 +6,7 @@ use futures::{
 };
 use rocksdb::{DBPinnableSlice, ReadOptions};
 use tokio::task;
-use tuwunel_core::{Err, Result, err, implement, utils::result::MapExpect};
+use gaussmatrix_core::{Err, Result, err, implement, utils::result::MapExpect};
 
 use crate::{
 	Handle,

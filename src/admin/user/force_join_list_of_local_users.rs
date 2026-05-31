@@ -1,5 +1,5 @@
 use ruma::{OwnedRoomOrAliasId, OwnedUserId};
-use tuwunel_core::{Err, Result, debug_warn};
+use gaussmatrix_core::{Err, Result, debug_warn};
 
 use super::BULK_JOIN_REASON;
 use crate::{admin_command, utils::parse_active_local_user_id};

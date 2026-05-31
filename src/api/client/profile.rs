@@ -17,8 +17,8 @@ use ruma::{
 	presence::PresenceState,
 };
 use serde_json::Value as JsonValue;
-use tuwunel_core::{Err, Result, utils::future::TryExtExt};
-use tuwunel_service::users::{Propagation, propagation_default};
+use gaussmatrix_core::{Err, Result, utils::future::TryExtExt};
+use gaussmatrix_service::users::{Propagation, propagation_default};
 
 use crate::{ClientIp, Ruma};
 

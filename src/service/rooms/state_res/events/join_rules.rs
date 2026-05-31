@@ -4,7 +4,7 @@ use std::ops::Deref;
 
 use ruma::serde::{StringEnum, from_raw_json_value};
 use serde::Deserialize;
-use tuwunel_core::{Error, Result, err, matrix::Event};
+use gaussmatrix_core::{Error, Result, err, matrix::Event};
 
 /// A helper type for an [`Event`] of type `m.room.join_rules`.
 ///

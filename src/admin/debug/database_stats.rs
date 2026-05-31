@@ -1,5 +1,5 @@
 use futures::TryStreamExt;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	utils::{stream::IterStream, string::EMPTY},
 };

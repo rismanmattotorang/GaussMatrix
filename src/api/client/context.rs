@@ -9,7 +9,7 @@ use ruma::{
 	events::{AnyStateEvent, StateEventType},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Event, Result, at, debug_warn, err,
 	matrix::pdu::{PduEvent, RawPduId},
 	ref_at,
@@ -19,7 +19,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, ReadyExt, TryIgnore, WidebandExt},
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	rooms::{
 		lazy_loading,

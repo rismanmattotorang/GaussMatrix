@@ -2,7 +2,7 @@ mod available;
 mod register;
 mod token_validity;
 
-use tuwunel_service::appservice::RegistrationInfo;
+use gaussmatrix_service::appservice::RegistrationInfo;
 
 pub(crate) use self::{
 	available::get_register_available_route, register::register_route,

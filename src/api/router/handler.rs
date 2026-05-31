@@ -9,7 +9,7 @@ use axum::{
 use futures::{Future, TryFutureExt};
 use http::Method;
 use ruma::api::{IncomingRequest, path_builder::PathBuilder};
-use tuwunel_core::{Result, trace};
+use gaussmatrix_core::{Result, trace};
 
 use super::{Ruma, RumaResponse, State, auth::AuthDispatch};
 

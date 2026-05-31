@@ -1,7 +1,7 @@
 use const_str::format as const_format;
 use ruma::{OwnedDeviceId, UserId};
-use tuwunel_core::{Err, Result, info, utils::html::escape as html_escape};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, info, utils::html::escape as html_escape};
+use gaussmatrix_service::Services;
 
 use super::ACCOUNT_HEAD;
 
@@ -50,7 +50,7 @@ static PAGE_HTML: &str = const_format!(
 			Session <code>{{did}}</code> for <strong>{{uid}}</strong> has been signed out.
 		</p>
 		<div class="nav">
-			<a href="/_tuwunel/oidc/account?action=org.matrix.sessions_list">
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.sessions_list">
 				Back to sessions
 			</a>
 		</div>

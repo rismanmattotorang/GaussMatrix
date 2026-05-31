@@ -2,7 +2,7 @@ use axum::extract::State;
 use futures::{StreamExt, stream};
 use itertools::Itertools;
 use ruma::{OwnedRoomId, api::client::keys::get_key_changes};
-use tuwunel_core::{Result, at, err, utils::stream::BroadbandExt};
+use gaussmatrix_core::{Result, at, err, utils::stream::BroadbandExt};
 
 use crate::Ruma;
 

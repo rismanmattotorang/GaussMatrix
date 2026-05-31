@@ -6,7 +6,7 @@ mod keys_rev;
 use std::{mem::replace, sync::Arc};
 
 use rocksdb::{DBRawIteratorWithThreadMode, ReadOptions};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 pub(crate) use self::{items::Items, items_rev::ItemsRev, keys::Keys, keys_rev::KeysRev};
 use crate::{

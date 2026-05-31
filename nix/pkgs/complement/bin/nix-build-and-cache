@@ -18,7 +18,7 @@ just() {
         return
     fi
 
-    # historical "conduit" store for compatibility purposes, same as tuwunel
+    # historical "conduit" store for compatibility purposes, same as gaussmatrix
     nix run --inputs-from "$toplevel" attic -- \
         login \
         conduit \
@@ -52,26 +52,26 @@ just() {
         withattic conduit || withattic conduit || withattic conduit || true
     )
 
-    # main "tuwunel" store
+    # main "gaussmatrix" store
     nix run --inputs-from "$toplevel" attic -- \
         login \
-        tuwunel \
-        "${ATTIC_ENDPOINT:-https://attic.kennel.juneis.dog/tuwunel}" \
+        gaussmatrix \
+        "${ATTIC_ENDPOINT:-https://attic.kennel.juneis.dog/gaussmatrix}" \
         "$ATTIC_TOKEN"
 
-    # Upload them to Attic (tuwunel store) and Cachix
+    # Upload them to Attic (gaussmatrix store) and Cachix
     #
     # Use `xargs` and a here-string because something would probably explode if
     # several thousand arguments got passed to a command at once. Hopefully no
     # store paths include a newline in them.
     (
         IFS=$'\n'
-        withattic tuwunel || withattic tuwunel || withattic tuwunel || true
+        withattic gaussmatrix || withattic gaussmatrix || withattic gaussmatrix || true
 
         # push to cachix if available
         if [ "$CACHIX_AUTH_TOKEN" ]; then
             nix shell --inputs-from "$toplevel" cachix -c xargs \
-            cachix push tuwunel <<< "${cache[*]}"
+            cachix push gaussmatrix <<< "${cache[*]}"
         fi
     )
 }

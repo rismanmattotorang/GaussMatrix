@@ -4,7 +4,7 @@ mod show_config;
 mod unregister;
 
 use clap::Subcommand;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

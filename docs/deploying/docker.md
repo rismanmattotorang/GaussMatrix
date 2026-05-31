@@ -1,28 +1,28 @@
-# Tuwunel for Docker
+# GaussMatrix for Docker
 
 ## Docker
 
-To run tuwunel with Docker you can either build the image yourself or pull it
+To run gaussmatrix with Docker you can either build the image yourself or pull it
 from a registry.
 
 ### Use a registry
 
-OCI images for tuwunel are available in the registries listed below.
+OCI images for gaussmatrix are available in the registries listed below.
 
 | Registry        | Image                                            | Size                            | Notes                                                                  |
 | --------------- | ------------------------------------------------ | ------------------------------- | ---------------------------------------------------------------------- |
-| GitHub Registry | [ghcr.io/matrix-construct/tuwunel:latest][gh]    | ![Image Size][shield-latest]    | Most recent tagged release. Recommended for automated updates (~monthly). |
-| Docker Hub      | [docker.io/jevolk/tuwunel:latest][dh]            | ![Image Size][shield-latest]    | Most recent tagged release. Recommended for automated updates (~monthly). |
-| GitHub Registry | [ghcr.io/matrix-construct/tuwunel:preview][gh]   | ![Image Size][shield-preview]   | Selected higher-confidence updates between releases (~weekly).         |
-| Docker Hub      | [docker.io/jevolk/tuwunel:preview][dh]           | ![Image Size][shield-preview]   | Selected higher-confidence updates between releases (~weekly).         |
-| GitHub Registry | [ghcr.io/matrix-construct/tuwunel:main][gh]      | ![Image Size][shield-main]      | Every reviewed merge to the main branch (~daily).                      |
-| Docker Hub      | [docker.io/jevolk/tuwunel:main][dh]              | ![Image Size][shield-main]      | Every reviewed merge to the main branch (~daily).                      |
+| GitHub Registry | [ghcr.io/rismanmattotorang/gaussmatrix:latest][gh]    | ![Image Size][shield-latest]    | Most recent tagged release. Recommended for automated updates (~monthly). |
+| Docker Hub      | [docker.io/rismanmattotorang/gaussmatrix:latest][dh]            | ![Image Size][shield-latest]    | Most recent tagged release. Recommended for automated updates (~monthly). |
+| GitHub Registry | [ghcr.io/rismanmattotorang/gaussmatrix:preview][gh]   | ![Image Size][shield-preview]   | Selected higher-confidence updates between releases (~weekly).         |
+| Docker Hub      | [docker.io/rismanmattotorang/gaussmatrix:preview][dh]           | ![Image Size][shield-preview]   | Selected higher-confidence updates between releases (~weekly).         |
+| GitHub Registry | [ghcr.io/rismanmattotorang/gaussmatrix:main][gh]      | ![Image Size][shield-main]      | Every reviewed merge to the main branch (~daily).                      |
+| Docker Hub      | [docker.io/rismanmattotorang/gaussmatrix:main][dh]              | ![Image Size][shield-main]      | Every reviewed merge to the main branch (~daily).                      |
 
-[dh]: https://hub.docker.com/r/jevolk/tuwunel
-[gh]: https://github.com/matrix-construct/tuwunel/pkgs/container/tuwunel
-[shield-latest]: https://img.shields.io/docker/image-size/jevolk/tuwunel/latest
-[shield-preview]: https://img.shields.io/docker/image-size/jevolk/tuwunel/preview
-[shield-main]: https://img.shields.io/docker/image-size/jevolk/tuwunel/main
+[dh]: https://hub.docker.com/r/rismanmattotorang/gaussmatrix
+[gh]: https://github.com/rismanmattotorang/gaussmatrix/pkgs/container/gaussmatrix
+[shield-latest]: https://img.shields.io/docker/image-size/rismanmattotorang/gaussmatrix/latest
+[shield-preview]: https://img.shields.io/docker/image-size/rismanmattotorang/gaussmatrix/preview
+[shield-main]: https://img.shields.io/docker/image-size/rismanmattotorang/gaussmatrix/main
 
 ### Run
 
@@ -30,22 +30,22 @@ When you have the image you can simply run it with
 
 ```bash
 docker run -d -p 8448:8008 \
-    -v db:/var/lib/tuwunel/ \
-    -e TUWUNEL_SERVER_NAME="your.server.name" \
-    -e TUWUNEL_ALLOW_REGISTRATION=false \
-    --name tuwunel $LINK
+    -v db:/var/lib/gaussmatrix/ \
+    -e GAUSSMATRIX_SERVER_NAME="your.server.name" \
+    -e GAUSSMATRIX_ALLOW_REGISTRATION=false \
+    --name gaussmatrix $LINK
 ```
 
 or you can use [docker compose](#docker-compose).
 
 The `-d` flag lets the container run in detached mode. You may supply an
-optional `tuwunel.toml` config file, the example config can be found
+optional `gaussmatrix.toml` config file, the example config can be found
 [here](../configuration/examples.md). You can pass in different env vars to
-change config values on the fly. You can even configure tuwunel completely by
+change config values on the fly. You can even configure gaussmatrix completely by
 using env vars. For an overview of possible values, please take a look at the
 [`docker-compose.yml`](docker-compose.yml) file.
 
-If you just want to test tuwunel for a short time, you can use the `--rm`
+If you just want to test gaussmatrix for a short time, you can use the `--rm`
 flag, which will clean up everything related to your container after you stop
 it.
 
@@ -80,7 +80,7 @@ docker network create caddy
 After that, you can rename it so it matches `docker-compose.yml` and spin up the
 containers!
 
-Additional info about deploying tuwunel can be found [here](generic.md).
+Additional info about deploying gaussmatrix can be found [here](generic.md).
 
 ### Run
 
@@ -96,7 +96,7 @@ docker compose up -d
 
 ### Nix build
 
-Tuwunel's Nix images are built using [`buildLayeredImage`][nix-buildlayeredimage].
+GaussMatrix's Nix images are built using [`buildLayeredImage`][nix-buildlayeredimage].
 This ensures all OCI images are repeatable and reproducible by anyone, keeps the
 images lightweight, and can be built offline.
 
@@ -104,7 +104,7 @@ This also ensures portability of our images because `buildLayeredImage` builds
 OCI images, not Docker images, and works with other container software.
 
 The OCI images are OS-less with only a very minimal environment of the `tini`
-init system, CA certificates, and the tuwunel binary. This does mean there is
+init system, CA certificates, and the gaussmatrix binary. This does mean there is
 not a shell, but in theory you can get a shell by adding the necessary layers
 to the layered image. However it's very unlikely you will need a shell for any
 real troubleshooting.
@@ -126,10 +126,10 @@ web. With the two provided files,
 [`docker-compose.for-traefik.yml`](docker-compose.for-traefik.yml) (or
 [`docker-compose.with-traefik.yml`](docker-compose.with-traefik.yml)) and
 [`docker-compose.override.yml`](docker-compose.override.yml), it is equally easy
-to deploy and use tuwunel, with a little caveat. If you already took a look at
+to deploy and use gaussmatrix, with a little caveat. If you already took a look at
 the files, then you should have seen the `well-known` service, and that is the
 little caveat. Traefik is simply a proxy and loadbalancer and is not able to
-serve any kind of content, but for tuwunel to federate, we need to either
+serve any kind of content, but for gaussmatrix to federate, we need to either
 expose ports `443` and `8448` or serve two endpoints `.well-known/matrix/client`
 and `.well-known/matrix/server`.
 
@@ -141,4 +141,4 @@ those two files.
 See the [TURN](../calls/turn.md) page.
 
 [nix-buildlayeredimage]: https://ryantm.github.io/nixpkgs/builders/images/dockertools/#ssec-pkgs-dockerTools-buildLayeredImage
-[oci-image-def]: https://github.com/jevolk/tuwunel/blob/main/nix/pkgs/oci-image/default.nix
+[oci-image-def]: https://github.com/rismanmattotorang/gaussmatrix/blob/main/nix/pkgs/oci-image/default.nix

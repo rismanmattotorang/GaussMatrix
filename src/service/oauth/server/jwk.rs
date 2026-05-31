@@ -4,7 +4,7 @@ use ring::{
 	signature::{self, EcdsaKeyPair, KeyPair},
 };
 use serde_json::{Value as JsonValue, json};
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 
 impl super::Server {
 	#[inline]

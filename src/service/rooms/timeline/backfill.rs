@@ -10,7 +10,7 @@ use ruma::{
 	uint,
 };
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, debug, debug_info, debug_warn, implement, is_false,
 	matrix::{
 		event::Event,
@@ -22,7 +22,7 @@ use tuwunel_core::{
 	},
 	validated, warn,
 };
-use tuwunel_database::Json;
+use gaussmatrix_database::Json;
 
 use super::ExtractBody;
 

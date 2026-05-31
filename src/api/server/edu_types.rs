@@ -1,6 +1,6 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use serde_json::json;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 /// # `GET /_matrix/federation/v1/query/edutypes`
 ///

@@ -11,7 +11,7 @@ use ruma::{
 		room::member::{MembershipState, RoomMemberEventContent},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Event, PduCount, Result, at, debug, debug_info, debug_warn, err, extract_variant,
 	implement, info,
 	matrix::event::gen_event_id,
@@ -229,7 +229,7 @@ async fn knock_room_local_federation_fallback(
 		.supported_room_version(&room_version_id)
 	{
 		return Err!(BadServerResponse(
-			"Remote room version {room_version_id} is not supported by tuwunel"
+			"Remote room version {room_version_id} is not supported by gaussmatrix"
 		));
 	}
 
@@ -344,7 +344,7 @@ async fn knock_room_helper_remote(
 		.supported_room_version(&room_version_id)
 	{
 		return Err!(BadServerResponse(
-			"Remote room version {room_version_id} is not supported by tuwunel"
+			"Remote room version {room_version_id} is not supported by gaussmatrix"
 		));
 	}
 

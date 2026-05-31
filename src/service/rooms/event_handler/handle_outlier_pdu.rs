@@ -2,7 +2,7 @@ use futures::{StreamExt, TryFutureExt};
 use ruma::{
 	CanonicalJsonObject, EventId, RoomId, RoomVersionId, ServerName, events::TimelineEventType,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug, debug_info, err, implement,
 	matrix::{Event, PduEvent, event::TypeExt, room_version},
 	ref_at, trace,

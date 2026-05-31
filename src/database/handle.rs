@@ -2,7 +2,7 @@ use std::{fmt, fmt::Debug, ops::Deref};
 
 use rocksdb::DBPinnableSlice;
 use serde::{Deserialize, Serialize, Serializer};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{Deserialized, Slice, keyval::deserialize_val};
 

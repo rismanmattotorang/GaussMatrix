@@ -1,4 +1,4 @@
-use tuwunel_core::{Result, at};
+use gaussmatrix_core::{Result, at};
 
 use crate::admin_command;
 

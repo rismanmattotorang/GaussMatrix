@@ -2,7 +2,7 @@ use ruma::{
 	RoomId, ServerName,
 	events::{StateEventType, room::server_acl::RoomServerAclEventContent},
 };
-use tuwunel_core::{Err, Result, debug, implement, trace, warn};
+use gaussmatrix_core::{Err, Result, debug, implement, trace, warn};
 
 /// Returns Ok if the acl allows the server
 #[implement(super::Service)]

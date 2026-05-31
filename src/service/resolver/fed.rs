@@ -4,7 +4,7 @@ use std::{
 };
 
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{arrayvec::ArrayString, smallstr::SmallString, utils::math::Expected};
+use gaussmatrix_core::{arrayvec::ArrayString, smallstr::SmallString, utils::math::Expected};
 
 use super::DestString;
 

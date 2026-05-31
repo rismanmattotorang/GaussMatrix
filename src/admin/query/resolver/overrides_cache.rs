@@ -1,6 +1,6 @@
 use futures::StreamExt;
-use tuwunel_core::{Result, utils::time};
-use tuwunel_service::resolver::cache::CachedOverride;
+use gaussmatrix_core::{Result, utils::time};
+use gaussmatrix_service::resolver::cache::CachedOverride;
 
 use crate::admin_command;
 

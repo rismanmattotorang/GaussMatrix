@@ -1,5 +1,5 @@
 use ruma::OwnedRoomId;
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use super::parse_alias_from_localpart;
 use crate::admin_command;

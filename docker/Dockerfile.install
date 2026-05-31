@@ -8,8 +8,8 @@ ARG install_prefix
 ARG assert_linkage=""
 
 WORKDIR ${install_prefix}
-ENV src_path="${CARGO_TARGET_DIR}/${rust_target}/${cargo_target_profile}/tuwunel"
-ENV dst_path="${install_prefix}/bin/tuwunel"
+ENV src_path="${CARGO_TARGET_DIR}/${rust_target}/${cargo_target_profile}/gaussmatrix"
+ENV dst_path="${install_prefix}/bin/gaussmatrix"
 COPY --from=bins $src_path $dst_path
 RUN <<EOF
     ldd -v "${dst_path}"

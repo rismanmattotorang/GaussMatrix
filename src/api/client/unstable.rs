@@ -12,8 +12,8 @@ use ruma::{
 	presence::PresenceState,
 	profile::{ProfileFieldName, ProfileFieldValue},
 };
-use tuwunel_core::{Err, Result, err};
-use tuwunel_service::users::propagation_default;
+use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::users::propagation_default;
 
 use super::profile::{profile_mxc, profile_str, resolve_propagation};
 use crate::{ClientIp, Ruma};

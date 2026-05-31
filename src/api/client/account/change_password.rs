@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::StreamExt;
 use ruma::api::client::account::change_password;
-use tuwunel_core::{Result, info, utils::ReadyExt};
+use gaussmatrix_core::{Result, info, utils::ReadyExt};
 
 use crate::{ClientIp, Ruma, router::auth_uiaa};
 

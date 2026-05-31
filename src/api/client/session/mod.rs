@@ -21,8 +21,8 @@ use ruma::api::client::session::{
 		v3::{DiscoveryInfo, HomeserverInfo, LoginInfo},
 	},
 };
-use tuwunel_core::{Err, Result, info, utils::stream::ReadyExt};
-use tuwunel_service::users::device::generate_refresh_token;
+use gaussmatrix_core::{Err, Result, info, utils::stream::ReadyExt};
+use gaussmatrix_service::users::device::generate_refresh_token;
 
 use self::{ldap::ldap_login, password::password_login};
 pub(crate) use self::{

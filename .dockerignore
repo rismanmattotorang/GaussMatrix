@@ -5,7 +5,7 @@ target/
 # Docker files
 Dockerfile*
 docker/
-!docker/playwright.tuwunel.ts
+!docker/playwright.gaussmatrix.ts
 
 # IDE files
 .vscode

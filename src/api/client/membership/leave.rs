@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::FutureExt;
 use ruma::api::client::membership::leave_room;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 

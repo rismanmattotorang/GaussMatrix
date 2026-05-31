@@ -15,7 +15,7 @@ use ruma::{
 	},
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at,
 	config::IdentityProvider,
 	debug::INFO_SPAN_LEVEL,
@@ -32,7 +32,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	media::MXC_LENGTH,
 	oauth::{
@@ -69,7 +69,7 @@ struct GrantCookie<'a> {
 	redirect_uri: Cow<'a, str>,
 }
 
-static GRANT_SESSION_COOKIE: &str = "tuwunel_grant_session";
+static GRANT_SESSION_COOKIE: &str = "gaussmatrix_grant_session";
 
 /// # `GET /_matrix/client/v3/login/sso/redirect`
 ///

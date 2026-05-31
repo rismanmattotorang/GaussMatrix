@@ -11,11 +11,11 @@ mod token_info;
 
 use clap::Subcommand;
 use ruma::OwnedUserId;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	either::{Either, Left, Right},
 };
-use tuwunel_service::oauth::{ProviderId, SessionId};
+use gaussmatrix_service::oauth::{ProviderId, SessionId};
 
 use crate::admin_command_dispatch;
 

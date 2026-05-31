@@ -15,7 +15,7 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug_info, debug_warn, err, implement,
 	matrix::{PduCount, pdu::check_rules, room_version},
 	pdu::PduBuilder,
@@ -345,7 +345,7 @@ async fn remote_leave(
 	let Some(room_version_id) = make_leave_response.room_version else {
 		return Err!(BadServerResponse(warn!(
 			"No room version was returned by {remote_server} for {room_id}, room version is \
-			 likely not supported by tuwunel"
+			 likely not supported by gaussmatrix"
 		)));
 	};
 

@@ -1,10 +1,10 @@
 use futures::StreamExt;
 use tokio::time::Instant;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, is_zero,
 	utils::stream::{IterStream, TryParallelExt},
 };
-use tuwunel_database::compact::Options;
+use gaussmatrix_database::compact::Options;
 
 use super::with_maps_or;
 use crate::admin_command;

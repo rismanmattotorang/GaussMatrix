@@ -10,49 +10,49 @@ For a rootless setup, we can use quadlets and systemd to manage the container li
 
 ### Step One
 
-Copy quadlet files to `~/.config/containers/systemd/tuwunel`
+Copy quadlet files to `~/.config/containers/systemd/gaussmatrix`
 
-**tuwunel.container**
+**gaussmatrix.container**
 
 <details>
-<summary>tuwunel container quadlet</summary>
+<summary>gaussmatrix container quadlet</summary>
 
 ```
-{{#include ../../quadlet/tuwunel.container}}
+{{#include ../../quadlet/gaussmatrix.container}}
 ```
 
 </details>
 
-**tuwunel-db.volume**
+**gaussmatrix-db.volume**
 
 <details>
-<summary>tuwunel database volume quadlet</summary>
+<summary>gaussmatrix database volume quadlet</summary>
 
 ```
-{{#include ../../quadlet/tuwunel-db.volume}}
+{{#include ../../quadlet/gaussmatrix-db.volume}}
 ```
 
 </details>
 
-**tuwunel.env**
+**gaussmatrix.env**
 
 <details>
-<summary>tuwunel environment variable quadlet</summary>
+<summary>gaussmatrix environment variable quadlet</summary>
 
 ```env
-{{#include ../../quadlet/tuwunel.env}}
+{{#include ../../quadlet/gaussmatrix.env}}
 ```
 
 </details>
 
 
 ```
-mkdir -p ~/.config/containers/systemd/tuwunel
+mkdir -p ~/.config/containers/systemd/gaussmatrix
 ```
 
 ### Step Two
 
-Modify `tuwunel.env` and [`tuwunel.toml`](generic.md#creating-the-tuwunel-configuration-file)
+Modify `gaussmatrix.env` and [`gaussmatrix.toml`](generic.md#creating-the-gaussmatrix-configuration-file)
 to desired values. This can be saved in your user home directory if desired.
 
 ### Step Three
@@ -65,22 +65,22 @@ systemctl --user daemon-reload
 
 ### Step Four
 
-- Start tuwunel:
+- Start gaussmatrix:
 
 ```
-systemctl --user start tuwunel
+systemctl --user start gaussmatrix
 ```
 
 ## Logging 
 
 To check the logs, run:
 ```
-systemctl --user status tuwunel
+systemctl --user status gaussmatrix
 ```
 or
 
 ```
-podman logs tuwunel-homeserver
+podman logs gaussmatrix-homeserver
 ```
 
 ## Troubleshooting systemd unit file generation

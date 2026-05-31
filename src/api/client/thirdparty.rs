@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use ruma::api::client::thirdparty::get_protocols;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 

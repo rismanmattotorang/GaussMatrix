@@ -26,7 +26,7 @@ use serde_json::{
 	json,
 	value::{RawValue as RawJsonValue, to_raw_value as to_raw_json_value},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, err, info,
 	matrix::{Event, EventHash, EventTypeExt, PduEvent, StateKey},
 	utils::stream::IterStream,

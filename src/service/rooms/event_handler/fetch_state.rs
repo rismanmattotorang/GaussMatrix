@@ -5,7 +5,7 @@ use ruma::{
 	EventId, OwnedEventId, RoomId, RoomVersionId, ServerName,
 	api::federation::event::get_room_state_ids, events::StateEventType,
 };
-use tuwunel_core::{Err, Result, debug, debug_warn, err, implement, matrix::Event};
+use gaussmatrix_core::{Err, Result, debug, debug_warn, err, implement, matrix::Event};
 
 use crate::rooms::short::ShortStateKey;
 

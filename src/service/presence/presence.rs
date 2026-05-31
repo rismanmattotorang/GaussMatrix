@@ -5,7 +5,7 @@ use ruma::{
 	presence::PresenceState,
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Error, Result, utils, utils::future::TryExtExt};
+use gaussmatrix_core::{Error, Result, utils, utils::future::TryExtExt};
 
 use crate::users;
 

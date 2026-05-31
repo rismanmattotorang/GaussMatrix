@@ -8,7 +8,7 @@ use std::{
 use futures::pin_mut;
 use serde::Serialize;
 use tokio::sync::watch::{Sender, channel};
-use tuwunel_core::{debug, implement, smallvec::SmallVec};
+use gaussmatrix_core::{debug, implement, smallvec::SmallVec};
 
 use crate::keyval::{KeyBuf, serialize_key};
 

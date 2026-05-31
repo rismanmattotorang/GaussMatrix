@@ -5,8 +5,8 @@ use tokio::{
 	select,
 	time::{Duration, sleep},
 };
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::Err;
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::Err;
 
 #[test]
 #[should_panic = "'unix_socket_path' directive in your configuration"]
@@ -22,7 +22,7 @@ fn listener_init_err() {
 		let server = Server::new(Some(&args), Some(&runtime)).unwrap();
 		let result = runtime.block_on(async {
 			select! {
-				result = tuwunel::async_exec(&server) => result,
+				result = gaussmatrix::async_exec(&server) => result,
 				() = sleep(Duration::from_secs(10)) => Err!("Shutdown hanging after error."),
 			}
 		});

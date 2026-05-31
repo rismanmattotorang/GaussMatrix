@@ -15,11 +15,11 @@ use http::{
 	header::{CACHE_CONTROL, CONTENT_SECURITY_POLICY, CONTENT_TYPE, REFERRER_POLICY},
 };
 use ruma::{OwnedDeviceId, OwnedRoomId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, err,
 	utils::{BoolExt, html::escape as html_escape},
 };
-use tuwunel_service::{Services, users::propagation_default};
+use gaussmatrix_service::{Services, users::propagation_default};
 use url::Url;
 
 use self::{
@@ -36,20 +36,20 @@ pub(crate) static ACCOUNT_MANAGEMENT_ACTIONS_SUPPORTED: &[&str] = &[
 	"org.matrix.session_end",
 ];
 
-/// Raw JS served at `/_tuwunel/oidc/account.js`.
+/// Raw JS served at `/_gaussmatrix/oidc/account.js`.
 /// Referenced via `<script src>` for CSP compatibility.
 static ACCOUNT_JS: &str = include_str!("account/account.js");
 
-/// Shared stylesheet served at `/_tuwunel/oidc/account.css`.
+/// Shared stylesheet served at `/_gaussmatrix/oidc/account.css`.
 static ACCOUNT_CSS: &str = include_str!("account/account.css");
 
 static ACCOUNT_HEAD: &str = r#"
 	<meta charset="UTF-8">
-	<link rel="stylesheet" href="/_tuwunel/oidc/account.css">
+	<link rel="stylesheet" href="/_gaussmatrix/oidc/account.css">
 "#;
 
 static ACCOUNT_JS_INCLUDE: &str = r#"
-	<script src="/_tuwunel/oidc/account.js"></script>
+	<script src="/_gaussmatrix/oidc/account.js"></script>
 "#;
 
 /// Cache-control header value.
@@ -58,7 +58,7 @@ static ACCOUNT_CACHE_CONTROL: &str = "no-store";
 /// CSP for account-management HTML pages. The global CSP has `form-action
 /// 'none'` and `sandbox` (which both block form submission).
 /// `SetResponseHeaderLayer::if_not_present` means our header takes precedence.
-/// Styles are served from `/_tuwunel/oidc/account.css` so `style-src 'self'`
+/// Styles are served from `/_gaussmatrix/oidc/account.css` so `style-src 'self'`
 /// suffices.
 static ACCOUNT_CSP: &[&str] = &[
 	"default-src 'none';",
@@ -292,7 +292,7 @@ fn account_sso_redirect(services: &Services, action: &str, device_id: &str) -> R
 	let issuer = services.oauth.get_server()?.issuer_url()?;
 	let base = issuer.trim_end_matches('/');
 
-	let mut callback_url = Url::parse(&format!("{base}/_tuwunel/oidc/account_callback"))
+	let mut callback_url = Url::parse(&format!("{base}/_gaussmatrix/oidc/account_callback"))
 		.map_err(|_| err!(error!("Failed to build account callback URL")))?;
 
 	callback_url
@@ -359,7 +359,7 @@ fn account_error_page(message: &str) -> String {
 				<h1 class="err">Error</h1>
 				<p>{msg}</p>
 				<div class="nav">
-					<a href="/_tuwunel/oidc/account">
+					<a href="/_gaussmatrix/oidc/account">
 						Return to account management
 					</a>
 				</div>

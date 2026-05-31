@@ -9,14 +9,14 @@ use ruma::{
 	serde::Raw,
 };
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug_warn,
 	utils::{
 		IterStream,
 		stream::{BroadbandExt, ReadyExt},
 	},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use super::FailureMap;
 use crate::Ruma;

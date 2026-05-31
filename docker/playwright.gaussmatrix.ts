@@ -21,28 +21,28 @@ import {ClientServerApi, type Credentials} from "@element-hq/element-web-playwri
 const REGISTRATION_SHARED_SECRET = "playwright-shared-secret";
 
 // The minimum config surface tests are allowed to flip at runtime. The full
-// config lives in tuwunel.toml; the in-image baked file is the source of
+// config lives in gaussmatrix.toml; the in-image baked file is the source of
 // truth. withConfigField/withConfig accept any key, but only the keys listed
 // here are forwarded as -O flags at startup.
 const DEFAULT_CONFIG = {
-    log: "warn,tuwunel=info",
+    log: "warn,gaussmatrix=info",
 };
-export type TuwunelConfig = typeof DEFAULT_CONFIG;
+export type GaussMatrixConfig = typeof DEFAULT_CONFIG;
 
 /**
- * A Playwright homeserver container backed by Tuwunel.
+ * A Playwright homeserver container backed by GaussMatrix.
  *
  * Warning: this is an unstable API/interface and may change without notice.
  */
-export class TuwunelContainer extends GenericContainer implements HomeserverContainer<TuwunelConfig> {
-    protected config: TuwunelConfig;
+export class GaussMatrixContainer extends GenericContainer implements HomeserverContainer<GaussMatrixConfig> {
+    protected config: GaussMatrixConfig;
     private cmdOverrides: string[] = [];
 
     /**
-     * Creates a new TuwunelContainer.
+     * Creates a new GaussMatrixContainer.
      * @param image The image tag to start from. Defaults to the locally-built testee image.
      */
-    public constructor(image = "tuwunel-playwright-testee:latest") {
+    public constructor(image = "gaussmatrix-playwright-testee:latest") {
         super(image);
 
         this.config = {...DEFAULT_CONFIG};
@@ -57,7 +57,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
      * @param value The value to set.
      * @returns This container, for chaining.
      */
-    public withConfigField<Key extends keyof TuwunelConfig>(key: Key, value: TuwunelConfig[Key]): this {
+    public withConfigField<Key extends keyof GaussMatrixConfig>(key: Key, value: GaussMatrixConfig[Key]): this {
         (this.config as Record<string, unknown>)[key as string] = value;
         this.cmdOverrides.push(`-O${String(key)}=${String(value)}`);
         return this;
@@ -68,7 +68,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
      * @param config A partial config to merge over the defaults.
      * @returns This container, for chaining.
      */
-    public withConfig(config: Partial<TuwunelConfig>): this {
+    public withConfig(config: Partial<GaussMatrixConfig>): this {
         this.config = {...this.config, ...config};
         for (const [k, v] of Object.entries(config)) {
             this.cmdOverrides.push(`-O${k}=${String(v)}`);
@@ -77,7 +77,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
     }
 
     /**
-     * No-op: the tuwunel test harness does not yet ship an SMTP server.
+     * No-op: the gaussmatrix test harness does not yet ship an SMTP server.
      * Specs that require email verification must be on the skip-list.
      * @returns This container, for chaining.
      */
@@ -86,7 +86,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
     }
 
     /**
-     * No-op: tuwunel does not integrate with MAS in the test harness.
+     * No-op: gaussmatrix does not integrate with MAS in the test harness.
      * Specs that require MAS must be on the skip-list.
      * @returns This container, for chaining.
      */
@@ -94,7 +94,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
         return this; // XXX: MAS integration not implemented
     }
 
-    public override async start(): Promise<StartedTuwunelContainer> {
+    public override async start(): Promise<StartedGaussMatrixContainer> {
         if (this.cmdOverrides.length > 0) {
             this.withCommand(this.cmdOverrides);
         }
@@ -106,7 +106,7 @@ export class TuwunelContainer extends GenericContainer implements HomeserverCont
         this.withExposedPorts({container: 8008, host: port});
         const container = await super.start();
         const baseUrl = `http://127.0.0.1:${port}`;
-        return new StartedTuwunelContainer(container, baseUrl, REGISTRATION_SHARED_SECRET);
+        return new StartedGaussMatrixContainer(container, baseUrl, REGISTRATION_SHARED_SECRET);
     }
 }
 
@@ -121,10 +121,10 @@ async function pickFreePort(): Promise<number> {
 }
 
 /**
- * A started TuwunelContainer, exposing the Client-Server API and a small
+ * A started GaussMatrixContainer, exposing the Client-Server API and a small
  * Synapse-compatible admin surface for test registration.
  */
-export class StartedTuwunelContainer extends AbstractStartedContainer implements StartedHomeserverContainer {
+export class StartedGaussMatrixContainer extends AbstractStartedContainer implements StartedHomeserverContainer {
     public readonly csApi: ClientServerApi;
 
     public constructor(
@@ -236,7 +236,7 @@ export class StartedTuwunelContainer extends AbstractStartedContainer implements
     }
 
     /**
-     * Binds a 3pid to a user. Not implemented: tuwunel does not expose a
+     * Binds a 3pid to a user. Not implemented: gaussmatrix does not expose a
      * Synapse-style PUT /_synapse/admin/v2/users/... endpoint.
      * @throws Error Always; specs depending on this must be skipped.
      */

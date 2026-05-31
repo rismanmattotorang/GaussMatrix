@@ -11,7 +11,7 @@ use ruma::{
 	},
 	presence::PresenceState,
 };
-use tuwunel_core::{Err, PduCount, Result, err};
+use gaussmatrix_core::{Err, PduCount, Result, err};
 
 use crate::{ClientIp, Ruma};
 

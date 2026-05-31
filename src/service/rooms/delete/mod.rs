@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use futures::{FutureExt, StreamExt};
 use ruma::RoomId;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug,
 	result::LogErr,
 	trace,

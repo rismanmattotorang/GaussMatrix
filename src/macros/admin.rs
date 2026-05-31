@@ -11,7 +11,7 @@ use crate::{
 
 pub(super) fn command(mut item: ItemFn, _args: &[Meta]) -> Result<TokenStream> {
 	let attr: Vec<Attribute> = parse_quote! {
-		#[tuwunel_macros::implement(crate::Context, params = "<'_>")]
+		#[gaussmatrix_macros::implement(crate::Context, params = "<'_>")]
 		#[expect(clippy::unused_async)]
 	};
 

@@ -27,13 +27,13 @@ use tower_http::{
 	trace::{DefaultOnFailure, DefaultOnRequest, DefaultOnResponse, TraceLayer},
 };
 use tracing::Level;
-use tuwunel_api::router::{ConfiguredIpSource, TrustedPeerSubnets, state::Guard};
-use tuwunel_core::{Result, Server, config::IpSource, debug, error};
-use tuwunel_service::Services;
+use gaussmatrix_api::router::{ConfiguredIpSource, TrustedPeerSubnets, state::Guard};
+use gaussmatrix_core::{Result, Server, config::IpSource, debug, error};
+use gaussmatrix_service::Services;
 
 use crate::{request, router};
 
-const TUWUNEL_CSP: &[&str; 5] = &[
+const GAUSSMATRIX_CSP: &[&str; 5] = &[
 	"default-src 'none'",
 	"frame-ancestors 'none'",
 	"form-action 'none'",
@@ -41,7 +41,7 @@ const TUWUNEL_CSP: &[&str; 5] = &[
 	"sandbox",
 ];
 
-const TUWUNEL_HTML_CSP: &[&str; 7] = &[
+const GAUSSMATRIX_HTML_CSP: &[&str; 7] = &[
 	"default-src 'none'",
 	"script-src 'unsafe-inline'",
 	"style-src 'unsafe-inline'",
@@ -51,7 +51,7 @@ const TUWUNEL_HTML_CSP: &[&str; 7] = &[
 	"sandbox",
 ];
 
-const TUWUNEL_PERMISSIONS_POLICY: &[&str; 2] = &["interest-cohort=()", "browsing-topics=()"];
+const GAUSSMATRIX_PERMISSIONS_POLICY: &[&str; 2] = &["interest-cohort=()", "browsing-topics=()"];
 
 pub(crate) fn build(services: &Arc<Services>) -> Result<(Router, Guard)> {
 	let server = &services.server;
@@ -109,7 +109,7 @@ pub(crate) fn build(services: &Arc<Services>) -> Result<(Router, Guard)> {
 		))
 		.layer(SetResponseHeaderLayer::if_not_present(
 			HeaderName::from_static("permissions-policy"),
-			HeaderValue::from_str(&TUWUNEL_PERMISSIONS_POLICY.join(","))?,
+			HeaderValue::from_str(&GAUSSMATRIX_PERMISSIONS_POLICY.join(","))?,
 		))
 		.layer(SetResponseHeaderLayer::if_not_present(
 			header::CONTENT_SECURITY_POLICY,
@@ -120,8 +120,8 @@ pub(crate) fn build(services: &Arc<Services>) -> Result<(Router, Guard)> {
 					.map(HeaderValue::to_str)
 					.and_then(Result::ok)
 					.is_some_and(|val| val.contains("text/html"))
-					.then(|| TUWUNEL_HTML_CSP.join(";"))
-					.unwrap_or_else(|| TUWUNEL_CSP.join(";"));
+					.then(|| GAUSSMATRIX_HTML_CSP.join(";"))
+					.unwrap_or_else(|| GAUSSMATRIX_CSP.join(";"));
 
 				HeaderValue::from_str(&csp).ok()
 			},

@@ -4,7 +4,7 @@ use ruma::{
 	RoomId,
 	api::client::membership::{join_room_by_id, join_room_by_id_or_alias},
 };
-use tuwunel_core::{Result, warn};
+use gaussmatrix_core::{Result, warn};
 
 use super::banned_room_check;
 use crate::{ClientIp, Ruma};

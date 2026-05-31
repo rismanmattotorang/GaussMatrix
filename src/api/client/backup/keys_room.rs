@@ -3,7 +3,7 @@ use futures::{StreamExt, TryStreamExt};
 use ruma::api::client::backup::{
 	add_backup_keys_for_room, delete_backup_keys_for_room, get_backup_keys_for_room,
 };
-use tuwunel_core::{Err, Result, utils::stream::IterStream};
+use gaussmatrix_core::{Err, Result, utils::stream::IterStream};
 
 use super::get_count_etag;
 use crate::Ruma;

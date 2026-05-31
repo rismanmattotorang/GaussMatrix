@@ -4,7 +4,7 @@ use ruma::{
 	api::federation::membership::create_invite,
 	events::room::member::{MembershipState, RoomMemberEventContent},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, err, implement, matrix::event::gen_event_id_canonical_json, pdu::PduBuilder,
 };
 

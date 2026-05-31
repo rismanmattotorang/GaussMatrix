@@ -3,7 +3,7 @@ use ruma::{
 	RoomId, api::federation::space::SpaceHierarchyParentSummary as ParentSummary,
 	events::space::child::HierarchySpaceChildEvent, room::RoomSummary, serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Event, Result, debug, error, implement,
 	utils::{future::TryExtExt, timepoint_has_passed},
 };

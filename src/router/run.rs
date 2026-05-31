@@ -4,10 +4,10 @@ use std::{
 };
 
 use futures::{FutureExt, future::join, pin_mut};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, Server, debug, debug_error, debug_info, error, info, utils::BoolExt,
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{handle::ServerHandle, serve};
 
@@ -18,7 +18,7 @@ pub(crate) async fn run(services: Arc<Services>) -> Result {
 	debug!("Start");
 
 	// Install the admin command root here for now
-	tuwunel_admin::init(&services.admin);
+	gaussmatrix_admin::init(&services.admin);
 
 	// Execute configured startup commands.
 	services.admin.startup_execute().await?;
@@ -68,7 +68,7 @@ pub(crate) async fn run(services: Arc<Services>) -> Result {
 	_ = sigs.await;
 
 	// Remove the admin command root
-	tuwunel_admin::fini(&services.admin);
+	gaussmatrix_admin::fini(&services.admin);
 
 	debug_info!("Finish");
 	res

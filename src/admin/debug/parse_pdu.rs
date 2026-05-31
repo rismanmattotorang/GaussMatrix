@@ -1,5 +1,5 @@
 use ruma::{OwnedEventId, RoomVersionId};
-use tuwunel_core::{Err, Result, err, matrix::pdu::PduEvent, utils::string::EMPTY};
+use gaussmatrix_core::{Err, Result, err, matrix::pdu::PduEvent, utils::string::EMPTY};
 
 use crate::admin_command;
 

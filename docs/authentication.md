@@ -1,6 +1,6 @@
 # Authentication systems
 
-Tuwunel gives you fine-grained control over who can register and how users
+GaussMatrix gives you fine-grained control over who can register and how users
 authenticate. This chapter covers everything from basic password login and
 token-based invitations to full OpenID Connect federation.
 
@@ -10,7 +10,7 @@ token-based invitations to full OpenID Connect federation.
 - [**Identity Providers**](authentication/providers.md) — Single-sign-on login via GitHub, Google,
   Keycloak, and other OAuth/OIDC providers.
 
-- [**OIDC Services**](authentication/oidc-server.md) — Tuwunel's built-in OIDC authorization
+- [**OIDC Services**](authentication/oidc-server.md) — GaussMatrix's built-in OIDC authorization
   server for next-generation Matrix applications.
 
 - [**LDAP Delegation**](authentication/ldap.md) — Delegate user management and password authentication

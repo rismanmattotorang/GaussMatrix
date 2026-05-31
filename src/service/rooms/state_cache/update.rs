@@ -14,8 +14,8 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{Result, implement, is_not_empty, matrix::PduCount, utils::ReadyExt, warn};
-use tuwunel_database::{Json, serialize_key};
+use gaussmatrix_core::{Result, implement, is_not_empty, matrix::PduCount, utils::ReadyExt, warn};
+use gaussmatrix_database::{Json, serialize_key};
 
 /// Update current membership data.
 #[implement(super::Service)]

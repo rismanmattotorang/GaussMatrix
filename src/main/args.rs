@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 
 use clap::{ArgAction, Parser};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result,
 	config::{Figment, FigmentValue},
 	err, is_true, toml,
@@ -15,8 +15,8 @@ use tuwunel_core::{
 #[clap(
 	about,
 	long_about = None,
-	name = "tuwunel",
-	version = tuwunel_core::version(),
+	name = "gaussmatrix",
+	version = gaussmatrix_core::version(),
 )]
 pub struct Args {
 	#[arg(short, long)]
@@ -111,7 +111,7 @@ pub struct Args {
 	#[arg(
 		long,
 		hide(true),
-		env = "TUWUNEL_RUNTIME_HISTOGRAM_INTERVAL",
+		env = "GAUSSMATRIX_RUNTIME_HISTOGRAM_INTERVAL",
 		default_value = "25"
 	)]
 	pub worker_histogram_interval: u64,
@@ -120,14 +120,14 @@ pub struct Args {
 	#[arg(
 		long,
 		hide(true),
-		env = "TUWUNEL_RUNTIME_HISTOGRAM_BUCKETS",
+		env = "GAUSSMATRIX_RUNTIME_HISTOGRAM_BUCKETS",
 		default_value = "20"
 	)]
 	pub worker_histogram_buckets: usize,
 
 	/// Write tokio runtime metrics at exit to a file in the directory
 	/// provided. The format will be JSON. The file will be named
-	/// `tuwunel.runtime_metrics.<pid>.json`. The metrics are accumulated for
+	/// `gaussmatrix.runtime_metrics.<pid>.json`. The metrics are accumulated for
 	/// the last runtime interval; total value is only obtained if this is the
 	/// first call for the execution.
 	#[arg(
@@ -135,20 +135,20 @@ pub struct Args {
 		hide(true),
 		num_args = 0..=1,
 		require_equals(false),
-		env = "TUWUNEL_RUNTIME_METRICS_DIR",
+		env = "GAUSSMATRIX_RUNTIME_METRICS_DIR",
 		default_missing_value = ""
 	)]
 	pub runtime_metrics_dir: Option<PathBuf>,
 
 	/// Write system resource usage (`getrusage(2)`) metrics at exit to a file
 	/// in the directory provided. The format will be JSON. The file will be
-	/// named `tuwunel.runtime_usage.<pid>.json`.
+	/// named `gaussmatrix.runtime_usage.<pid>.json`.
 	#[arg(
 		long,
 		hide(true),
 		num_args = 0..=1,
 		require_equals(false),
-		env = "TUWUNEL_RUNTIME_USAGE_DIR",
+		env = "GAUSSMATRIX_RUNTIME_USAGE_DIR",
 		default_missing_value = ""
 	)]
 	pub runtime_usage_dir: Option<PathBuf>,
@@ -157,7 +157,7 @@ pub struct Args {
 	#[arg(
 		long,
 		hide(true),
-		env = "TUWUNEL_RUNTIME_WORKER_AFFINITY",
+		env = "GAUSSMATRIX_RUNTIME_WORKER_AFFINITY",
 		action = ArgAction::Set,
 		num_args = 0..=1,
 		require_equals(false),
@@ -171,7 +171,7 @@ pub struct Args {
 	#[arg(
 		long,
 		hide(true),
-		env = "TUWUNEL_RUNTIME_GC_ON_PARK",
+		env = "GAUSSMATRIX_RUNTIME_GC_ON_PARK",
 		action = ArgAction::Set,
 		num_args = 0..=1,
 		require_equals(false),
@@ -187,7 +187,7 @@ pub struct Args {
 	#[arg(
 		long,
 		hide(true),
-		env = "TUWUNEL_RUNTIME_GC_MUZZY",
+		env = "GAUSSMATRIX_RUNTIME_GC_MUZZY",
 		action = ArgAction::Set,
 		num_args = 0..=1,
 		require_equals(false),

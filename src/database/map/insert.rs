@@ -6,7 +6,7 @@
 use std::{convert::AsRef, fmt::Debug};
 
 use rocksdb::WriteBatchWithTransaction;
-use tuwunel_core::implement;
+use gaussmatrix_core::implement;
 
 use crate::util::or_else;
 

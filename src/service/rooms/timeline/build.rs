@@ -8,7 +8,7 @@ use ruma::{
 		room::member::{MembershipState, RoomMemberEventContent},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, implement,
 	matrix::{event::Event, pdu::PduBuilder, room_version},
 	utils::{IterStream, ReadyExt},

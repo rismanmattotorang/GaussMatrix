@@ -38,7 +38,7 @@ use ruma::{
 	serde::Raw,
 	uint,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Event, Result, debug, err, error, extract_variant,
 	result::LogErr,
 	smallvec::SmallVec,

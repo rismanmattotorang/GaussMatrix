@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 use ruma::{OwnedDeviceId, OwnedUserId, UInt, UserId, presence::PresenceState};
 use tokio::sync::RwLock;
-use tuwunel_core::debug;
+use gaussmatrix_core::debug;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum DeviceKey {

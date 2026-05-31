@@ -2,7 +2,7 @@ use std::{iter::once, time::Instant};
 
 use futures::StreamExt;
 use ruma::{CanonicalJsonValue, OwnedEventId, RoomId};
-use tuwunel_core::{Err, Result, err, utils::stream::ReadyExt};
+use gaussmatrix_core::{Err, Result, err, utils::stream::ReadyExt};
 
 use crate::admin_command;
 

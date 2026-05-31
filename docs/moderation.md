@@ -1,7 +1,7 @@
 # Policy and Moderation
 
 This chapter covers the federation-level, room-level, and user-level controls
-Tuwunel exposes to operators for keeping their server, its users, and the rooms
+GaussMatrix exposes to operators for keeping their server, its users, and the rooms
 they participate in within a desired policy posture. Most controls fall into
 one of three layers: configuration (statically applied at startup or reload),
 admin-room commands (live operator actions), and per-room policy delegation
@@ -138,7 +138,7 @@ existing entries.
 MSC4284 lets a room's moderators delegate event signing to a third-party
 *policy server* whose ed25519 signature must be present on every non-policy
 event in the room. The signature folds into `event.signatures` and federates
-transitively. Tuwunel implements outbound `/sign` on local sends, inbound
+transitively. GaussMatrix implements outbound `/sign` on local sends, inbound
 verification on federated receives, fetch-on-missing for inbound events
 without a signature, and refusal/backoff caching to avoid hammering a server
 that is rate-limiting or has refused.
@@ -146,7 +146,7 @@ that is rate-limiting or has refused.
 Two configuration knobs:
 
 - `enable_policy_servers`: master switch (default `false`). When `false`,
-  Tuwunel ignores policy state entirely. When `true`, the gate engages only
+  GaussMatrix ignores policy state entirely. When `true`, the gate engages only
   in rooms that carry a valid `m.room.policy` state event.
 - `policy_server_request_timeout`: seconds (default `5`) for both outbound
   `/sign` and inbound signature-fetch requests.
@@ -169,14 +169,14 @@ Operator-relevant implications when enabling:
 - **Privacy in encrypted rooms.** The PDU is forwarded to the policy server
   for signing. Ciphertext is opaque, but metadata (sender, timestamp, room,
   event type) is not. Encrypted-room policy delegation is the room's call;
-  Tuwunel does not block it.
+  GaussMatrix does not block it.
 - **Refusal and rate-limit caching.** Per-event refusals and per-policy-server
   `M_LIMIT_EXCEEDED` backoffs are persisted, so repeated arrivals of the
   same event do not re-hit a refusing or throttled server.
 
 For room version compatibility, MSC4416 (the room-version-13 successor that
 makes a missing or invalid policy signature an auth-rule rejection rather
-than a soft fail) is not yet active in Tuwunel and depends on upstream
+than a soft fail) is not yet active in GaussMatrix and depends on upstream
 typing work. Until v13 ships, "leave it off" is safe; once v13 rooms become
 common, leaving it off in such a room means accepting events that the rest
 of the federation will reject.
@@ -184,7 +184,7 @@ of the federation will reject.
 ## URL previews and outbound network policy
 
 URL preview generation is a frequent attack surface (SSRF, exfiltration via
-forced fetches). Tuwunel exposes both a domain policy layer and an IP egress
+forced fetches). GaussMatrix exposes both a domain policy layer and an IP egress
 layer.
 
 Domain policy:
@@ -206,7 +206,7 @@ Domain policy:
 
 IP egress:
 
-- `ip_range_denylist`: list of IPv4/IPv6 CIDR ranges Tuwunel will not send
+- `ip_range_denylist`: list of IPv4/IPv6 CIDR ranges GaussMatrix will not send
   outbound requests to. Defaults to RFC1918, loopback, multicast, link-local,
   and the documentation/testnet ranges. This is application-layer enforcement
   and not a substitute for a host firewall, but it closes the obvious SSRF
@@ -250,7 +250,7 @@ elsewhere.
 
 **3. Block future media downloads from that server.**
 Add the server to `prevent_media_downloads_from` in your config and reload
-or restart Tuwunel:
+or restart GaussMatrix:
 
 ```toml
 prevent_media_downloads_from = ["badserver\\.tld$"]

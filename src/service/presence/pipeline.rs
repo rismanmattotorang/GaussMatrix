@@ -11,7 +11,7 @@ use ruma::{
 	DeviceId, OwnedUserId, UInt, UserId, events::presence::PresenceEvent, presence::PresenceState,
 };
 use tokio::time::sleep;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, debug, error,
 	result::LogErr,
 	trace,
@@ -100,7 +100,7 @@ impl Service {
 		status_msg: StatusMsg,
 		refresh_window_ms: Option<u64>,
 	) -> Result {
-		let now = tuwunel_core::utils::millis_since_unix_epoch();
+		let now = gaussmatrix_core::utils::millis_since_unix_epoch();
 		let preserve_status = matches!(status_msg, StatusMsg::Unchanged);
 		// 1) Capture per-device presence snapshot for aggregation.
 		debug!(
@@ -345,7 +345,7 @@ impl Service {
 		}
 
 		let presence_state = presence.state().clone();
-		let now = tuwunel_core::utils::millis_since_unix_epoch();
+		let now = gaussmatrix_core::utils::millis_since_unix_epoch();
 		let aggregated = self
 			.device_presence
 			.aggregate(user_id, now, self.idle_timeout, self.offline_timeout)

@@ -3,7 +3,7 @@ use ruma::{
 	CanonicalJsonObject, EventId, OwnedEventId, RoomId, ServerName, UserId,
 	events::StateEventType,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug,
 	debug::INFO_SPAN_LEVEL,
 	debug_warn, err, implement,

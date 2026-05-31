@@ -15,9 +15,9 @@ mod vals_total;
 use std::{fmt::Write, sync::Arc};
 
 use clap::Subcommand;
-use tuwunel_core::{Result, err, itertools::Itertools, utils::math::Expected};
-use tuwunel_database::Map;
-use tuwunel_service::Services;
+use gaussmatrix_core::{Result, err, itertools::Itertools, utils::math::Expected};
+use gaussmatrix_database::Map;
+use gaussmatrix_service::Services;
 
 use crate::admin_command_dispatch;
 

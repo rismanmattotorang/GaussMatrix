@@ -25,8 +25,8 @@
     # be expected on non-debug builds.
     "jemalloc_prof"
     "jemalloc_stats"
-    # tuwunel_mods is a development-only hot reload feature
-    "tuwunel_mods"
+    # gaussmatrix_mods is a development-only hot reload feature
+    "gaussmatrix_mods"
   ],
   disable_release_max_log_level ? false,
   features ? [ ],
@@ -145,8 +145,8 @@ let
   });
 
   buildPackageEnv = {
-    TUWUNEL_VERSION_EXTRA = inputs.self.shortRev or inputs.self.dirtyShortRev or "";
-    TUWUNEL_DATABASE_PATH = "/var/tmp/tuwunel.db";
+    GAUSSMATRIX_VERSION_EXTRA = inputs.self.shortRev or inputs.self.dirtyShortRev or "";
+    GAUSSMATRIX_DATABASE_PATH = "/var/tmp/gaussmatrix.db";
   }
   // buildDepsOnlyEnv
   // {
@@ -253,7 +253,7 @@ craneLib.buildPackage (
       in
       ''
         export NIX_REDIRECTS="/etc/resolv.conf=${fakeResolvConf}"
-        export TUWUNEL_DATABASE_PATH="$(mktemp -d)/smoketest.db"
+        export GAUSSMATRIX_DATABASE_PATH="$(mktemp -d)/smoketest.db"
       '';
     doCheck = true;
 

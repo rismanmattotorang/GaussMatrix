@@ -12,7 +12,7 @@ use ruma::{
 	events::{AnyStrippedStateEvent, AnySyncStateEvent, room::member::MembershipState},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement, trace,
 	utils::{
 		self, BoolExt,
@@ -21,7 +21,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Map};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Map};
 
 use crate::appservice::RegistrationInfo;
 

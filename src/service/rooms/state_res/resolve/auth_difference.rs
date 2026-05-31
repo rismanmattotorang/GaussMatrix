@@ -2,7 +2,7 @@ use std::{borrow::Borrow, collections::BTreeMap};
 
 use futures::{FutureExt, Stream};
 use ruma::EventId;
-use tuwunel_core::utils::stream::{IterStream, ReadyExt};
+use gaussmatrix_core::utils::stream::{IterStream, ReadyExt};
 
 use super::AuthSet;
 

@@ -19,19 +19,19 @@ pub(crate) mod user;
 use std::sync::Arc;
 
 use log as _;
-pub(crate) use tuwunel_macros::{admin_command, admin_command_dispatch};
+pub(crate) use gaussmatrix_macros::{admin_command, admin_command_dispatch};
 
 pub(crate) use crate::{context::Context, utils::get_room_info};
 
 pub(crate) const PAGE_SIZE: usize = 100;
 
-tuwunel_core::mod_ctor! {}
-tuwunel_core::mod_dtor! {}
-tuwunel_core::rustc_flags_capture! {}
+gaussmatrix_core::mod_ctor! {}
+gaussmatrix_core::mod_dtor! {}
+gaussmatrix_core::rustc_flags_capture! {}
 
 /// Install the admin command root.
-pub fn init(admin_service: &tuwunel_service::admin::Service) {
-	let root: Arc<dyn tuwunel_service::admin::Command> = Arc::new(admin::Root);
+pub fn init(admin_service: &gaussmatrix_service::admin::Service) {
+	let root: Arc<dyn gaussmatrix_service::admin::Command> = Arc::new(admin::Root);
 	_ = admin_service
 		.command
 		.write()
@@ -40,7 +40,7 @@ pub fn init(admin_service: &tuwunel_service::admin::Service) {
 }
 
 /// Uninstall the admin command root.
-pub fn fini(admin_service: &tuwunel_service::admin::Service) {
+pub fn fini(admin_service: &gaussmatrix_service::admin::Service) {
 	_ = admin_service
 		.command
 		.write()

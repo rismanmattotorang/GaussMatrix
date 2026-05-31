@@ -16,7 +16,7 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug, err,
 	matrix::{
 		Event,

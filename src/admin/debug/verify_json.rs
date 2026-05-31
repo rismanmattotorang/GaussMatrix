@@ -1,5 +1,5 @@
 use ruma::CanonicalJsonObject;
-use tuwunel_core::{Err, Result, err, utils::math::Expected};
+use gaussmatrix_core::{Err, Result, err, utils::math::Expected};
 
 use crate::admin_command;
 

@@ -2,11 +2,11 @@ use std::{ops::Range, sync::Arc};
 
 use futures::TryFutureExt;
 use tokio::sync::watch::Sender;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, utils,
 	utils::two_phase_counter::{Counter as TwoPhaseCounter, Permit as TwoPhasePermit},
 };
-use tuwunel_database::{Database, Deserialized, Map};
+use gaussmatrix_database::{Database, Deserialized, Map};
 
 pub struct Data {
 	global: Arc<Map>,

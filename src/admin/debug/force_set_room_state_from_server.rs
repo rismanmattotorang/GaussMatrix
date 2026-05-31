@@ -4,12 +4,12 @@ use ruma::{
 	CanonicalJsonValue, OwnedEventId, OwnedRoomId, OwnedServerName,
 	api::federation::event::get_room_state,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_error, err, info,
 	matrix::{Event, pdu::PduEvent},
 	warn,
 };
-use tuwunel_service::rooms::state_compressor::HashSetCompressStateEvent;
+use gaussmatrix_service::rooms::state_compressor::HashSetCompressStateEvent;
 
 use crate::admin_command;
 

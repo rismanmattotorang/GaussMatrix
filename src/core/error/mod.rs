@@ -104,7 +104,7 @@ pub enum Error {
 	#[error(transparent)]
 	Yaml(#[from] serde_yaml::Error),
 
-	// ruma/tuwunel
+	// ruma/gaussmatrix
 	#[error("Arithmetic operation failed: {0}")]
 	Arithmetic(Cow<'static, str>),
 

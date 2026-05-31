@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tracing::subscriber::NoSubscriber;
 use tracing_subscriber::{EnvFilter, Layer, Registry, fmt, layer::SubscriberExt, reload};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	config::Config,
 	debug_warn, err,
@@ -104,7 +104,7 @@ pub(crate) fn init(config: &Config) -> Result<(TracingFlameGuard, Logging)> {
 				.expect("otlp span exporter");
 
 			let resource = Resource::builder()
-				.with_service_name("tuwunel")
+				.with_service_name("gaussmatrix")
 				.build();
 
 			let provider = SdkTracerProvider::builder()
@@ -112,7 +112,7 @@ pub(crate) fn init(config: &Config) -> Result<(TracingFlameGuard, Logging)> {
 				.with_resource(resource)
 				.build();
 
-			let tracer = provider.tracer("tuwunel");
+			let tracer = provider.tracer("gaussmatrix");
 			let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
 
 			let (jaeger_reload_filter, jaeger_reload_handle) =

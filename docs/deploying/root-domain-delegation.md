@@ -2,18 +2,18 @@
 
 [<= Back to Generic Deployment Guide](generic.md#quick-overview)
 
-It is possible to host tuwunel on a subdomain such as `matrix.example.com` but delegate from `example.com` as the server name. This means that usernames will be `@user:example.com` rather than `@user:matrix.example.com`.
+It is possible to host gaussmatrix on a subdomain such as `matrix.example.com` but delegate from `example.com` as the server name. This means that usernames will be `@user:example.com` rather than `@user:matrix.example.com`.
 
-Federating servers and clients accessing tuwunel at `example.com` will attempt to discover the subdomain by accessing the `example.com/.well-known/matrix/client` and `example.com/.well-known/matrix/server` endpoints. These need to be set up to point back to `matrix.example.com`.
+Federating servers and clients accessing gaussmatrix at `example.com` will attempt to discover the subdomain by accessing the `example.com/.well-known/matrix/client` and `example.com/.well-known/matrix/server` endpoints. These need to be set up to point back to `matrix.example.com`.
 
 > [!NOTE]  
-> In all of the following examples, replace `matrix.example.com` with the subdomain where tuwunel is hosted, `<PORT>` with the external port for federation, and `example.com` with the domain you want to use as the public-facing homeserver.
+> In all of the following examples, replace `matrix.example.com` with the subdomain where gaussmatrix is hosted, `<PORT>` with the external port for federation, and `example.com` with the domain you want to use as the public-facing homeserver.
 
 ## Configuration
 
-Make sure the following are set in your [configuration file](<../configuration/examples.md#:~:text=### Tuwunel Configuration>) or via [environment variables](../configuration.md#environment-variables):
+Make sure the following are set in your [configuration file](<../configuration/examples.md#:~:text=### GaussMatrix Configuration>) or via [environment variables](../configuration.md#environment-variables):
 
-1. [Server name](<../configuration/examples.md#:~:text=# The server_name,#server_name>): set `TUWUNEL_SERVER_NAME=example.com` or in the configuration file:
+1. [Server name](<../configuration/examples.md#:~:text=# The server_name,#server_name>): set `GAUSSMATRIX_SERVER_NAME=example.com` or in the configuration file:
     ```toml,hidelines=~
     [global]
     ~
@@ -21,7 +21,7 @@ Make sure the following are set in your [configuration file](<../configuration/e
     ~# suffix for user and room IDs/aliases.
     ~#
     ~# See the docs for reverse proxying and delegation:
-    ~# https://tuwunel.chat/deploying/generic.html#setting-up-the-reverse-proxy
+    ~# https://gaussmatrix.dev/deploying/generic.html#setting-up-the-reverse-proxy
     ~#
     ~# Also see the `[global.well_known]` config section at the very bottom.
     ~#
@@ -36,7 +36,7 @@ Make sure the following are set in your [configuration file](<../configuration/e
     ~#
     server_name = example.com
     ```
-2. [Client-server URL](../configuration/examples.md#:~:text=#[global.well_known],#client): set `TUWUNEL_WELL_KNOWN__CLIENT=https://matrix.example.com` or in the configuration file:
+2. [Client-server URL](../configuration/examples.md#:~:text=#[global.well_known],#client): set `GAUSSMATRIX_WELL_KNOWN__CLIENT=https://matrix.example.com` or in the configuration file:
     ```toml,hidelines=~
     [global.well_known]
     ~
@@ -47,7 +47,7 @@ Make sure the following are set in your [configuration file](<../configuration/e
     ~#
     client = https://matrix.example.com
     ```
-3. [Server-server federation domain and port](<../configuration/examples.md#:~:text=# The server base domain,#server>): where `<PORT>` is the external port for federation (default 8448, but often 443 when reverse proxying), set `TUWUNEL_WELL_KNOWN__SERVER=matrix.example.com:<PORT>` or in the configuration file:
+3. [Server-server federation domain and port](<../configuration/examples.md#:~:text=# The server base domain,#server>): where `<PORT>` is the external port for federation (default 8448, but often 443 when reverse proxying), set `GAUSSMATRIX_WELL_KNOWN__SERVER=matrix.example.com:<PORT>` or in the configuration file:
     ```toml,hidelines=~
     [global.well_known]
     ~
@@ -69,7 +69,7 @@ Make sure the following are set in your [configuration file](<../configuration/e
 
 ## Serving `.well-known` endpoints
 
-With the above configuration, tuwunel will generate and serve the appropriate `/.well-known/matrix` entries for delegation, so these can be served by reverse proxying `/.well-known/matrix` on `example.com` to tuwunel. Alternatively, if `example.com` is not behind a reverse proxy, static JSON files can be served directly.
+With the above configuration, gaussmatrix will generate and serve the appropriate `/.well-known/matrix` entries for delegation, so these can be served by reverse proxying `/.well-known/matrix` on `example.com` to gaussmatrix. Alternatively, if `example.com` is not behind a reverse proxy, static JSON files can be served directly.
 
 ### Option 1: Static JSON files
 
@@ -95,7 +95,7 @@ At a minimum, the following JSON files should be created:
 These are example configurations if `example.com` is reverse-proxied behind Nginx or Caddy.
 
 > [!NOTE]  
-> Replace `tuwunel` with the URL where tuwunel is listening; this may look like `127.0.0.1:8008`, `matrix.example.com`, or `tuwunel` if you declared an `upstream tuwunel` block.
+> Replace `gaussmatrix` with the URL where gaussmatrix is listening; this may look like `127.0.0.1:8008`, `matrix.example.com`, or `gaussmatrix` if you declared an `upstream gaussmatrix` block.
 
 > [!IMPORTANT]  
 > These configurations need to be applied to the reverse proxy for `example.com`, **not** `matrix.example.com`.
@@ -120,7 +120,7 @@ server {
   ~listen [::]:443 ssl http2;
   server_name example.com;
 
-  set $backend "tuwunel";
+  set $backend "gaussmatrix";
 
   location /.well-known/matrix/ {
     proxy_pass http://$backend:6167$request_uri;

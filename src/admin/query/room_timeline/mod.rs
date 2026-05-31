@@ -3,7 +3,7 @@ mod pdus;
 
 use clap::Subcommand;
 use ruma::OwnedRoomOrAliasId;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

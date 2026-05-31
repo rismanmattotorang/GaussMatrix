@@ -1,5 +1,5 @@
 use ruma::{OwnedRoomId, RoomOrAliasId};
-use tuwunel_core::{Err, Result, is_equal_to, warn};
+use gaussmatrix_core::{Err, Result, is_equal_to, warn};
 
 use super::do_ban_room;
 use crate::admin_command;

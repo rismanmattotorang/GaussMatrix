@@ -22,7 +22,7 @@ use ruma::{
 	http_headers::ContentDisposition,
 };
 use tokio::{fs, sync::Notify};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug, debug_error, debug_info, debug_warn, err, trace,
 	utils::{
 		self, BoolExt, MutexMap,

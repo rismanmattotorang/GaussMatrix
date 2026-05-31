@@ -3,7 +3,7 @@ use ruma::{
 	MilliSecondsSinceUnixEpoch,
 	api::client::device::{delete_device, get_device, update_device},
 };
-use tuwunel_core::{Err, Result, debug, err, utils::string::to_small_string};
+use gaussmatrix_core::{Err, Result, debug, err, utils::string::to_small_string};
 
 use crate::{ClientIp, Ruma, router::auth_uiaa};
 

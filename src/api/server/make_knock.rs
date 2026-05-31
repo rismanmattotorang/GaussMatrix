@@ -9,7 +9,7 @@ use ruma::{
 	},
 	events::room::member::{MembershipState, RoomMemberEventContent},
 };
-use tuwunel_core::{Err, Error, Result, at, debug_warn, matrix::pdu::PduBuilder};
+use gaussmatrix_core::{Err, Error, Result, at, debug_warn, matrix::pdu::PduBuilder};
 
 use crate::Ruma;
 

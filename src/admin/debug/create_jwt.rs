@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use serde::Serialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err,
 	jwt::{Algorithm, EncodingKey, Header, encode},
 	utils::time::now_secs,

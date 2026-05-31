@@ -11,11 +11,11 @@ Install Traefik via your preferred method. You can read the official [docker qui
 
 You can setup auto renewing certificates with different kinds of [acme challenges](https://doc.traefik.io/traefik/reference/install-configuration/tls/certificate-resolvers/acme/).
 ### Router configurations
-Add tuwunel to your traefik's network.
+Add gaussmatrix to your traefik's network.
 
 ```yaml
 services:
-    tuwunel:
+    gaussmatrix:
     # ...
     networks:
         - proxy # your traefik network name
@@ -24,7 +24,7 @@ networks:
         external: true
 ```
 
-Be sure to change the `your.server.name` to your actual tuwunel domain. and the `yourcertresolver` should be changed to whatever you named it in your traefik config.
+Be sure to change the `your.server.name` to your actual gaussmatrix domain. and the `yourcertresolver` should be changed to whatever you named it in your traefik config.
 
 You only have to do any one of these methods below.
 
@@ -32,22 +32,22 @@ You only have to do any one of these methods below.
 ### Labels
 To use labels with traefik you need to configure a [docker provider](https://doc.traefik.io/traefik/reference/install-configuration/providers/docker/).
 
-Then add the labels in your tuwunel's docker compose file.
+Then add the labels in your gaussmatrix's docker compose file.
 ```yaml
 services:
-    tuwunel:
+    gaussmatrix:
         # ...
         labels:
             - "traefik.enable=true"
-            - "traefik.http.routers.tuwunel.entrypoints=web"
-            - "traefik.http.routers.tuwunel.rule=Host(`your.server.name`)"
-            - "traefik.http.routers.tuwunel.middlewares=https-redirect@file"
-            - "traefik.http.routers.tuwunel-secure.entrypoints=websecure"
-            - "traefik.http.routers.tuwunel-secure.rule=Host(`your.server.name`)"
-            - "traefik.http.routers.tuwunel-secure.tls=true"
-            - "traefik.http.routers.tuwunel-secure.service=tuwunel"
-            - "traefik.http.services.tuwunel.loadbalancer.server.port=6167"
-            - "traefik.http.routers.tuwunel-secure.tls.certresolver=yourcertresolver"
+            - "traefik.http.routers.gaussmatrix.entrypoints=web"
+            - "traefik.http.routers.gaussmatrix.rule=Host(`your.server.name`)"
+            - "traefik.http.routers.gaussmatrix.middlewares=https-redirect@file"
+            - "traefik.http.routers.gaussmatrix-secure.entrypoints=websecure"
+            - "traefik.http.routers.gaussmatrix-secure.rule=Host(`your.server.name`)"
+            - "traefik.http.routers.gaussmatrix-secure.tls=true"
+            - "traefik.http.routers.gaussmatrix-secure.service=gaussmatrix"
+            - "traefik.http.services.gaussmatrix.loadbalancer.server.port=6167"
+            - "traefik.http.routers.gaussmatrix-secure.tls.certresolver=yourcertresolver"
             - "traefik.docker.network=proxy"
 ```
 ### Config File
@@ -57,7 +57,7 @@ Then add this into your config file.
 ```yaml
 http:
     routers:
-        tuwunel:
+        gaussmatrix:
             entryPoints:
                 - "web"
                 - "websecure"
@@ -66,26 +66,26 @@ http:
                 - https-redirect
             tls:
                 certResolver: "yourcertresolver"
-            service: tuwunel
+            service: gaussmatrix
     services:
-        tuwunel:
+        gaussmatrix:
             loadBalancer:
                 servers:
-            # this url should point to your tuwunel installation.
-            # this should work if your tuwunel container is named tuwunel and is in the same network as traefik.
-                    - url: "http://tuwunel:6167"
+            # this url should point to your gaussmatrix installation.
+            # this should work if your gaussmatrix container is named gaussmatrix and is in the same network as traefik.
+                    - url: "http://gaussmatrix:6167"
                 passHostHeader: true
 ```
 
 ### Client IP source
 
-If Traefik is the only way clients can reach Tuwunel, set
-`ip_source = "rightmost_x_forwarded_for"` in `tuwunel.toml` so Tuwunel uses the
+If Traefik is the only way clients can reach GaussMatrix, set
+`ip_source = "rightmost_x_forwarded_for"` in `gaussmatrix.toml` so GaussMatrix uses the
 trusted `X-Forwarded-For` value.
 
 ### Federation
 
-If you will use a .well-known file you can use traefik to redirect .well-known/matrix to tuwunel built-in .well-known file.
+If you will use a .well-known file you can use traefik to redirect .well-known/matrix to gaussmatrix built-in .well-known file.
 
 replace the rule in either of the methods from
 ```
@@ -93,7 +93,7 @@ Host(`your.server.name`)
 ```
 to
 ```
-Host(`your.tuwunel.domain`) || Host(`your.server.name`) && PathPrefix(`/.well-known/matrix`)
+Host(`your.gaussmatrix.domain`) || Host(`your.server.name`) && PathPrefix(`/.well-known/matrix`)
 ```
 If you are not using a .well-known file you will need to add and expose port 8448 to a [traefik entrypoint](https://doc.traefik.io/traefik/reference/install-configuration/entrypoints/).
 
@@ -127,8 +127,8 @@ Config file:
 After starting Traefik, verify it's working by checking:
 
 ```bash
-curl https://your.server.name/_tuwunel/server_version
-curl https://your.server.name:8448/_tuwunel/server_version
+curl https://your.server.name/_gaussmatrix/server_version
+curl https://your.server.name:8448/_gaussmatrix/server_version
 ```
 
 ---

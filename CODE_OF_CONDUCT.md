@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement over encrypted
-DM to <@jason:tuwunel.chat>, <@june:vern.cc>, <@dasha_uwu:linuxping.win> or
+DM to <@jason:gaussmatrix.dev>, <@june:vern.cc>, <@dasha_uwu:linuxping.win> or
 over email to <jasonzemos@gmail.com>.
 
 All complaints will be reviewed and investigated promptly and fairly. All

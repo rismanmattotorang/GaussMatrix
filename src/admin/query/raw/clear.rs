@@ -1,6 +1,6 @@
 use futures::{FutureExt, StreamExt};
 use tokio::time::Instant;
-use tuwunel_core::{Err, Result, utils::stream::TryIgnore};
+use gaussmatrix_core::{Err, Result, utils::stream::TryIgnore};
 
 use crate::admin_command;
 

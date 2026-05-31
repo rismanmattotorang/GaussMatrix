@@ -16,7 +16,7 @@ use ruma::{
 		topic::{RoomTopicEventContent, TopicContentBlock},
 	},
 };
-use tuwunel_core::{Result, pdu::PduBuilder};
+use gaussmatrix_core::{Result, pdu::PduBuilder};
 
 use crate::Services;
 
@@ -38,7 +38,7 @@ pub async fn create_server_user(services: &Services) -> Result {
 
 /// Create the admin room.
 ///
-/// Users in this room are considered admins by tuwunel, and the room can be
+/// Users in this room are considered admins by gaussmatrix, and the room can be
 /// used to issue admin commands by talking to the server user inside it.
 pub async fn create_admin_room(services: &Services) -> Result {
 	let room_id = RoomId::new_v1(services.globals.server_name());
@@ -175,7 +175,7 @@ pub async fn create_admin_room(services: &Services) -> Result {
 		.build_and_append_pdu(
 			PduBuilder::state(String::new(), &RoomTopicEventContent {
 				topic_block: TopicContentBlock::default(),
-				topic: format!("Manage {} | Run commands prefixed with `!admin` | Run `!admin -h` for help | Documentation: https://matrix-construct.github.io/tuwunel", services.config.server_name),
+				topic: format!("Manage {} | Run commands prefixed with `!admin` | Run `!admin -h` for help | Documentation: https://gaussmatrix.dev", services.config.server_name),
 			}),
 			server_user,
 			&room_id,

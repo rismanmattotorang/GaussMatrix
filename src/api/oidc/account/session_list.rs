@@ -3,8 +3,8 @@ use std::cmp;
 use const_str::format as const_format;
 use futures::StreamExt;
 use ruma::{MilliSecondsSinceUnixEpoch, UserId};
-use tuwunel_core::{Result, utils::html::escape as html_escape};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Result, utils::html::escape as html_escape};
+use gaussmatrix_service::Services;
 
 use super::{ACCOUNT_HEAD, ACCOUNT_JS_INCLUDE, ts_cell, url_encode};
 
@@ -45,12 +45,12 @@ pub(super) async fn sessions_list_html(services: &Services, user_id: &UserId) ->
 				<td>{ip}</td>
 				<td>{ts_cell}</td>
 				<td class="center">
-					<a href="/_tuwunel/oidc/account?action=org.matrix.session_view&device_id={id_enc}">
+					<a href="/_gaussmatrix/oidc/account?action=org.matrix.session_view&device_id={id_enc}">
 						View
 					</a>
 					<span class="sep"> | </span>
 					<a
-						href="/_tuwunel/oidc/account?action=org.matrix.session_end&device_id={id_enc}"
+						href="/_gaussmatrix/oidc/account?action=org.matrix.session_end&device_id={id_enc}"
 						class="err"
 					>
 						Sign out
@@ -90,7 +90,7 @@ static PAGE_HTML: &str = const_format!(
 			{{rows}}
 		</table>
 		<div class="nav">
-			<a href="/_tuwunel/oidc/account?action=org.matrix.profile">View Profile</a>
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.profile">View Profile</a>
 		</div>
 		{ACCOUNT_JS_INCLUDE}
 	</body>

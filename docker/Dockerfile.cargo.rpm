@@ -14,7 +14,7 @@ ARG cargo_spec_features
 ARG pkg_dir
 ARG gen_rpm_args=""
 
-WORKDIR /usr/src/tuwunel
+WORKDIR /usr/src/gaussmatrix
 RUN \
 --mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=shared \
 --mount=type=cache,dst=${CARGO_HOME}/registry,sharing=shared \
@@ -33,14 +33,14 @@ RUN \
 			--output "${pkg_dir}" \
 			${gen_rpm_args}
 
-	mv ${pkg_dir}/* "${pkg_dir}/tuwunel.rpm"
+	mv ${pkg_dir}/* "${pkg_dir}/gaussmatrix.rpm"
 EOF
 
 
 FROM scratch AS rpm
 ARG pkg_dir
 
-COPY --from=input ${pkg_dir}/tuwunel.rpm .
+COPY --from=input ${pkg_dir}/gaussmatrix.rpm .
 
 
 FROM input AS rpm-install
@@ -50,6 +50,6 @@ WORKDIR ${pkg_dir}
 COPY --link --from=rpm . .
 RUN <<EOF
 	set -eux
-	rpm -i --test tuwunel.rpm
-	rpm -i tuwunel.rpm
+	rpm -i --test gaussmatrix.rpm
+	rpm -i gaussmatrix.rpm
 EOF

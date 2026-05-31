@@ -9,11 +9,11 @@ use ruma::{
 		get_media_preview,
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err,
 	utils::{content_disposition::make_content_disposition, math::ruma_from_usize},
 };
-use tuwunel_service::media::{CACHE_CONTROL_IMMUTABLE, CORP_CROSS_ORIGIN, Dim, Media};
+use gaussmatrix_service::media::{CACHE_CONTROL_IMMUTABLE, CORP_CROSS_ORIGIN, Dim, Media};
 
 use crate::{ClientIp, Ruma};
 

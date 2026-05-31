@@ -1,4 +1,4 @@
-#![cfg(all(tuwunel_mods, feature = "tuwunel_mods"))]
+#![cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
 
 pub(crate) use libloading::os::unix::{Library, Symbol};
 

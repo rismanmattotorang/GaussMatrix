@@ -12,13 +12,13 @@ use ruma::{
 	serde::Raw,
 };
 use serde_json::from_str;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err,
 	matrix::pdu::PduBuilder,
 	utils::{self},
 	warn,
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

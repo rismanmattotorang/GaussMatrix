@@ -11,13 +11,13 @@ to produce it (the hash always starts with `$pbkdf2`).
 identity_providers:
   oidc:
     claims_policies:
-      tuwunel:
+      gaussmatrix:
         id_token: ["email", "name", "groups", "preferred_username"]
     clients:
       - client_id: '<client_id>'
-        client_name: 'tuwunel'
+        client_name: 'gaussmatrix'
         client_secret: '<client_secret_hash>'
-        claims_policy: "tuwunel"
+        claims_policy: "gaussmatrix"
         public: false
         redirect_uris:
           - "https://<your.matrix.example.com>/_matrix/client/unstable/login/sso/callback/<client_id>"
@@ -36,11 +36,11 @@ identity_providers:
         token_endpoint_auth_method: 'client_secret_post'
 ```
 
-## Tuwunel configuration
+## GaussMatrix configuration
 
 > [!NOTE]
 > The `client_secret` value here is the **plain-text** password, not the hash
-> stored in Authelia. Authelia stores the hash; Tuwunel supplies the password.
+> stored in Authelia. Authelia stores the hash; GaussMatrix supplies the password.
 
 ```toml
 [[global.identity_provider]]

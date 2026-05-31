@@ -10,7 +10,7 @@ use std::{
 };
 
 // Capture rustc version during compilation.
-tuwunel_macros::rustc_version! {}
+gaussmatrix_macros::rustc_version! {}
 
 /// Raw capture of rustc flags used to build each crate in the project. Informed
 /// by rustc_flags_capture macro (one in each crate's mod.rs). This is

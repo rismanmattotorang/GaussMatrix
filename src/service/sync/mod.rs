@@ -18,8 +18,8 @@ use ruma::{
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex as TokioMutex;
-use tuwunel_core::{Result, at, debug, err, implement, is_equal_to, utils::stream::TryIgnore};
-use tuwunel_database::{Cbor, Deserialized, Map};
+use gaussmatrix_core::{Result, at, debug, err, implement, is_equal_to, utils::stream::TryIgnore};
+use gaussmatrix_database::{Cbor, Deserialized, Map};
 
 pub struct Service {
 	services: Arc<crate::services::OnceServices>,

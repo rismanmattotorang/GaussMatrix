@@ -32,7 +32,7 @@ pub fn reload(old: &Config, new: &Config) -> Result {
 
 pub fn check(config: &Config) -> Result {
 	#[cfg(debug_assertions)]
-	warn!("Note: tuwunel was built without optimisations (i.e. debug build)");
+	warn!("Note: gaussmatrix was built without optimisations (i.e. debug build)");
 
 	warn_deprecated(config);
 	warn_unknown_key(config)?;
@@ -146,14 +146,14 @@ fn warn_loopback_in_container(addr: &SocketAddr) {
 		error!(
 			"You are detected using Docker with a loopback/localhost listening address of \
 			 {addr}. If you are using a reverse proxy on the host and require communication to \
-			 tuwunel in the Docker container via NAT-based networking, this will NOT work. \
+			 gaussmatrix in the Docker container via NAT-based networking, this will NOT work. \
 			 Please change this to \"0.0.0.0\". If this is expected, you can ignore.",
 		);
 	} else if Path::new("/run/.containerenv").exists() {
 		error!(
 			"You are detected using Podman with a loopback/localhost listening address of \
 			 {addr}. If you are using a reverse proxy on the host and require communication to \
-			 tuwunel in the Podman container via NAT-based networking, this will NOT work. \
+			 gaussmatrix in the Podman container via NAT-based networking, this will NOT work. \
 			 Please change this to \"0.0.0.0\". If this is expected, you can ignore.",
 		);
 	}
@@ -173,7 +173,7 @@ fn check_storage(config: &Config) -> Result {
 	if config.server_name == "your.server.name" {
 		return Err!(Config(
 			"server_name",
-			"You must specify a valid server name for production usage of tuwunel."
+			"You must specify a valid server name for production usage of gaussmatrix."
 		));
 	}
 
@@ -245,9 +245,9 @@ fn check_registration(config: &Config) -> Result {
 		return Err!(Config(
 			"registration_token",
 			"!! You have `allow_registration` enabled without a token configured in your config \
-			 which means you are allowing ANYONE to register on your tuwunel instance without \
+			 which means you are allowing ANYONE to register on your gaussmatrix instance without \
 			 any 2nd-step (e.g. registration token). If this is not the intended behaviour, \
-			 please set a registration token. For security and safety reasons, tuwunel will \
+			 please set a registration token. For security and safety reasons, gaussmatrix will \
 			 shut down. If you are extra sure this is the desired behaviour you want, please \
 			 set the following config option to true:
 `yes_i_am_very_very_sure_i_want_an_open_registration_server_prone_to_abuse`"
@@ -516,7 +516,7 @@ fn warn_deprecated(config: &Config) {
 
 	if found_deprecated_keys {
 		warn!(
-			"Deprecated config keys were found. Read tuwunel config documentation at https://tuwunel.chat/configuration.html and \
+			"Deprecated config keys were found. Read gaussmatrix config documentation at https://gaussmatrix.dev/configuration.html and \
 			 check your configuration if any new configuration parameters should be adjusted"
 		);
 	}
@@ -535,9 +535,9 @@ fn warn_unknown_key(config: &Config) -> Result {
 		.filter(|key| !known_keys.is_match(key))
 		.inspect(|key| {
 			if config.error_on_unknown_config_opts {
-				error!("Config parameter \"{key}\" is unknown to tuwunel");
+				error!("Config parameter \"{key}\" is unknown to gaussmatrix");
 			} else {
-				warn!("Config parameter \"{key}\" is unknown to tuwunel, ignoring.");
+				warn!("Config parameter \"{key}\" is unknown to gaussmatrix, ignoring.");
 			}
 		})
 		.collect_vec();

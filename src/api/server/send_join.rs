@@ -12,7 +12,7 @@ use ruma::{
 	},
 };
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, debug_error, err,
 	itertools::Itertools,
 	matrix::event::gen_event_id_canonical_json,
@@ -23,7 +23,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{Ruma, client::sync::calculate_heroes};
 

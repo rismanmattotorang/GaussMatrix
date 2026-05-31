@@ -15,7 +15,7 @@ use std::{
 
 use futures::{FutureExt, Stream, StreamExt, TryFutureExt};
 use ruma::{OwnedEventId, events::StateEventType, room_version_rules::RoomVersionRules};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug,
 	itertools::Itertools,
 	matrix::{Event, TypeStateKey},

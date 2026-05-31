@@ -16,8 +16,8 @@ EOF
 
 FROM nix-base AS build-nix
 
-WORKDIR /usr/src/tuwunel
-COPY --link --from=source /usr/src/tuwunel .
+WORKDIR /usr/src/gaussmatrix
+COPY --link --from=source /usr/src/gaussmatrix .
 RUN \
 --mount=type=cache,dst=/nix,sharing=shared \
 --mount=type=cache,dst=/root/.cache/nix,sharing=shared \
@@ -32,16 +32,16 @@ RUN \
 		--log-format raw \
 		.
 
-	cp -afRL --copy-contents result /opt/tuwunel
+	cp -afRL --copy-contents result /opt/gaussmatrix
 EOF
 
 
 FROM nix-base AS smoke-nix
 
-WORKDIR /usr/src/tuwunel
-COPY --link --from=source /usr/src/tuwunel .
-ENV TUWUNEL_DATABASE_PATH="/tmp/tuwunel/smoketest.db"
-ENV TUWUNEL_LOG="info"
+WORKDIR /usr/src/gaussmatrix
+COPY --link --from=source /usr/src/gaussmatrix .
+ENV GAUSSMATRIX_DATABASE_PATH="/tmp/gaussmatrix/smoketest.db"
+ENV GAUSSMATRIX_LOG="info"
 RUN \
 --mount=type=cache,dst=/nix,sharing=shared \
 --mount=type=cache,dst=/root/.cache/nix,sharing=shared \
@@ -65,8 +65,8 @@ EOF
 
 FROM nix-base AS nix-pkg
 
-WORKDIR /usr/src/tuwunel
-COPY --link --from=source /usr/src/tuwunel .
+WORKDIR /usr/src/gaussmatrix
+COPY --link --from=source /usr/src/gaussmatrix .
 RUN \
 --mount=type=cache,dst=/nix,sharing=shared \
 --mount=type=cache,dst=/root/.cache/nix,sharing=shared \
@@ -77,7 +77,7 @@ RUN \
 
     ID=$(nix-store --realise $(nix path-info --derivation))
 
-    mkdir -p tuwunel
-    nix-store --export $ID > tuwunel/tuwunel.drv
-    tar -cvf /opt/tuwunel.nix.tar tuwunel
+    mkdir -p gaussmatrix
+    nix-store --export $ID > gaussmatrix/gaussmatrix.drv
+    tar -cvf /opt/gaussmatrix.nix.tar gaussmatrix
 EOF

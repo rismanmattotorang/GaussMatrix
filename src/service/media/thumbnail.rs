@@ -10,7 +10,7 @@ use std::{cmp, num::Saturating as Sat, sync::Arc, time::Duration};
 use futures::{StreamExt, pin_mut};
 use ruma::{Mxc, UInt, UserId, http_headers::ContentDisposition, media::Method};
 use tokio::sync::Notify;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, checked, err, implement,
 	utils::{result::LogDebugErr, stream::IterStream},
 };

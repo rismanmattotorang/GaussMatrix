@@ -313,12 +313,12 @@ jobs:
       artifact: >
         {
           "rust-sdk-integ": {
-            "src": "/var/log/tuwunel.log",
-            "dst": "rust-sdk-integ.tuwunel.log",
+            "src": "/var/log/gaussmatrix.log",
+            "dst": "rust-sdk-integ.gaussmatrix.log",
           },
           "rust-sdk-valgrind": {
-            "src": "/var/log/tuwunel.log",
-            "dst": "rust-sdk-valgrind.tuwunel.log",
+            "src": "/var/log/gaussmatrix.log",
+            "dst": "rust-sdk-valgrind.gaussmatrix.log",
           }
         }
       excludes: >

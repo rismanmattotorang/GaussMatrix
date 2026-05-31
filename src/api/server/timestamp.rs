@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::federation::event::get_event_by_timestamp::v1;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::router::Ruma;
 

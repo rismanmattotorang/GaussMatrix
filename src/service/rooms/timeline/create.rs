@@ -9,7 +9,7 @@ use ruma::{
 	uint,
 };
 use serde_json::value::to_raw_value;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, err, implement,
 	matrix::{
 		event::{Event, StateKey, TypeExt},

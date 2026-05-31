@@ -9,11 +9,11 @@ use ruma::{
 	events::room::member::MembershipState,
 	room::{JoinRuleSummary, RoomSummary},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_warn, trace,
 	utils::{IterStream, future::TryExtExt, option::OptionExt},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{ClientIp, Ruma, RumaResponse};
 

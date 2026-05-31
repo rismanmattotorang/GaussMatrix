@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::admin::suspend_user;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use super::authorize;
 use crate::Ruma;

@@ -1,8 +1,8 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use http::StatusCode;
 use serde_json::json;
-use tuwunel_core::{Err, Result, info};
-use tuwunel_service::oauth::server::DcrRequest;
+use gaussmatrix_core::{Err, Result, info};
+use gaussmatrix_service::oauth::server::DcrRequest;
 
 pub(crate) async fn registration_route(
 	State(services): State<crate::State>,

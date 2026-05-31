@@ -8,11 +8,11 @@ use ruma::{
 	serde::Raw,
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_error, err, implement,
 	utils::{BoolExt, ReadyExt, stream::TryIgnore},
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Json};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Json};
 
 /// MSC2732: row stored under `(user, device, algorithm)` in
 /// `userdeviceidalgorithm_fallback`. Fallback keys are not deleted on

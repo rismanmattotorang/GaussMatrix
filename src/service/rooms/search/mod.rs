@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use futures::{Stream, StreamExt};
 use ruma::{RoomId, UserId, api::client::search::search_events::v3::Criteria};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	PduCount, Result,
 	arrayvec::ArrayVec,
 	implement,
@@ -13,7 +13,7 @@ use tuwunel_core::{
 		stream::{TryIgnore, WidebandExt},
 	},
 };
-use tuwunel_database::{Interfix, Map, keyval::Val};
+use gaussmatrix_database::{Interfix, Map, keyval::Val};
 
 use crate::rooms::{
 	short::ShortRoomId,
@@ -232,7 +232,7 @@ fn make_prefix(shortroomid: ShortRoomId, word: &str) -> TokenId {
 	let mut key = TokenId::new();
 	key.extend_from_slice(&shortroomid.to_be_bytes());
 	key.extend_from_slice(word.as_bytes());
-	key.push(tuwunel_database::SEP);
+	key.push(gaussmatrix_database::SEP);
 	key
 }
 

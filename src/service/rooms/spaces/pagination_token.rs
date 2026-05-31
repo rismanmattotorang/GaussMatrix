@@ -4,7 +4,7 @@ use std::{
 };
 
 use ruma::UInt;
-use tuwunel_core::{Err, Error, Result};
+use gaussmatrix_core::{Err, Error, Result};
 
 use crate::rooms::short::ShortRoomId;
 

@@ -1,8 +1,8 @@
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err,
 	matrix::pdu::{PduId, RawPduId},
 };
-use tuwunel_service::rooms::short::ShortRoomId;
+use gaussmatrix_service::rooms::short::ShortRoomId;
 
 use crate::admin_command;
 

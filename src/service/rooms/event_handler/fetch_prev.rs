@@ -5,7 +5,7 @@ use ruma::{
 	CanonicalJsonObject, EventId, MilliSecondsSinceUnixEpoch, OwnedEventId, RoomId,
 	RoomVersionId, ServerName, int, uint,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug_warn, err, implement,
 	matrix::{
 		Event, PduEvent,

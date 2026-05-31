@@ -10,11 +10,11 @@ use ruma::{
 		},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_info, debug_warn, error, implement, matrix::pdu::PduBuilder,
 };
 
-/// Invite the user to the tuwunel admin room.
+/// Invite the user to the gaussmatrix admin room.
 ///
 /// This is equivalent to granting server admin privileges.
 #[implement(super::Service)]
@@ -144,7 +144,7 @@ pub async fn make_user_admin(&self, user_id: &UserId) -> Result {
 
 	if self.services.server.config.admin_room_notices {
 		let welcome_message = String::from(
-			"## Thank you for trying out tuwunel!\n\nTuwunel is a continuation of conduwuit which was technically a hard fork of Conduit.\n\nHelpful links:\n> GitHub Repo: https://github.com/matrix-construct/tuwunel\n> Documentation: https://matrix-construct.github.io/tuwunel\n> Report issues: https://github.com/matrix-construct/tuwunel/issues\n\nFor a list of available commands, send the following message in this room: `!admin --help`",
+			"## Thank you for trying out gaussmatrix!\n\nGaussMatrix is a continuation of conduwuit which was technically a hard fork of Conduit.\n\nHelpful links:\n> GitHub Repo: https://github.com/rismanmattotorang/gaussmatrix\n> Documentation: https://gaussmatrix.dev\n> Report issues: https://github.com/rismanmattotorang/gaussmatrix/issues\n\nFor a list of available commands, send the following message in this room: `!admin --help`",
 		);
 
 		// Send welcome message

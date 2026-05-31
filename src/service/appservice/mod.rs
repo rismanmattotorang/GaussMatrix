@@ -9,8 +9,8 @@ use async_trait::async_trait;
 use futures::{Future, FutureExt, Stream, TryStreamExt};
 use ruma::{RoomAliasId, RoomId, UserId, api::appservice::Registration};
 use tokio::sync::{RwLock, RwLockReadGuard};
-use tuwunel_core::{Err, Result, err, utils::stream::IterStream};
-use tuwunel_database::Map;
+use gaussmatrix_core::{Err, Result, err, utils::stream::IterStream};
+use gaussmatrix_database::Map;
 
 pub use self::{namespace_regex::NamespaceRegex, registration_info::RegistrationInfo};
 

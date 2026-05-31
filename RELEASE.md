@@ -1,10 +1,10 @@
-# Tuwunel 1.7.0
+# GaussMatrix 1.7.0
 
 May 21, 2026
 
 **All servers raising their `cache_capacity_modifier` above default must consider decreasing it to deploy this release.** The default of `1.0` is now generally recommended, and up to `2.0` for systems with four or less cores. Taking no action may cost 25% to 50% more memory (#123).
 
-Nine additional MSCs have landed. Current status is kept up to date in our [documentation](https://matrix-construct.github.io/tuwunel/development/compliance/msc.html).
+Nine additional MSCs have landed. Current status is kept up to date in our [documentation](https://gaussmatrix.dev/development/compliance/msc.html).
 
 ### New Features & Enhancements
 
@@ -32,7 +32,7 @@ Nine additional MSCs have landed. Current status is kept up to date in our [docu
 
 - **OpenTelemetry OTLP exporter** replaces the deprecated `opentelemetry-jaeger` crate, closing (#85); `tokio-console` is re-enabled.
 
-- Tip of the hat to @nyakokitsu, who reported in (#460) that `turn_uris` set without TURN credentials produces empty creds silently. Tuwunel now warns at startup.
+- Tip of the hat to @nyakokitsu, who reported in (#460) that `turn_uris` set without TURN credentials produces empty creds silently. GaussMatrix now warns at startup.
 
 - Thanks to @dasha-uwu for simplifying `servers_route_via`.
 
@@ -82,6 +82,6 @@ Nine additional MSCs have landed. Current status is kept up to date in our [docu
 
 - The Docker bake file dropped the non-functional `cache_to`/`cache_from` directives (8e4bc8c68).
 
-- Thank you @pedrompcaetano for the typo fix in `tuwunel.container` (#456).
+- Thank you @pedrompcaetano for the typo fix in `gaussmatrix.container` (#456).
 
 - Stale comments and fan-out destructure cleanups (85e85c883, 9c4cd7c33, 2cc249363).

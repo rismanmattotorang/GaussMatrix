@@ -2,23 +2,23 @@
 
 use std::{env, process, sync::Arc};
 
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::{Err, Result, utils::time::now};
-use tuwunel_service::Services;
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::{Err, Result, utils::time::now};
+use gaussmatrix_service::Services;
 
 const PROVIDER_ID: &str = "test_s3";
 
-const ENV_BUCKET: &str = "TUWUNEL_TEST_S3_BUCKET";
-const ENV_URL: &str = "TUWUNEL_TEST_S3_URL";
-const ENV_REGION: &str = "TUWUNEL_TEST_S3_REGION";
-const ENV_KEY: &str = "TUWUNEL_TEST_S3_KEY";
-const ENV_SECRET: &str = "TUWUNEL_TEST_S3_SECRET";
-const ENV_ENDPOINT: &str = "TUWUNEL_TEST_S3_ENDPOINT";
-const ENV_BASE_PATH: &str = "TUWUNEL_TEST_S3_BASE_PATH";
-const ENV_USE_HTTPS: &str = "TUWUNEL_TEST_S3_USE_HTTPS";
-const ENV_USE_VHOST: &str = "TUWUNEL_TEST_S3_USE_VHOST_REQUEST";
-const ENV_USE_SIGNATURES: &str = "TUWUNEL_TEST_S3_USE_SIGNATURES";
-const ENV_USE_PAYLOAD_SIGNATURES: &str = "TUWUNEL_TEST_S3_USE_PAYLOAD_SIGNATURES";
+const ENV_BUCKET: &str = "GAUSSMATRIX_TEST_S3_BUCKET";
+const ENV_URL: &str = "GAUSSMATRIX_TEST_S3_URL";
+const ENV_REGION: &str = "GAUSSMATRIX_TEST_S3_REGION";
+const ENV_KEY: &str = "GAUSSMATRIX_TEST_S3_KEY";
+const ENV_SECRET: &str = "GAUSSMATRIX_TEST_S3_SECRET";
+const ENV_ENDPOINT: &str = "GAUSSMATRIX_TEST_S3_ENDPOINT";
+const ENV_BASE_PATH: &str = "GAUSSMATRIX_TEST_S3_BASE_PATH";
+const ENV_USE_HTTPS: &str = "GAUSSMATRIX_TEST_S3_USE_HTTPS";
+const ENV_USE_VHOST: &str = "GAUSSMATRIX_TEST_S3_USE_VHOST_REQUEST";
+const ENV_USE_SIGNATURES: &str = "GAUSSMATRIX_TEST_S3_USE_SIGNATURES";
+const ENV_USE_PAYLOAD_SIGNATURES: &str = "GAUSSMATRIX_TEST_S3_USE_PAYLOAD_SIGNATURES";
 
 #[test]
 fn storage_s3_upload_download() -> Result {
@@ -38,15 +38,15 @@ fn storage_s3_upload_download() -> Result {
 	let server = Server::new(Some(&args), Some(&runtime))?;
 
 	let result: Result = runtime.block_on(async {
-		let services = tuwunel::async_start(&server).await?;
+		let services = gaussmatrix::async_start(&server).await?;
 
 		let roundtrip = roundtrip(&services).await;
 
 		server.server.shutdown()?;
 		drop(services);
 
-		tuwunel::async_run(&server).await?;
-		tuwunel::async_stop(&server).await?;
+		gaussmatrix::async_run(&server).await?;
+		gaussmatrix::async_stop(&server).await?;
 
 		roundtrip
 	});
@@ -58,7 +58,7 @@ fn storage_s3_upload_download() -> Result {
 async fn roundtrip(services: &Arc<Services>) -> Result {
 	let provider = services.storage.provider(PROVIDER_ID)?;
 	let path = unique_path();
-	let payload = b"tuwunel s3 storage roundtrip integration test payload\n".to_vec();
+	let payload = b"gaussmatrix s3 storage roundtrip integration test payload\n".to_vec();
 
 	provider.put_one(&path, payload.clone()).await?;
 
@@ -113,5 +113,5 @@ fn unique_path() -> String {
 	let nanos = now().as_nanos();
 	let pid = process::id();
 
-	format!("tuwunel-integration-test/{nanos}-{pid}.bin")
+	format!("gaussmatrix-integration-test/{nanos}-{pid}.bin")
 }

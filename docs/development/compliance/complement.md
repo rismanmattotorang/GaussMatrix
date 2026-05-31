@@ -1,6 +1,6 @@
-# Tuwunel Complement Test Results
+# GaussMatrix Complement Test Results
 
-Tuwunel runs the [Complement](https://github.com/matrix-org/complement) Matrix homeserver acceptance suite. Raw results are committed to `tests/complement/results.jsonl`; full server and test logs to `tests/complement/logs.jsonl`.
+GaussMatrix runs the [Complement](https://github.com/matrix-org/complement) Matrix homeserver acceptance suite. Raw results are committed to `tests/complement/results.jsonl`; full server and test logs to `tests/complement/logs.jsonl`.
 
 ## Counts
 

@@ -3,7 +3,7 @@ use ruma::api::client::discovery::{
 	discover_homeserver::{self, HomeserverInfo},
 	discover_support::{self},
 };
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::Ruma;
 

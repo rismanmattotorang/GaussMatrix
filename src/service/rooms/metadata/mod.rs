@@ -2,14 +2,14 @@ use std::sync::Arc;
 
 use futures::{FutureExt, Stream, StreamExt, pin_mut};
 use ruma::{OwnedRoomId, RoomId, events::room::join_rules::JoinRule};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	utils::{
 		future::BoolExt,
 		stream::{TryIgnore, WidebandExt},
 	},
 };
-use tuwunel_database::Map;
+use gaussmatrix_database::Map;
 
 pub struct Service {
 	db: Data,

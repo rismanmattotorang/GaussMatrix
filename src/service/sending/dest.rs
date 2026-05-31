@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use ruma::{OwnedServerName, OwnedUserId};
-use tuwunel_core::implement;
+use gaussmatrix_core::implement;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Destination {

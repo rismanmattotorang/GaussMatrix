@@ -8,7 +8,7 @@ mod unban;
 
 use std::sync::Arc;
 
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 pub struct Service {
 	services: Arc<crate::services::OnceServices>,

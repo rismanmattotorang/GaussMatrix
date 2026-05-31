@@ -46,7 +46,7 @@ RUN [ -f certificate.crt ] && [ -f private_key.pem ]
 FROM scratch AS complement-config
 WORKDIR /complement
 COPY --from=key-gen /complement/* .
-COPY --from=source /usr/src/tuwunel/tests/complement/results.jsonl old_results.jsonl
+COPY --from=source /usr/src/gaussmatrix/tests/complement/results.jsonl old_results.jsonl
 COPY <<EOF complement.toml
     [global]
     address = "0.0.0.0"
@@ -65,7 +65,7 @@ COPY <<EOF complement.toml
     error_on_unknown_config_opts = true
     federation_idle_timeout = 300
     ip_range_denylist = []
-    log = "debug,tuwunel=trace,h2=warn,hyper=warn"
+    log = "debug,gaussmatrix=trace,h2=warn,hyper=warn"
     log_colors = false
     log_guest_registrations = false
     log_span_events = "NONE"
@@ -105,12 +105,12 @@ FROM input AS complement-testee
 
 EXPOSE 8008 8448
 RUN mkdir /database
-RUN mkdir -p /var/log/tuwunel/metrics
+RUN mkdir -p /var/log/gaussmatrix/metrics
 COPY --from=complement-config * /complement/
-ENV TUWUNEL_CONFIG="/complement/complement.toml"
-ENV TUWUNEL_RUNTIME_METRICS_DIR="/var/log/tuwunel/metrics"
-ENV TUWUNEL_RUNTIME_USAGE_DIR="/var/log/tuwunel/metrics"
-ENTRYPOINT exec tuwunel -Oserver_name=\""$SERVER_NAME\""
+ENV GAUSSMATRIX_CONFIG="/complement/complement.toml"
+ENV GAUSSMATRIX_RUNTIME_METRICS_DIR="/var/log/gaussmatrix/metrics"
+ENV GAUSSMATRIX_RUNTIME_USAGE_DIR="/var/log/gaussmatrix/metrics"
+ENTRYPOINT exec gaussmatrix -Oserver_name=\""$SERVER_NAME\""
 
 
 FROM input AS complement-testee-valgrind
@@ -118,17 +118,17 @@ ARG db_pool_max_workers=128
 
 EXPOSE 8008 8448
 RUN mkdir /database
-RUN mkdir -p /var/log/tuwunel/metrics
+RUN mkdir -p /var/log/gaussmatrix/metrics
 COPY --from=complement-config * /complement/
-ENV TUWUNEL_CONFIG="/complement/complement.toml"
-ENV TUWUNEL_RUNTIME_METRICS_DIR="/var/log/tuwunel/metrics"
-ENV TUWUNEL_RUNTIME_USAGE_DIR="/var/log/tuwunel/metrics"
+ENV GAUSSMATRIX_CONFIG="/complement/complement.toml"
+ENV GAUSSMATRIX_RUNTIME_METRICS_DIR="/var/log/gaussmatrix/metrics"
+ENV GAUSSMATRIX_RUNTIME_USAGE_DIR="/var/log/gaussmatrix/metrics"
 ENTRYPOINT exec valgrind \
     --leak-check=no \
     --undef-value-errors=no \
     --exit-on-first-error=yes \
     --error-exitcode=1 \
-    tuwunel \
+    gaussmatrix \
         -Oserver_name=\""$SERVER_NAME\"" \
         -Odb_pool_max_workers=${db_pool_max_workers}
 
@@ -194,7 +194,7 @@ COPY <<'EOF' post_test.sh
 #!/bin/bash
 # Invoked by Complement per spawned homeserver after each test, before the
 # container is removed. Args: container_id, test_name, test_failed. Extracts
-# /var/log/tuwunel/metrics from the stopped testee via the docker engine
+# /var/log/gaussmatrix/metrics from the stopped testee via the docker engine
 # unix-socket API and lands the dump files under
 # /runtime_metrics/by_test/<test_name>/<container_id>/ for the runner to tar.
 set -eo pipefail
@@ -208,7 +208,7 @@ mkdir -p "$dst"
 
 curl --silent --fail --unix-socket /var/run/docker.sock \
     --output - \
-    "http://localhost/containers/$cid/archive?path=/var/log/tuwunel/metrics" \
+    "http://localhost/containers/$cid/archive?path=/var/log/gaussmatrix/metrics" \
     | tar -x --strip-components=1 -C "$dst" 2>/dev/null \
     || rmdir "$dst" 2>/dev/null || true
 EOF

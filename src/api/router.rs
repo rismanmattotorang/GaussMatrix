@@ -12,7 +12,7 @@ use axum::{
 	routing::{any, get, post},
 };
 pub use client_ip::{ConfiguredIpSource, TrustedPeerSubnets};
-use tuwunel_core::{Server, err};
+use gaussmatrix_core::{Server, err};
 
 use self::handler::RouterExt;
 pub(super) use self::{
@@ -246,26 +246,26 @@ fn register_client_misc_routes(router: Router<State>) -> Router<State> {
 		.ruma_route(&client::get_transports_route)
 		.ruma_route(&client::well_known_support)
 		.ruma_route(&client::well_known_client)
-		.route("/_tuwunel/server_version", get(client::tuwunel_server_version))
+		.route("/_gaussmatrix/server_version", get(client::gaussmatrix_server_version))
 }
 
 fn register_oidc_routes(router: Router<State>) -> Router<State> {
 	// OIDC server endpoints (next-gen auth, MSC2965/2964/2966/2967)
 	router
-		.route("/_tuwunel/oidc/registration", post(oidc::registration_route))
-		.route("/_tuwunel/oidc/authorize", get(oidc::authorize_route))
-		.route("/_tuwunel/oidc/_complete", get(oidc::complete_route))
-		.route("/_tuwunel/oidc/token", post(oidc::token_route))
-		.route("/_tuwunel/oidc/revoke", post(oidc::revoke_route))
-		.route("/_tuwunel/oidc/jwks", get(oidc::jwks_route))
-		.route("/_tuwunel/oidc/userinfo", get(oidc::userinfo_route).post(oidc::userinfo_route))
-		.route("/_tuwunel/oidc/account.js", get(oidc::account_js_route))
-		.route("/_tuwunel/oidc/account.css", get(oidc::account_css_route))
+		.route("/_gaussmatrix/oidc/registration", post(oidc::registration_route))
+		.route("/_gaussmatrix/oidc/authorize", get(oidc::authorize_route))
+		.route("/_gaussmatrix/oidc/_complete", get(oidc::complete_route))
+		.route("/_gaussmatrix/oidc/token", post(oidc::token_route))
+		.route("/_gaussmatrix/oidc/revoke", post(oidc::revoke_route))
+		.route("/_gaussmatrix/oidc/jwks", get(oidc::jwks_route))
+		.route("/_gaussmatrix/oidc/userinfo", get(oidc::userinfo_route).post(oidc::userinfo_route))
+		.route("/_gaussmatrix/oidc/account.js", get(oidc::account_js_route))
+		.route("/_gaussmatrix/oidc/account.css", get(oidc::account_css_route))
 		.route(
-			"/_tuwunel/oidc/account_callback",
+			"/_gaussmatrix/oidc/account_callback",
 			get(oidc::get_account_callback_route).post(oidc::post_account_callback_route),
 		)
-		.route("/_tuwunel/oidc/account", get(oidc::get_account_route))
+		.route("/_gaussmatrix/oidc/account", get(oidc::get_account_route))
 		.route("/_matrix/client/v1/auth_issuer", get(oidc::auth_issuer_route))
 		.route("/_matrix/client/v1/auth_metadata", get(oidc::openid_configuration_route))
 		.route(
@@ -317,12 +317,12 @@ fn register_federation_routes(router: Router<State>, allow_federation: bool) -> 
 			.ruma_route(&server::get_content_route)
 			.ruma_route(&server::get_content_thumbnail_route)
 			.route("/_matrix/federation/v1/query/edutypes", get(server::get_edu_types_route))
-			.route("/_tuwunel/local_user_count", get(client::tuwunel_local_user_count))
+			.route("/_gaussmatrix/local_user_count", get(client::gaussmatrix_local_user_count))
 	} else {
 		router
 			.route("/_matrix/federation/{*path}", any(federation_disabled))
 			.route("/_matrix/key/{*path}", any(federation_disabled))
-			.route("/_tuwunel/local_user_count", any(federation_disabled))
+			.route("/_gaussmatrix/local_user_count", any(federation_disabled))
 	}
 }
 

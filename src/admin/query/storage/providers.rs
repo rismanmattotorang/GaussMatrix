@@ -1,5 +1,5 @@
 use futures::TryStreamExt;
-use tuwunel_core::{Result, utils::stream::IterStream};
+use gaussmatrix_core::{Result, utils::stream::IterStream};
 
 use crate::admin_command;
 

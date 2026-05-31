@@ -11,7 +11,7 @@ use ruma::{
 		federation::authenticated_media::{Content, FileOrLocation},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug_warn, err, implement,
 	utils::content_disposition::make_content_disposition,
 };

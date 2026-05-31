@@ -4,7 +4,7 @@ use ruma::{
 	CanonicalJsonObject, ServerName, ServerSigningKeyId, api::federation::discovery::VerifyKey,
 	room_version_rules::RoomVersionRules,
 };
-use tuwunel_core::{Err, Result, implement};
+use gaussmatrix_core::{Err, Result, implement};
 
 use super::{PubKeyMap, PubKeys, extract_key};
 

@@ -1,5 +1,5 @@
 use rocksdb::{BottommostLevelCompaction, CompactOptions};
-use tuwunel_core::{Err, Result, implement};
+use gaussmatrix_core::{Err, Result, implement};
 
 use crate::keyval::KeyBuf;
 

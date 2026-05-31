@@ -5,7 +5,7 @@ use futures::{
 	future::{join, join5},
 };
 use ruma::{OwnedRoomId, UInt, events::room::member::MembershipState, uint};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	apply, is_true,
 	matrix::PduCount,
 	trace,
@@ -16,7 +16,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, IterStream},
 	},
 };
-use tuwunel_service::sync::Connection;
+use gaussmatrix_service::sync::Connection;
 
 use super::{
 	ListIds, ResponseLists, SyncInfo, Window, WindowRoom,

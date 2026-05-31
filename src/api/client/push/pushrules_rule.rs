@@ -7,7 +7,7 @@ use ruma::{
 		RemovePushRuleError,
 	},
 };
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use crate::Ruma;
 

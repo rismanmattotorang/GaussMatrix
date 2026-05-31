@@ -41,6 +41,6 @@ use log as _;
 
 pub use crate::services::Services;
 
-tuwunel_core::mod_ctor! {}
-tuwunel_core::mod_dtor! {}
-tuwunel_core::rustc_flags_capture! {}
+gaussmatrix_core::mod_ctor! {}
+gaussmatrix_core::mod_dtor! {}
+gaussmatrix_core::rustc_flags_capture! {}

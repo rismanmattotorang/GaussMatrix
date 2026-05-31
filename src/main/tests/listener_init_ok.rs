@@ -5,8 +5,8 @@ use tokio::{
 	select,
 	time::{Duration, sleep},
 };
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::{Err, Result};
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::{Err, Result};
 
 #[test]
 fn listener_init_ok() -> Result {
@@ -21,7 +21,7 @@ fn listener_init_ok() -> Result {
 		let result = runtime.block_on(async {
 			select! {
 				() = sleep(Duration::from_secs(5)) => Ok(()),
-				_ = tuwunel::async_exec(&server) => Err!("Premature server shutdown"),
+				_ = gaussmatrix::async_exec(&server) => Err!("Premature server shutdown"),
 			}
 		});
 

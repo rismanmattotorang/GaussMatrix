@@ -16,8 +16,8 @@ select **Create with Provider**. Review the items below and click **Submit**.
 
 - **Application name**: the user-facing name shown to your users on the
   Authentik side.
-- **Slug**: appears in the issuer URL on the tuwunel side. Pick something
-  short and stable, such as `tuwunel`.
+- **Slug**: appears in the issuer URL on the gaussmatrix side. Pick something
+  short and stable, such as `gaussmatrix`.
 
 ##### Provider
 
@@ -26,7 +26,7 @@ Select **OAuth2/OpenID Provider**.
 - **Authorization flow**: any built-in flow is fine if you have not created
   custom ones.
 - **Client ID** and **Client Secret**: Authentik generates these. Save both
-  values — tuwunel needs them.
+  values — gaussmatrix needs them.
 - **Redirect URIs/Origins**: set this to
   `https://<your.matrix.example.com>/_matrix/client/unstable/login/sso/callback/<client_id>`,
   substituting your Matrix server's public hostname and the **Client ID** from
@@ -35,13 +35,13 @@ Select **OAuth2/OpenID Provider**.
 
 ##### Bindings
 
-Optional. Add policies here to restrict tuwunel access to a subset of your
+Optional. Add policies here to restrict gaussmatrix access to a subset of your
 Authentik users.
 
 
-## Tuwunel configuration
+## GaussMatrix configuration
 
-Add an `[[global.identity_provider]]` entry to your `tuwunel.toml`:
+Add an `[[global.identity_provider]]` entry to your `gaussmatrix.toml`:
 
 ```toml
 [[global.identity_provider]]
@@ -53,7 +53,7 @@ callback_url = "https://<your.matrix.example.com>/_matrix/client/unstable/login/
 ```
 
 `issuer_url` is the application's slug-based path with a trailing slash. This
-is the value Authentik returns as the `iss` claim in issued tokens, and tuwunel
+is the value Authentik returns as the `iss` claim in issued tokens, and gaussmatrix
 discovers all other endpoints from
 `<issuer_url>.well-known/openid-configuration` automatically.
 
@@ -72,14 +72,14 @@ discovery_url = "https://<your.authentik.example.com>/application/o/<slug>/.well
 
 ## Customising the Matrix localpart
 
-By default tuwunel derives a new user's Matrix localpart from the
+By default gaussmatrix derives a new user's Matrix localpart from the
 `preferred_username` claim Authentik returns — see
-[How tuwunel derives Matrix user IDs from claims][user-ids-from-claims]. The
+[How gaussmatrix derives Matrix user IDs from claims][user-ids-from-claims]. The
 default Authentik mapping populates `preferred_username` with the user's
 Authentik username, so user `foo` becomes `@foo:example.com`.
 
 [user-ids-from-claims]:
-    ../providers.md#how-tuwunel-derives-matrix-user-ids-from-claims
+    ../providers.md#how-gaussmatrix-derives-matrix-user-ids-from-claims
 
 To decouple the two — for example to give Authentik user `foo` the localpart
 `@bar:example.com` — replace Authentik's default `profile` scope with a custom
@@ -117,7 +117,7 @@ Note the **Name** you give the mapping, then click **Finish**.
 
 ### Replace the default profile mapping
 
-In **Applications** > **Providers**, edit your tuwunel provider, expand
+In **Applications** > **Providers**, edit your gaussmatrix provider, expand
 **Advanced protocol settings**, and find the **Scopes** field.
 
 Move your new mapping from **Available Scopes** into **Selected Scopes** with

@@ -93,12 +93,12 @@ jobs:
       includes: ${{inputs.includes}}
       release_url: ${{inputs.release_url}}
       checkout: ${{inputs.checkout}}
-      rustdoc_base_path: '/tuwunel/docs'
+      rustdoc_base_path: '/gaussmatrix/docs'
       artifact: >
         {
           "docs": {
             "dst": "docs",
-            "src": "/usr/src/tuwunel/target/x86_64-unknown-linux-gnu/doc",
+            "src": "/usr/src/gaussmatrix/target/x86_64-unknown-linux-gnu/doc",
           }
         }
 
@@ -160,8 +160,8 @@ jobs:
       artifact: >
         {
           "static": {
-            "dst": "tuwunel.zst",
-            "src": "/usr/bin/tuwunel",
+            "dst": "gaussmatrix.zst",
+            "src": "/usr/bin/gaussmatrix",
             "mime": "application/zstd",
             "zstd": 11,
             "chmod": "a+x"
@@ -192,13 +192,13 @@ jobs:
       artifact: >
         {
           "docker": {
-            "dst": "tuwunel-docker.tar.gz",
+            "dst": "gaussmatrix-docker.tar.gz",
             "img": true,
             "mime": "application/gzip",
             "gzip": 7
           },
           "oci": {
-            "dst": "tuwunel-oci.tar.zst",
+            "dst": "gaussmatrix-oci.tar.zst",
             "runner": true,
             "mime": "application/zstd",
             "zstd": 11
@@ -232,16 +232,16 @@ jobs:
       artifact: >
         {
           "deb": {
-            "dst": "tuwunel.deb",
+            "dst": "gaussmatrix.deb",
             "mime": "application/vnd.debian.binary-package"
           },
           "rpm": {
-            "dst": "tuwunel.rpm",
+            "dst": "gaussmatrix.rpm",
             "mime": "application/x-rpm"
           },
           "nix": {
-            "dst": "tuwunel.nix.tar.zst",
-            "src": "/opt/tuwunel.nix.tar",
+            "dst": "gaussmatrix.nix.tar.zst",
+            "src": "/opt/gaussmatrix.nix.tar",
             "mime": "application/zstd",
             "zstd": 11
           }

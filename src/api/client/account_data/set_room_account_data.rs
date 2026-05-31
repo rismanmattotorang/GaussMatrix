@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::config::set_room_account_data;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use super::set_account_data;
 use crate::Ruma;

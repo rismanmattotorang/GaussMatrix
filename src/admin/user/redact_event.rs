@@ -1,5 +1,5 @@
 use ruma::{OwnedEventId, events::room::redaction::RoomRedactionEventContent};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result,
 	matrix::{Event, pdu::PduBuilder},
 };

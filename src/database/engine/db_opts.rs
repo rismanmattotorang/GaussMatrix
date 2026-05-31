@@ -1,7 +1,7 @@
 use std::{cmp, convert::TryFrom};
 
 use rocksdb::{Cache, DBRecoveryMode, Env, LogLevel, Options, statistics::StatsLevel};
-use tuwunel_core::{Config, Result, utils};
+use gaussmatrix_core::{Config, Result, utils};
 
 use super::{cf_opts::cache_size_f64, events::Events, logger::handle as handle_log};
 use crate::util::map_err;

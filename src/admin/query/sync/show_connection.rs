@@ -1,6 +1,6 @@
 use ruma::{OwnedDeviceId, OwnedUserId};
-use tuwunel_core::Result;
-use tuwunel_service::sync::into_connection_key;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::sync::into_connection_key;
 
 use crate::admin_command;
 

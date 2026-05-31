@@ -2,7 +2,7 @@ use std::{any::Any, env, panic, sync::LazyLock};
 
 use tracing::Level;
 // Export debug proc_macros
-pub use tuwunel_macros::recursion_depth;
+pub use gaussmatrix_macros::recursion_depth;
 
 // Export all of the ancillary tools from here as well.
 pub use crate::{result::DebugInspect, utils::debug::*};
@@ -115,6 +115,6 @@ pub fn type_name<T: ?Sized>() -> &'static str { std::any::type_name::<T>() }
 #[inline]
 pub const fn logging() -> bool {
 	cfg!(debug_assertions)
-		|| cfg!(tuwunel_debug_logging)
+		|| cfg!(gaussmatrix_debug_logging)
 		|| !cfg!(feature = "release_max_log_level")
 }

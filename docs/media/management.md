@@ -1,6 +1,6 @@
 # Media management
 
-Tuwunel provides a set of admin room commands for inspecting and deleting
+GaussMatrix provides a set of admin room commands for inspecting and deleting
 media. All commands are invoked in the admin room and prefixed with
 `!admin media`.
 

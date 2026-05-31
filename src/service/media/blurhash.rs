@@ -1,6 +1,6 @@
 #[cfg(feature = "blurhashing")]
-use tuwunel_core::config::BlurhashConfig as CoreBlurhashConfig;
-use tuwunel_core::{Result, implement};
+use gaussmatrix_core::config::BlurhashConfig as CoreBlurhashConfig;
+use gaussmatrix_core::{Result, implement};
 
 use super::Service;
 
@@ -12,7 +12,7 @@ pub fn create_blurhash(
 	_content_type: Option<&str>,
 	_file_name: Option<&str>,
 ) -> Result<Option<String>> {
-	tuwunel_core::debug_warn!("blurhashing on upload support was not compiled");
+	gaussmatrix_core::debug_warn!("blurhashing on upload support was not compiled");
 
 	Ok(None)
 }
@@ -33,7 +33,7 @@ pub fn create_blurhash(
 	}
 
 	get_blurhash_from_request(file, content_type, file_name, config)
-		.map_err(|e| tuwunel_core::err!(debug_error!("blurhashing error: {e}")))
+		.map_err(|e| gaussmatrix_core::err!(debug_error!("blurhashing error: {e}")))
 		.map(Some)
 }
 

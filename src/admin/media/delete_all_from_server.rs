@@ -1,5 +1,5 @@
 use ruma::{Mxc, OwnedServerName};
-use tuwunel_core::{Err, Result, error, trace, warn};
+use gaussmatrix_core::{Err, Result, error, trace, warn};
 
 use crate::admin_command;
 

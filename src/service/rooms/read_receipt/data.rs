@@ -9,11 +9,11 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, is_equal_to, trace,
 	utils::{ReadyExt, stream::TryIgnore},
 };
-use tuwunel_database::{Deserialized, Interfix, Json, Map, serialize_key};
+use gaussmatrix_database::{Deserialized, Interfix, Json, Map, serialize_key};
 
 use super::ThreadKind;
 

@@ -13,7 +13,7 @@ use ruma::{
 		room::member::{MembershipState, RoomMemberEventContent},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, error,
 	matrix::{Event, pdu::PduCount},
 	pair_of,
@@ -22,7 +22,7 @@ use tuwunel_core::{
 		stream::BroadbandExt,
 	},
 };
-use tuwunel_service::sync::Connection;
+use gaussmatrix_service::sync::Connection;
 
 use super::{SyncInfo, share_encrypted_room};
 

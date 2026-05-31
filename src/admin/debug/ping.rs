@@ -1,6 +1,6 @@
 use ruma::{OwnedServerName, api::federation::discovery::get_server_version};
 use tokio::time::Instant;
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 
 use crate::admin_command;
 

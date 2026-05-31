@@ -2,7 +2,7 @@
 
 FROM input AS source
 
-ADD --link . /usr/src/tuwunel
+ADD --link . /usr/src/gaussmatrix
 
 
 FROM input AS ingredients
@@ -19,9 +19,9 @@ ARG ROCKSDB_LIB_DIR
 
 WORKDIR /
 COPY --link --from=rust ${RUST_HOME} ${RUST_HOME}
-COPY --link --from=source /usr/src/tuwunel /usr/src/tuwunel
+COPY --link --from=source /usr/src/gaussmatrix /usr/src/gaussmatrix
 
-WORKDIR /usr/src/tuwunel
+WORKDIR /usr/src/gaussmatrix
 ENV PATH="${CARGO_HOME}/bin:$PATH"
 ENV CARGO_TERM_VERBOSE="${CARGO_TERM_VERBOSE}"
 ENV RUST_BACKTRACE="${RUST_BACKTRACE}"
@@ -47,7 +47,7 @@ ARG RUSTUP_HOME
 ARG CARGO_HOME
 ARG CARGO_TARGET
 
-WORKDIR /usr/src/tuwunel
+WORKDIR /usr/src/gaussmatrix
 RUN \
 --mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=locked \
 --mount=type=cache,dst=${CARGO_HOME}/registry,sharing=locked \
@@ -68,5 +68,5 @@ EOF
 FROM scratch AS recipe
 
 WORKDIR /
-COPY --link --from=preparing /usr/src/tuwunel/recipe.json .
-COPY --link --from=preparing /usr/src/tuwunel/rocksdb.url .
+COPY --link --from=preparing /usr/src/gaussmatrix/recipe.json .
+COPY --link --from=preparing /usr/src/gaussmatrix/rocksdb.url .

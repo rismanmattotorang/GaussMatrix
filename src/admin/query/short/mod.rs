@@ -3,7 +3,7 @@ mod short_room_id;
 
 use clap::Subcommand;
 use ruma::{OwnedEventId, OwnedRoomOrAliasId};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

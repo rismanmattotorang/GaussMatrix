@@ -19,7 +19,7 @@ use tokio::{
 	sync::Notify,
 	time::{Instant, timeout_at},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug,
 	debug::INFO_SPAN_LEVEL,
 	debug_warn,
@@ -28,7 +28,7 @@ use tuwunel_core::{
 	trace,
 	utils::{TryFutureExtExt, result::FlatOk},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	sync::{Connection, into_connection_key},
 };

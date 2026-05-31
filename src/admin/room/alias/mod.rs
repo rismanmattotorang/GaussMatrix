@@ -5,8 +5,8 @@ mod which;
 
 use clap::Subcommand;
 use ruma::{OwnedRoomAliasId, OwnedRoomId};
-use tuwunel_core::Result;
-use tuwunel_service::Services;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::Services;
 
 use crate::admin_command_dispatch;
 

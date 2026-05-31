@@ -11,7 +11,7 @@ use ruma::{
 	},
 	uint,
 };
-use tuwunel_core::{Err, Result, utils::future::TryExtExt};
+use gaussmatrix_core::{Err, Result, utils::future::TryExtExt};
 
 use crate::{
 	Ruma,

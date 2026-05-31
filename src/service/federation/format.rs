@@ -1,7 +1,7 @@
 use futures::future::OptionFuture;
 use ruma::{CanonicalJsonObject, CanonicalJsonValue, RoomId, RoomVersionId};
 use serde_json::value::{RawValue as RawJsonValue, to_raw_value};
-use tuwunel_core::{implement, matrix::pdu, utils::result::FlatOk};
+use gaussmatrix_core::{implement, matrix::pdu, utils::result::FlatOk};
 
 /// This does not return a full `Pdu` it is only to satisfy ruma's types.
 #[implement(super::Service)]

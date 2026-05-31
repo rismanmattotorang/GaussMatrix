@@ -1,8 +1,8 @@
 # Identity Providers
 
-Tuwunel can delegate login to external OAuth/OIDC identity providers. Each
+GaussMatrix can delegate login to external OAuth/OIDC identity providers. Each
 configured provider appears as an option on the client's login page. Users are
-redirected to the provider to authenticate, then returned to Tuwunel which
+redirected to the provider to authenticate, then returned to GaussMatrix which
 maps their identity to a Matrix account.
 
 ### Provider guides
@@ -12,7 +12,7 @@ maps their identity to a Matrix account.
 - [Keycloak](providers/keycloak.md)
 - _Please contribute documentation for yours here!_
 
-## Configuring Tuwunel
+## Configuring GaussMatrix
 
 Each provider is a `[[global.identity_provider]]` table in your configuration
 file. Multiple providers can be configured by repeating the table header. Container users
@@ -23,14 +23,14 @@ please refer to the section on [environment variables](#configuring-via-environm
 | Field | Description |
 |---|---|
 | `brand` | Brand name of the provider: `Apple`, `Facebook`, `GitHub`, `GitLab`, `Google`, `Keycloak`, `MAS`, `Twitter`, or any custom string. Case-insensitive. Known brands get built-in defaults and workarounds. |
-| `client_id` | The OAuth application ID issued by the provider. This becomes the provider's unique ID within Tuwunel and **must never change** — Tuwunel associates stored identities to it. |
+| `client_id` | The OAuth application ID issued by the provider. This becomes the provider's unique ID within GaussMatrix and **must never change** — GaussMatrix associates stored identities to it. |
 
 ### Authentication
 
 | Field | Default | Description |
 |---|---|---|
 | `client_secret` | — | OAuth client secret issued by the provider. |
-| `client_secret_file` | — | Path to a file containing the client secret. Takes priority over `client_secret`. Example: `/etc/tuwunel/.github_secret` |
+| `client_secret_file` | — | Path to a file containing the client secret. Takes priority over `client_secret`. Example: `/etc/gaussmatrix/.github_secret` |
 
 ### Discovery
 
@@ -60,8 +60,8 @@ please refer to the section on [environment variables](#configuring-via-environm
 
 | Field | Default | Description |
 |---|---|---|
-| `userid_claims` | all | Claims used to compute the Matrix localpart for new registrations. When empty, Tuwunel avoids generated IDs where possible. The special value `"unique"` forces generated IDs exclusively. The claim `"sub"` takes precedence over all others when listed. |
-| `trusted` | `false` | Inverts user matching: instead of registering a new account when claims conflict with existing users, Tuwunel finds the first matching user and grants access to it. **Only set this for providers you self-host and fully control. Never use with public providers (GitHub, GitLab, Google, etc.) — it enables account takeover.** |
+| `userid_claims` | all | Claims used to compute the Matrix localpart for new registrations. When empty, GaussMatrix avoids generated IDs where possible. The special value `"unique"` forces generated IDs exclusively. The claim `"sub"` takes precedence over all others when listed. |
+| `trusted` | `false` | Inverts user matching: instead of registering a new account when claims conflict with existing users, GaussMatrix finds the first matching user and grants access to it. **Only set this for providers you self-host and fully control. Never use with public providers (GitHub, GitLab, Google, etc.) — it enables account takeover.** |
 | `unique_id_fallbacks` | `true` | When no claim maps cleanly to an available username, generate a unique random localpart as a fallback. Set to `false` on private servers where random usernames are undesirable — a misconfiguration will produce an error instead. |
 | `registration` | `true` | Whether this provider can create new Matrix accounts. Set to `false` to restrict the provider to existing users only. |
 
@@ -95,10 +95,10 @@ environment variables instead.
 The variable name is built from three parts joined by `__` (double underscore):
 
 ```
-TUWUNEL_IDENTITY_PROVIDER__<index>__<FIELD>
+GAUSSMATRIX_IDENTITY_PROVIDER__<index>__<FIELD>
 ```
 
-- **`TUWUNEL_IDENTITY_PROVIDER`** — fixed prefix that maps to the
+- **`GAUSSMATRIX_IDENTITY_PROVIDER`** — fixed prefix that maps to the
   `[[global.identity_provider]]` table array.
 - **`<index>`** — an arbitrary string (typically `0`, `1`, `2`, …) that groups
   variables belonging to the same provider. All variables sharing the same
@@ -110,22 +110,22 @@ Multiple providers are expressed by using different indexes:
 
 ```env
 # First provider — GitHub
-TUWUNEL_IDENTITY_PROVIDER__0__BRAND="github"
-TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_ID="Ov23liYourGitHubClientId"
-TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_SECRET="your_github_secret"
-TUWUNEL_IDENTITY_PROVIDER__0__CALLBACK_URL="https://matrix.example.com/_matrix/client/unstable/login/sso/callback/Ov23liYourGitHubClientId"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__BRAND="github"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CLIENT_ID="Ov23liYourGitHubClientId"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CLIENT_SECRET="your_github_secret"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CALLBACK_URL="https://matrix.example.com/_matrix/client/unstable/login/sso/callback/Ov23liYourGitHubClientId"
 
 # Second provider — Google (marked as default)
-TUWUNEL_IDENTITY_PROVIDER__1__BRAND="google"
-TUWUNEL_IDENTITY_PROVIDER__1__CLIENT_ID="123456789-abc.apps.googleusercontent.com"
-TUWUNEL_IDENTITY_PROVIDER__1__CLIENT_SECRET="GOCSPX-your_secret"
-TUWUNEL_IDENTITY_PROVIDER__1__CALLBACK_URL="https://matrix.example.com/_matrix/client/unstable/login/sso/callback/123456789-abc.apps.googleusercontent.com"
-TUWUNEL_IDENTITY_PROVIDER__1__DEFAULT="true"
+GAUSSMATRIX_IDENTITY_PROVIDER__1__BRAND="google"
+GAUSSMATRIX_IDENTITY_PROVIDER__1__CLIENT_ID="123456789-abc.apps.googleusercontent.com"
+GAUSSMATRIX_IDENTITY_PROVIDER__1__CLIENT_SECRET="GOCSPX-your_secret"
+GAUSSMATRIX_IDENTITY_PROVIDER__1__CALLBACK_URL="https://matrix.example.com/_matrix/client/unstable/login/sso/callback/123456789-abc.apps.googleusercontent.com"
+GAUSSMATRIX_IDENTITY_PROVIDER__1__DEFAULT="true"
 ```
 
 Every field listed in the tables below has a matching environment variable. For
 example, `trusted = true` in TOML becomes
-`TUWUNEL_IDENTITY_PROVIDER__0__TRUSTED="true"`.
+`GAUSSMATRIX_IDENTITY_PROVIDER__0__TRUSTED="true"`.
 
 ## Example configurartions
 
@@ -157,10 +157,10 @@ callback_url = "https://matrix.example.com/_matrix/client/unstable/login/sso/cal
 ```toml
 [[global.identity_provider]]
 brand = "Keycloak"
-client_id = "tuwunel"
+client_id = "gaussmatrix"
 client_secret = "your_keycloak_secret"
 issuer_url = "https://sso.example.com/realms/myrealm"
-callback_url = "https://matrix.example.com/_matrix/client/unstable/login/sso/callback/tuwunel"
+callback_url = "https://matrix.example.com/_matrix/client/unstable/login/sso/callback/gaussmatrix"
 trusted = true
 ```
 
@@ -184,14 +184,14 @@ callback_url = "https://matrix.example.com/_matrix/client/unstable/login/sso/cal
 ### Linking existing users to an identity provider
 
 When SSO is added to a server that already has password-based accounts, the
-central question is: how does Tuwunel know which provider identity belongs to
+central question is: how does GaussMatrix know which provider identity belongs to
 which existing Matrix account?
 
 The most direct approach is to set `trusted = true` and list `"sub"` in
 `userid_claims`. The `sub` claim is the stable, globally unique user
 identifier that every OIDC provider is required to maintain. Listing it in
-`userid_claims` tells Tuwunel to use it as the authoritative match key.
-Marking the provider as trusted then inverts Tuwunel's normal logic: instead
+`userid_claims` tells GaussMatrix to use it as the authoritative match key.
+Marking the provider as trusted then inverts GaussMatrix's normal logic: instead
 of registering a new account when it finds no existing match, it looks for an
 existing Matrix account whose localpart equals the `sub` value and grants
 access to it. The result is that logging in through the provider seamlessly
@@ -200,7 +200,7 @@ picks up the user's existing account:
 ```toml
 [[global.identity_provider]]
 brand = "Keycloak"
-client_id = "tuwunel"
+client_id = "gaussmatrix"
 # ...
 trusted = true
 userid_claims = ["sub"]
@@ -226,7 +226,7 @@ Matrix account to a specific provider identity by having an admin pre-approve
 the connection before the user's next login.
 
 The admin command registers a set of claims to watch for from that provider.
-When the user next authenticates, Tuwunel checks the claims returned by the
+When the user next authenticates, GaussMatrix checks the claims returned by the
 provider against any pending approvals. If every claim in the approval matches
 what the provider returns, the accounts are linked and the approval is
 consumed.
@@ -244,10 +244,10 @@ unique per user.
 must complete their login before the server is restarted, or the command must
 be run again.
 
-### How Tuwunel derives Matrix user IDs from claims
+### How GaussMatrix derives Matrix user IDs from claims
 
 When a user authenticates through a provider for the first time and no
-existing account is linked, Tuwunel must compute a Matrix localpart from the
+existing account is linked, GaussMatrix must compute a Matrix localpart from the
 claims in the provider's userinfo response. It tries each of the following in
 order, using the first claim that is present and yields a valid, available
 username:
@@ -264,20 +264,20 @@ only consulted when explicitly listed in `userid_claims`, where it always
 takes precedence over every other claim regardless of list order.
 
 If none of these five claims appear in the userinfo response, or if every
-derived candidate is already taken by another account, Tuwunel falls back to
+derived candidate is already taken by another account, GaussMatrix falls back to
 a randomly generated localpart. This fallback is controlled by
 `unique_id_fallbacks`, which defaults to `true`. On private servers where
-silent random assignment is unacceptable, set it to `false` — Tuwunel will
+silent random assignment is unacceptable, set it to `false` — GaussMatrix will
 return an error instead.
 
 **Make sure user profiles on your identity provider contain at least one of
-the five claims above.** If a profile has none of them, Tuwunel has nothing
+the five claims above.** If a profile has none of them, GaussMatrix has nothing
 to work with and will resort to the random fallback. The safest choice is to
 ensure `preferred_username` is populated on every account, as it is the
-first claim Tuwunel checks and tends to hold a recognisable, human-readable
+first claim GaussMatrix checks and tends to hold a recognisable, human-readable
 name that also makes a reasonable Matrix localpart.
 
-The `userid_claims` field lets you restrict which claims Tuwunel considers
+The `userid_claims` field lets you restrict which claims GaussMatrix considers
 and in what order. For example, to use only `preferred_username` and fall
 back to the local part of the email address, and never silently generate a
 random ID:
@@ -289,7 +289,7 @@ unique_id_fallbacks = false
 
 Listing `"sub"` anywhere in `userid_claims` elevates it to the highest
 priority, overriding all other entries. The special value `"unique"` used
-alone instructs Tuwunel to always generate a unique random localpart and
+alone instructs GaussMatrix to always generate a unique random localpart and
 never attempt to derive one from claims at all.
 
 ## Multiple providers
@@ -346,8 +346,8 @@ These admin room commands help manage OAuth state:
    entry listing configured providers.
 2. The user selects a provider; the client redirects to
    `/_matrix/client/v3/login/sso/redirect/<client_id>`.
-3. Tuwunel redirects the user to the provider's authorization endpoint.
+3. GaussMatrix redirects the user to the provider's authorization endpoint.
 4. The provider authenticates the user and redirects back to
    `/_matrix/client/unstable/login/sso/callback/<client_id>`.
-5. Tuwunel exchanges the code for tokens, fetches user claims, maps them to a
+5. GaussMatrix exchanges the code for tokens, fetches user claims, maps them to a
    Matrix user ID, and issues a login token back to the client.

@@ -1,7 +1,7 @@
 use const_str::format as const_format;
 use ruma::UserId;
-use tuwunel_core::{Result, utils::html::escape as html_escape};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Result, utils::html::escape as html_escape};
+use gaussmatrix_service::Services;
 
 use super::ACCOUNT_HEAD;
 
@@ -60,7 +60,7 @@ static PAGE_HTML: &str = const_format!(
 		<p>
 			Signed in as <strong>{{uid}}</strong> on <strong>{{server}}</strong>.
 		</p>
-		<form method="POST" action="/_tuwunel/oidc/account_callback">
+		<form method="POST" action="/_gaussmatrix/oidc/account_callback">
 			<input type="hidden" name="action" value="org.matrix.profile" />
 			<input type="hidden" name="loginToken" value="{{tok}}" />
 			<label for="dn">Display name</label>
@@ -78,7 +78,7 @@ static PAGE_HTML: &str = const_format!(
 			</p>
 		</form>
 		<div class="nav">
-			<a href="/_tuwunel/oidc/account?action=org.matrix.sessions_list">
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.sessions_list">
 				Back to sessions
 			</a>
 		</div>

@@ -9,13 +9,13 @@ use ruma::{
 	serde::Raw,
 };
 use serde_json::{json, value::to_raw_value};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug, debug_error, err,
 	result::NotFound,
 	utils,
 	utils::{BoolExt, OptionExt},
 };
-use tuwunel_service::{Services, uiaa::SESSION_ID_LENGTH, users::parse_master_key};
+use gaussmatrix_service::{Services, uiaa::SESSION_ID_LENGTH, users::parse_master_key};
 
 use crate::{Ruma, router::auth_uiaa};
 

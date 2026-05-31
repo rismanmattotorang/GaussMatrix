@@ -18,7 +18,7 @@ use ruma::{
 	},
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_warn, err, is_equal_to,
 	pdu::PduBuilder,
 	trace,
@@ -28,7 +28,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{Deserialized, Json, Map};
+use gaussmatrix_database::{Deserialized, Json, Map};
 
 pub use self::{
 	keys::parse_master_key,

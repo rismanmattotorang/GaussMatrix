@@ -15,7 +15,7 @@ mod uptime;
 use std::path::PathBuf;
 
 use clap::Subcommand;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 
@@ -48,7 +48,7 @@ pub(super) enum ServerCommand {
 	/// - Print database memory usage statistics
 	MemoryUsage,
 
-	/// - Clears all of Tuwunel's caches
+	/// - Clears all of GaussMatrix's caches
 	ClearCaches,
 
 	/// - Performs an online backup of the database (only available for RocksDB

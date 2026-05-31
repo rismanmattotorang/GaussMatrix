@@ -1,7 +1,7 @@
 use std::{io::Write, mem::replace};
 
 use serde::{Deserialize, Serialize, ser};
-use tuwunel_core::{Error, Result, debug::type_name, err, result::DebugInspect, unhandled};
+use gaussmatrix_core::{Error, Result, debug::type_name, err, result::DebugInspect, unhandled};
 
 #[inline]
 pub fn serialize_to_vec<T: Serialize>(val: T) -> Result<Vec<u8>> {

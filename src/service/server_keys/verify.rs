@@ -2,7 +2,7 @@ use ruma::{
 	CanonicalJsonObject, CanonicalJsonValue, OwnedEventId, RoomVersionId, signatures::Verified,
 };
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, implement,
 	matrix::{event::gen_event_id_canonical_json, room_version},
 };

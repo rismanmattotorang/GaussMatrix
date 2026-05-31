@@ -6,7 +6,7 @@ use rocksdb::{
 		WriteStallInfo,
 	},
 };
-use tuwunel_core::{Config, debug, debug::INFO_SPAN_LEVEL, debug_info, error, info, warn};
+use gaussmatrix_core::{Config, debug, debug::INFO_SPAN_LEVEL, debug_info, error, info, warn};
 
 pub(super) struct Events;
 

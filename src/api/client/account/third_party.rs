@@ -1,5 +1,5 @@
 use ruma::api::client::account::get_3pids;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 

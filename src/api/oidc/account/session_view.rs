@@ -1,7 +1,7 @@
 use const_str::format as const_format;
 use ruma::{OwnedDeviceId, UserId};
-use tuwunel_core::{Err, Result, err, utils::html::escape as html_escape};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, err, utils::html::escape as html_escape};
+use gaussmatrix_service::Services;
 
 use super::{ACCOUNT_HEAD, ACCOUNT_JS_INCLUDE, ts_cell, url_encode};
 
@@ -71,11 +71,11 @@ static PAGE_HTML: &str = const_format!(
 			<dt>Last seen</dt><dd>{{ts_cell}}</dd>
 		</dl>
 		<div class="actions">
-			<a href="/_tuwunel/oidc/account?action=org.matrix.sessions_list">
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.sessions_list">
 				Back to sessions
 			</a>
 			<a
-				href="/_tuwunel/oidc/account_callback?action=org.matrix.session_end&device_id={{id_enc}}&loginToken={{tok}}"
+				href="/_gaussmatrix/oidc/account_callback?action=org.matrix.session_end&device_id={{id_enc}}&loginToken={{tok}}"
 				class="err"
 			>
 				Sign out this session

@@ -3,7 +3,7 @@ use std::{borrow::Borrow, iter::once};
 use axum::extract::State;
 use futures::{FutureExt, StreamExt, TryFutureExt, TryStreamExt, future::try_join};
 use ruma::{OwnedEventId, api::federation::event::get_room_state};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, err,
 	utils::stream::{IterStream, TryBroadbandExt},
 };

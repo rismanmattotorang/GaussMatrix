@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::StreamExt;
 use ruma::api::client::session::{logout, logout_all};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{ClientIp, Ruma};
 

@@ -7,7 +7,7 @@ use ruma::{
 	},
 	events::room::member::MembershipState,
 };
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use super::banned_room_check;
 use crate::{ClientIp, Ruma, client::utils::invite_check};

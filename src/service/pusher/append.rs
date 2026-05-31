@@ -11,7 +11,7 @@ use ruma::{
 	push::{Action, Actions, Ruleset, Tweak},
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	matrix::{
 		event::Event,
@@ -19,7 +19,7 @@ use tuwunel_core::{
 	},
 	utils::{BoolExt, ReadyExt, future::TryExtExt, option::OptionExt, time::now_millis},
 };
-use tuwunel_database::{Deserialized, Json, Map};
+use gaussmatrix_database::{Deserialized, Json, Map};
 
 use crate::rooms::short::ShortRoomId;
 

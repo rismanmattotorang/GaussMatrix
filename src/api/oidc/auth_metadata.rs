@@ -1,6 +1,6 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use serde::{Deserialize, Serialize};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use super::ACCOUNT_MANAGEMENT_ACTIONS_SUPPORTED;
 
@@ -37,19 +37,19 @@ pub(crate) async fn openid_configuration_route(
 	Ok(Json(ProviderMetadata {
 		issuer,
 
-		authorization_endpoint: format!("{base}/_tuwunel/oidc/authorize"),
+		authorization_endpoint: format!("{base}/_gaussmatrix/oidc/authorize"),
 
-		registration_endpoint: Some(format!("{base}/_tuwunel/oidc/registration")),
+		registration_endpoint: Some(format!("{base}/_gaussmatrix/oidc/registration")),
 
-		userinfo_endpoint: Some(format!("{base}/_tuwunel/oidc/userinfo")),
+		userinfo_endpoint: Some(format!("{base}/_gaussmatrix/oidc/userinfo")),
 
-		token_endpoint: format!("{base}/_tuwunel/oidc/token"),
+		token_endpoint: format!("{base}/_gaussmatrix/oidc/token"),
 
-		jwks_uri: format!("{base}/_tuwunel/oidc/jwks"),
+		jwks_uri: format!("{base}/_gaussmatrix/oidc/jwks"),
 
-		account_management_uri: Some(format!("{base}/_tuwunel/oidc/account")),
+		account_management_uri: Some(format!("{base}/_gaussmatrix/oidc/account")),
 
-		revocation_endpoint: Some(format!("{base}/_tuwunel/oidc/revoke")),
+		revocation_endpoint: Some(format!("{base}/_gaussmatrix/oidc/revoke")),
 
 		response_modes_supported: Some(vec!["query".to_owned(), "fragment".to_owned()]),
 

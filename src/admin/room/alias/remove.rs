@@ -1,4 +1,4 @@
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 
 use super::parse_alias_from_localpart;
 use crate::admin_command;

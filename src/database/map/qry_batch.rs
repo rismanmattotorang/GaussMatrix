@@ -2,7 +2,7 @@ use std::{fmt::Debug, sync::Arc};
 
 use futures::{Stream, StreamExt, TryStreamExt};
 use serde::Serialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	utils::{
 		IterStream,

@@ -1,6 +1,6 @@
 use futures::{StreamExt, TryStreamExt};
 use ruma::OwnedUserId;
-use tuwunel_core::{Result, utils::stream::ReadyExt};
+use gaussmatrix_core::{Result, utils::stream::ReadyExt};
 
 use crate::admin_command;
 

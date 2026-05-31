@@ -17,8 +17,8 @@ use crate::{
 };
 
 #[cfg(tokio_unstable)]
-const RUNTIME_METRICS_PREFIX: &str = "tuwunel.runtime_metrics";
-const RUNTIME_USAGE_PREFIX: &str = "tuwunel.runtime_usage";
+const RUNTIME_METRICS_PREFIX: &str = "gaussmatrix.runtime_metrics";
+const RUNTIME_USAGE_PREFIX: &str = "gaussmatrix.runtime_usage";
 
 #[derive(Serialize)]
 struct Dump<'a> {
@@ -30,7 +30,7 @@ struct Dump<'a> {
 struct DumpMeta {
 	pid: u32,
 	wrote_at_ms: u64,
-	tuwunel_version: &'static str,
+	gaussmatrix_version: &'static str,
 	scope: &'static str,
 }
 
@@ -39,7 +39,7 @@ impl DumpMeta {
 		Self {
 			pid: process::id(),
 			wrote_at_ms: now_millis(),
-			tuwunel_version: version(),
+			gaussmatrix_version: version(),
 			scope,
 		}
 	}

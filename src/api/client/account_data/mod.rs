@@ -12,8 +12,8 @@ use ruma::{
 };
 use serde::Deserialize;
 use serde_json::{Value as JsonValue, json, value::RawValue as RawJsonValue};
-use tuwunel_core::{Err, Result, err};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::Services;
 
 pub(crate) use self::{
 	delete_global_account_data::delete_global_account_data_route,

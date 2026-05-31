@@ -9,7 +9,7 @@ use std::{
 };
 
 use ruma::{OwnedRoomId, OwnedUserId, RoomId, UserId};
-use tuwunel_core::{debug, implement, trace, utils};
+use gaussmatrix_core::{debug, implement, trace, utils};
 
 use crate::rooms::timeline::RawPduId;
 

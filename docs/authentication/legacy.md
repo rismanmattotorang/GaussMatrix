@@ -31,7 +31,7 @@ whitespace. Useful for rotating tokens without restarting the server:
 
 ```toml
 allow_registration = true
-registration_token_file = "/etc/tuwunel/.reg_tokens"
+registration_token_file = "/etc/gaussmatrix/.reg_tokens"
 ```
 
 Both options can be set at the same time; the file takes priority.

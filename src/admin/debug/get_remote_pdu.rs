@@ -1,6 +1,6 @@
 use futures::FutureExt;
 use ruma::{CanonicalJsonObject, OwnedEventId, OwnedServerName};
-use tuwunel_core::{Err, Result, err, info, trace, warn};
+use gaussmatrix_core::{Err, Result, err, info, trace, warn};
 
 use crate::admin_command;
 

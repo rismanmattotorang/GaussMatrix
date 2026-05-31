@@ -1,6 +1,6 @@
 use axum::{Json, extract::State, response::IntoResponse};
 use serde::Serialize;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 #[derive(Serialize)]
 struct AuthIssuerResponse {

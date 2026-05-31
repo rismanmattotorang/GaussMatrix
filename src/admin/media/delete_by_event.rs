@@ -1,5 +1,5 @@
 use ruma::{CanonicalJsonObject, CanonicalJsonValue, Mxc, OwnedEventId};
-use tuwunel_core::{Err, Result, debug, err, info, warn};
+use gaussmatrix_core::{Err, Result, debug, err, info, warn};
 
 use crate::admin_command;
 

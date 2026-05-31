@@ -34,7 +34,7 @@ use ruma::{
 	uint,
 };
 use tokio::time;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at,
 	debug::INFO_SPAN_LEVEL,
 	debug_error, err,
@@ -57,7 +57,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, Tools, TryExpect, WidebandExt},
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	rooms::{
 		lazy_loading,

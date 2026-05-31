@@ -6,8 +6,8 @@ use ruma::{
 	api::client::session::login::v3::{Request, Token},
 };
 use serde::Deserialize;
-use tuwunel_core::{Err, Result, at, config::JwtConfig, debug, err, jwt, warn};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, at, config::JwtConfig, debug, err, jwt, warn};
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

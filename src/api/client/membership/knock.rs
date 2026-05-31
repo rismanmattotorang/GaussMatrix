@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::knock::knock_room;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use super::banned_room_check;
 use crate::{ClientIp, Ruma};

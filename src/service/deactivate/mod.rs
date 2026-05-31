@@ -5,7 +5,7 @@ use ruma::{
 	OwnedRoomId, UserId,
 	events::{StateEventType, room::power_levels::RoomPowerLevelsEventContent},
 };
-use tuwunel_core::{Event, Result, info, pdu::PduBuilder, utils::ReadyExt, warn};
+use gaussmatrix_core::{Event, Result, info, pdu::PduBuilder, utils::ReadyExt, warn};
 
 use crate::users::Propagation;
 

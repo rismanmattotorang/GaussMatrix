@@ -29,8 +29,8 @@ use ruma::{
 		session::{logout, logout_all},
 	},
 };
-use tuwunel_core::{Err, Result, is_less_than};
-use tuwunel_service::{Services, appservice::RegistrationInfo};
+use gaussmatrix_core::{Err, Result, is_less_than};
+use gaussmatrix_service::{Services, appservice::RegistrationInfo};
 
 pub(super) use self::dispatch::AuthDispatch;
 use self::dispatch::Scheme;

@@ -1,7 +1,7 @@
 use futures::{FutureExt, StreamExt, join};
 use ruma::{EventId, RoomId, ServerName};
-use tuwunel_core::{Err, Result, implement, is_false, utils::option::OptionExt};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, implement, is_false, utils::option::OptionExt};
+use gaussmatrix_service::Services;
 
 pub(super) struct AccessCheck<'a> {
 	pub(super) services: &'a Services,

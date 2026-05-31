@@ -6,7 +6,7 @@ ARG RUSTUP_HOME
 ARG CARGO_HOME
 ARG fmt_args=""
 
-WORKDIR /usr/src/tuwunel
+WORKDIR /usr/src/gaussmatrix
 RUN <<EOF
     set -eux
     rustup run ${rust_toolchain} \

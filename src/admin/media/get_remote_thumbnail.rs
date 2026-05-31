@@ -1,8 +1,8 @@
 use std::time::Duration;
 
 use ruma::{Mxc, OwnedMxcUri, OwnedServerName};
-use tuwunel_core::Result;
-use tuwunel_service::media::Dim;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::media::Dim;
 
 use crate::admin_command;
 

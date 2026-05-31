@@ -4,7 +4,7 @@ use ruma::{
 	events::{StateEventType, TimelineEventType},
 	room_version_rules::RoomVersionRules,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, debug_warn, err, error,
 	matrix::{Event, EventTypeExt, StateKey},
 	smallvec::SmallVec,

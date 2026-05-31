@@ -2,7 +2,7 @@
 
 [<= Back to Generic Deployment Guide](generic.md#setting-up-the-reverse-proxy)
 
-This guide shows you how to configure Nginx as a reverse proxy for Tuwunel with TLS support.
+This guide shows you how to configure Nginx as a reverse proxy for GaussMatrix with TLS support.
 
 ## Installation
 
@@ -21,11 +21,11 @@ sudo pacman -S nginx
 
 ## Configuration
 
-Create a new configuration file at `/etc/nginx/sites-available/tuwunel` (or `/etc/nginx/conf.d/tuwunel.conf` on some distributions):
+Create a new configuration file at `/etc/nginx/sites-available/gaussmatrix` (or `/etc/nginx/conf.d/gaussmatrix.conf` on some distributions):
 
 ```nginx
-upstream tuwunel {
-  server 127.0.0.1:8008; # IP and port where tuwunel is listening
+upstream gaussmatrix {
+  server 127.0.0.1:8008; # IP and port where gaussmatrix is listening
 }
 
 # Client-Server API over HTTPS (port 443)
@@ -36,12 +36,12 @@ server {
   server_name matrix.example.com;
 
   # Nginx standard body size is 1MB, which is quite small for media uploads
-  # Increase this to match the max_request_size in your tuwunel.toml
+  # Increase this to match the max_request_size in your gaussmatrix.toml
   client_max_body_size 100M;
 
-  # Forward requests to Tuwunel
+  # Forward requests to GaussMatrix
   location / {
-    proxy_pass http://tuwunel;
+    proxy_pass http://gaussmatrix;
 
     # Preserve host and scheme - critical for proper Matrix operation
     proxy_set_header Host $host;
@@ -68,7 +68,7 @@ server {
 
   # Forward to the same local port as client-server API
   location / {
-    proxy_pass http://tuwunel;
+    proxy_pass http://gaussmatrix;
     proxy_set_header Host $host;
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto https;
@@ -83,11 +83,11 @@ server {
 ### Important Notes
 
 - **Replace `matrix.example.com`** with your actual server name
-- **`client_max_body_size`**: Must match or exceed `max_request_size` in your `tuwunel.toml`
-- **`ip_source`**: If Nginx is the only way clients can reach Tuwunel, set
-  `ip_source = "rightmost_x_forwarded_for"` so Tuwunel uses the trusted
+- **`client_max_body_size`**: Must match or exceed `max_request_size` in your `gaussmatrix.toml`
+- **`ip_source`**: If Nginx is the only way clients can reach GaussMatrix, set
+  `ip_source = "rightmost_x_forwarded_for"` so GaussMatrix uses the trusted
   `X-Forwarded-For` value
-- **Do NOT use `$request_uri`** in `proxy_pass` - while some guides suggest this, it's not necessary for Tuwunel and can cause issues
+- **Do NOT use `$request_uri`** in `proxy_pass` - while some guides suggest this, it's not necessary for GaussMatrix and can cause issues
 - **IPv6**: The `listen [::]:443` and `listen [::]:8448` lines enable IPv6 support. Remove them if you don't need IPv6
 
 ### TLS Certificates
@@ -112,7 +112,7 @@ However, if you experience federation retries or dropped long-poll connections, 
 
 ```nginx
 location / {
-  proxy_pass http://tuwunel;
+  proxy_pass http://gaussmatrix;
   proxy_set_header Host $host;
   proxy_set_header X-Forwarded-For $remote_addr;
   proxy_set_header X-Forwarded-Proto https;
@@ -128,7 +128,7 @@ location / {
 If using sites-available/sites-enabled structure:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/tuwunel /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/gaussmatrix /etc/nginx/sites-enabled/
 ```
 
 Test the configuration:
@@ -154,8 +154,8 @@ sudo systemctl enable nginx
 After configuring Nginx, verify it's working by checking:
 
 ```bash
-curl https://matrix.example.com/_tuwunel/server_version
-curl https://matrix.example.com:8448/_tuwunel/server_version
+curl https://matrix.example.com/_gaussmatrix/server_version
+curl https://matrix.example.com:8448/_gaussmatrix/server_version
 ```
 
 ## Troubleshooting
@@ -166,7 +166,7 @@ If you're considering Apache instead of Nginx: Apache is not well-suited as a re
 
 ### Lighttpd is Not Supported
 
-Lighttpd has known issues with the `X-Matrix` authorization header, making federation non-functional. We do not recommend using Lighttpd with Tuwunel.
+Lighttpd has known issues with the `X-Matrix` authorization header, making federation non-functional. We do not recommend using Lighttpd with GaussMatrix.
 
 ---
 

@@ -1,6 +1,6 @@
 use futures::{FutureExt, StreamExt};
 use ruma::OwnedRoomId;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_warn,
 	utils::{ReadyExt, stream::BroadbandExt},
 };

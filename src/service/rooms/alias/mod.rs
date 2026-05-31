@@ -5,12 +5,12 @@ use ruma::{
 	OwnedRoomId, OwnedServerName, OwnedUserId, RoomAliasId, RoomId, RoomOrAliasId, UserId,
 	api::federation::query::get_room_information::v1::Request, events::StateEventType,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err,
 	matrix::Event,
 	utils::{ReadyExt, stream::TryIgnore},
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Map};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Map};
 
 use crate::appservice::RegistrationInfo;
 

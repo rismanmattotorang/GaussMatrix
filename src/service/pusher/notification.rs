@@ -2,11 +2,11 @@ use std::collections::BTreeMap;
 
 use futures::{StreamExt, stream::select};
 use ruma::{EventId, OwnedEventId, RoomId, UserId, events::receipt::ReceiptThread};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement, trace,
 	utils::stream::{ReadyExt, TryIgnore},
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix};
 
 /// Per-thread unread counts: `(notification, highlight)` keyed by thread root.
 type ThreadCounts = BTreeMap<OwnedEventId, (u64, u64)>;

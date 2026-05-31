@@ -2,8 +2,8 @@ use futures::{
 	Future, FutureExt, Stream, StreamExt, future::BoxFuture, pin_mut, stream::FuturesUnordered,
 };
 use ruma::{DeviceId, RoomId, UserId};
-use tuwunel_core::{implement, trace};
-use tuwunel_database::{Interfix, Separator, serialize_key};
+use gaussmatrix_core::{implement, trace};
+use gaussmatrix_database::{Interfix, Separator, serialize_key};
 
 /// Register all sync watchers for the given user, device, and rooms eagerly,
 /// then return a future that resolves when any watcher fires.

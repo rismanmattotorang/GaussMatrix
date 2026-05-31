@@ -8,7 +8,7 @@ use ruma::{
 	room_version_rules::AuthorizationRules,
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Event, PduEvent, Result, err,
 	error::inspect_debug_log,
 	implement,
@@ -22,7 +22,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Map};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Map};
 
 use crate::{
 	rooms::{

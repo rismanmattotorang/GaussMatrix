@@ -5,7 +5,7 @@ use axum::{
 	response::{IntoResponse, Redirect},
 };
 use serde::Deserialize;
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 use url::{Url, form_urlencoded};
 
 #[derive(Debug, Deserialize)]

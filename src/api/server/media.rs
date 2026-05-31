@@ -5,8 +5,8 @@ use ruma::{
 		Content, ContentMetadata, FileOrLocation, get_content, get_content_thumbnail,
 	},
 };
-use tuwunel_core::{Result, utils::content_disposition::make_content_disposition};
-use tuwunel_service::media::{Dim, Media};
+use gaussmatrix_core::{Result, utils::content_disposition::make_content_disposition};
+use gaussmatrix_service::media::{Dim, Media};
 
 use crate::{ClientIp, Ruma};
 

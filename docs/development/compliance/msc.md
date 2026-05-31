@@ -1,4 +1,4 @@
-# Tuwunel MSC Implementation Status
+# GaussMatrix MSC Implementation Status
 
 ## Columns
 
@@ -10,7 +10,7 @@
   in the implementation.
 - **Correct/Impl**: two absolute percentages of the total proposal,
   e.g. `70/80`. Correct is the share of the proposal's requirements
-  Tuwunel adheres to correctly; Impl is the share that has any code
+  GaussMatrix adheres to correctly; Impl is the share that has any code
   path attempting adherence. By definition Correct <= Impl. Either
   may be `?`. Proposals are loosely normative, so this is NOT just
   MUST/SHOULD: every requirement-shaped statement counts ("the server
@@ -77,7 +77,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC4126 | ✅ ● | 100/100 | Deprecation of query string auth | deprecation of query string auth; server still accepts both |
 | MSC4115 | ✅ ● | 100/100 | membership metadata on events | src/core/matrix/pdu/unsigned.rs add_membership; src/service/rooms/state_acces... |
 | MSC4041 | ✅ ◐ | 90/90 | Use http header Retry-After to enable library-assisted retry handling | Ruma error type emits Retry-After header for LimitExceeded responses. |
-| MSC4040 | ✅ ● | 100/100 | Update SRV service name to IANA registration | Tuwunel queries _matrix-fed first then falls back to _matrix. |
+| MSC4040 | ✅ ● | 100/100 | Update SRV service name to IANA registration | GaussMatrix queries _matrix-fed first then falls back to _matrix. |
 | MSC4026 | ✅ ◐ | 80/90 | Allow /versions to optionally accept authentication | versions endpoint accepts optional auth via Ruma |
 | MSC4025 | 🟨 ● | 50/50 | Local user erasure requests | phase A landed (account-data wipe); phase B (per-event visibility gate) deferred |
 | MSC4010 | ✅ ● | 100/100 | Push rules and account data | m.push_rules and m.fully_read rejected on /account_data |
@@ -95,7 +95,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3939 | ✅ ● | 100/100 | Account locking | src/api/router/auth.rs locked_account_gate; M_USER_LOCKED 401 with soft_logou... |
 | MSC3938 | ✅ ◐ | 80/80 | Remove deprecated `keyId` parameters from `/keys` endpoints | New /key/v2/server (no keyId) implemented; deprecated form retained for compat. |
 | MSC3930 | 🟨 ◐ | 0/? | Polls push rules/notifications | complement: 0p/2f |
-| MSC3925 | 🟨 ◐ | 50/50 | m.replace aggregation with full event | Tuwunel doesn't replace content (good) but also lacks bundled m.replace aggre... |
+| MSC3925 | 🟨 ◐ | 50/50 | m.replace aggregation with full event | GaussMatrix doesn't replace content (good) but also lacks bundled m.replace aggre... |
 | MSC3916 | ✅ ● | 90/100 | Authentication for media access, and new endpoint names | New /client/v1/media and /federation/v1/media auth endpoints implemented. |
 | MSC3905 | ✅ ● | 100/100 | Application services should only be interested in local users | src/service/appservice/append.rs:66; local-user guard at the three event-inte... |
 | MSC3882 | ✅ ● | 90/100 | Allow an existing session to sign in a new session | POST /login/get_token implemented with UIA |
@@ -103,7 +103,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3861 | 🟨 ◐ | 60/70 | Next-generation auth for Matrix, based on OAuth 2.0/OIDC | OIDC core endpoints implemented but not advertised as MSC3861 itself |
 | MSC3860 | ❌ ◐ | 20/20 | Media Download Redirects | forwards allow_redirect to remote fetch but does not emit own redirect |
 | MSC3856 | 🟨 ◐ | 40/60 | Threads List API | GET /threads route present but participated filter and latest-event order mis... |
-| MSC3844 | ✅ ● | 100/100 | Remove "Mjolnir" (policy room) sharing mechanism | removal of unused Mjolnir share endpoint; Tuwunel never implemented it |
+| MSC3844 | ✅ ● | 100/100 | Remove "Mjolnir" (policy room) sharing mechanism | removal of unused Mjolnir share endpoint; GaussMatrix never implemented it |
 | MSC3828 | ✅ ● | 100/100 | Content Repository Cross Origin Resource Policy (CORP) Headers | media endpoints return Cross-Origin-Resource-Policy: cross-origin |
 | MSC3827 | ✅ ● | 100/100 | Filtering of `/publicRooms` by room type | /publicRooms supports room_types filter and returns room_type |
 | MSC3824 | 🟨 ◐ | 60/60 | OAuth 2.0 API aware clients | oauth_aware_preferred set in /login; SSO redirect action param ignored |
@@ -125,7 +125,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3666 | 🟨 ● | 30/30 | Bundled aggregations for server side search | thread bundles already surface in /search responses via verbatim serializatio... |
 | MSC3604 | ✅ ● | 100/100 | Room Version 10 | V10 supported; integer_power_levels and knock_restricted enforced |
 | MSC3589 | ✅ ● | 100/100 | Room version 9 as a default | default_room_version defaults to V11 (exceeds V9) |
-| MSC3582 | ✅ ● | 100/100 | Remove m.room.message.feedback | feedback removal; tuwunel never produces or dispatches on m.room.message.feed... |
+| MSC3582 | ✅ ● | 100/100 | Remove m.room.message.feedback | feedback removal; gaussmatrix never produces or dispatches on m.room.message.feed... |
 | MSC3567 | ✅ ● | 100/100 | Allow requesting events from the start/end of the room history | from is optional; defaults to start/end based on dir |
 | MSC3550 | 🟨 ◐ | 50/50 | Add HTTP 403 to possible profile lookup responses | federation 403 returned; client /profile still 404 only |
 | MSC3442 | ✅ ● | 100/100 | move the `prev_content` key to `unsigned` | prev_content placed under unsigned in created/appended PDUs |
@@ -173,7 +173,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC2659 | 🟨 ● | 70/90 | Application service ping endpoint | src/api/client/appservice.rs:11 calls AS /_matrix/app/v1/ping |
 | MSC2611 | ✅ ● | 100/100 | Remove `m.login.token` User-Interactive Authentication type from the specific... | AuthType::Token UIAA not advertised; m.login.token login is unrelated |
 | MSC2610 | ✅ ● | 100/100 | Remove `m.login.oauth2` User-Interactive Authentication type from the specifi... | AuthType::OAuth2 not advertised; only Password/Sso/Jwt flows |
-| MSC2540 | ❌ ◐ | 0/0 | Stricter event validation: JSON compliance | ruma exposes strict_canonical_json flag; Tuwunel does not enforce floats reje... |
+| MSC2540 | ❌ ◐ | 0/0 | Stricter event validation: JSON compliance | ruma exposes strict_canonical_json flag; GaussMatrix does not enforce floats reje... |
 | MSC2526 | ✅ ● | 100/100 | Add ability to delete key backups | src/api/client/backup.rs:134 delete_backup_version_route |
 | MSC2457 | ✅ ● | 100/100 | Invalidating devices during password modification | src/api/client/account.rs:41 honors body.logout_devices |
 | MSC2454 | ✅ ● | 90/90 | User-Interactive Authentication for SSO-backed homeserver | src/api/router/auth/uiaa.rs:53 sso_flow; sso/uiaa.rs serves fallback |
@@ -224,7 +224,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC1708 | ✅ ● | 90/100 | .well-known support for server name resolution | src/service/resolver/well_known.rs; resolver/actual.rs ordering matches spec |
 | MSC1704 | ✅ ● | 100/100 | matrix.to permalink navigation | server-side requirement is via= on /join; src/api/client/membership/join.rs:79 |
 | MSC1693 | ✅ ● | 100/100 | Specify how to handle rejected events in new state res | rejected event handling in iterative auth check matches MSC1442 amendment |
-| MSC1692 | ❌ ◐ | 0/10 | Terms of service at registration | AuthType::Terms exists in Ruma but Tuwunel's register flow does not advertise... |
+| MSC1692 | ❌ ◐ | 0/10 | Terms of service at registration | AuthType::Terms exists in Ruma but GaussMatrix's register flow does not advertise... |
 | MSC1659 | ✅ ● | 90/100 | Changing Event IDs to be Hashes | reference_hash event IDs; v3 in UNSTABLE_ROOM_VERSIONS; auth_events as list-o... |
 | MSC1501 | ✅ ● | 90/90 | Room version upgrades | upgrade endpoint present; tombstone, predecessor, PL freeze all implemented |
 | MSC1466 | ✅ ● | 100/100 | Soft Remote Logout Proposal | soft_logout=true returned for expired tokens in 401 responses |
@@ -233,7 +233,7 @@ in the [Out of scope](#out-of-scope) section.
 
 ## Spec compliance gaps
 
-Merged MSCs (in the live Matrix spec) that Tuwunel does not
+Merged MSCs (in the live Matrix spec) that GaussMatrix does not
 fully implement. These are the highest-priority items to fix
 for spec compliance.
 
@@ -256,7 +256,7 @@ for spec compliance.
 | MSC2676 | 🟨 ● | 50/60 | Message editing | edits accepted/relayed; no m.replace bundle or new_content apply |
 | MSC3267 | 🟨 ◐ | 50/50 | reference relationships | reference relations queryable via /relations; no m.relations bundling |
 | MSC3550 | 🟨 ◐ | 50/50 | Add HTTP 403 to possible profile lookup responses | federation 403 returned; client /profile still 404 only |
-| MSC3925 | 🟨 ◐ | 50/50 | m.replace aggregation with full event | Tuwunel doesn't replace content (good) but also lacks bundled m.replace aggre... |
+| MSC3925 | 🟨 ◐ | 50/50 | m.replace aggregation with full event | GaussMatrix doesn't replace content (good) but also lacks bundled m.replace aggre... |
 | MSC4025 | 🟨 ● | 50/50 | Local user erasure requests | phase A landed (account-data wipe); phase B (per-event visibility gate) deferred |
 | MSC4191 | 🟨 ◐ | 50/80 | Account management for OAuth 2.0 API | metadata wired but action names diverge from MSC |
 | MSC2746 | 🟨 ○ | 40/40 | Improved Signalling for 1:1 VoIP | Events relayed; no specific server hooks |
@@ -270,11 +270,11 @@ for spec compliance.
 | MSC3860 | ❌ ◐ | 20/20 | Media Download Redirects | forwards allow_redirect to remote fetch but does not emit own redirect |
 | MSC1759 | ❌ ◐ | 10/20 | MSC 1759 - Rooms V2 | v2 algorithm in use for v3+; v2 itself not in supported_room_versions |
 | MSC3816 | ❌ ◐ | 10/10 | Clarify Thread Participation | BundledThread.current_user_participated hardcoded true on first reply only |
-| MSC1692 | ❌ ◐ | 0/10 | Terms of service at registration | AuthType::Terms exists in Ruma but Tuwunel's register flow does not advertise... |
+| MSC1692 | ❌ ◐ | 0/10 | Terms of service at registration | AuthType::Terms exists in Ruma but GaussMatrix's register flow does not advertise... |
 | MSC1767 | ❌ ◐ | 0/0 | Extensible events in Matrix | no extensible-events handling; relies on generic event relay |
 | MSC2076 | ❌ ◐ | 0/10 | Enforce key-validity periods when validating event signatures | minimum_valid_until_ts passed for fetches; per-event ts check absent |
 | MSC2244 | ❌ ● | 0/0 | Mass redactions | Single-target redactions only; no array redacts handling |
-| MSC2540 | ❌ ◐ | 0/0 | Stricter event validation: JSON compliance | ruma exposes strict_canonical_json flag; Tuwunel does not enforce floats reje... |
+| MSC2540 | ❌ ◐ | 0/0 | Stricter event validation: JSON compliance | ruma exposes strict_canonical_json flag; GaussMatrix does not enforce floats reje... |
 | MSC2705 | ❌ ◐ | 0/10 | Animated thumbnails | animated param accepted; thumbnails always PNG static |
 | MSC3980 | ❌ ● | 0/0 | Dotted Field Consistency | blocked on a missing prerequisite: Tu does not implement event_fields filteri... |
 | MSC4335 | ❌ ● | 0/0 | M_USER_LIMIT_EXCEEDED error code | M_USER_LIMIT_EXCEEDED error code not used |
@@ -299,7 +299,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC4464 | ❌ ● | 0/0 | verifiable links in profile | No `/verify_profile_connection` endpoint or verification backend. |
 | MSC4462 | ❌ ◐ | 10/10 | Links in Profile | Incidental MSC4133 passthrough; no m.connections parsing. |
 | MSC4461 | ✅ ◐ | 100/100 | Storing per-message profiles for users | Pure account data passthrough; generic CS account-data covers it. |
-| MSC4460 | ❌ ● | 0/0 | Extensible Events - Alternative unstable support | Client-side hybrid extensible-events rendering rules; no Tuwunel dispatch. |
+| MSC4460 | ❌ ● | 0/0 | Extensible Events - Alternative unstable support | Client-side hybrid extensible-events rendering rules; no GaussMatrix dispatch. |
 | MSC4459 | ❌ ● | 0/0 | Image pack references | Client-side image pack reference field; homeserver passes events through tran... |
 | MSC4458 | ✅ ◐ | 80/80 | Handling incoming JSON in the server-server API | Incoming PDUs deserialized via serde_json into CanonicalJsonObject |
 | MSC4457 | ❌ ● | 0/0 | Generic reporting API | No /_matrix/client/v1/safety/report endpoint |
@@ -326,7 +326,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC4427 | ❌ ● | 0/0 | Custom banners for user profiles | No m.banner_url or chat.commet.profile_banner support |
 | MSC4426 | ❌ ◐ | 20/20 | User Status Profile Fields | Profile keys passthrough via MSC4133 endpoints; no specific m.status/m.call v... |
 | MSC4425 | ❌ ● | 0/0 | Ephemeral media | no ephemeral query param; no DELETE on /_matrix/client/v1/media/.../.... |
-| MSC4423 | ✅ ● | 100/100 | Undefine order of room directory | undefines /publicRooms ordering; Tuwunel's existing order is now compatible. |
+| MSC4423 | ✅ ● | 100/100 | Undefine order of room directory | undefines /publicRooms ordering; GaussMatrix's existing order is now compatible. |
 | MSC4420 | ❌ ● | 0/0 | Duplicate one-time key error response for /keys/upload | add_one_time_key silently overwrites; no M_DUPLICATE_ONE_TIME_KEY emitted. |
 | MSC4418 | ✅ ● | 100/100 | Make `destination` a required server authentication field | destination required on inbound and outbound; cited verbatim in MSC. |
 | MSC4417 | ❌ ● | 0/0 | URL Previews via Appservices | client preview_url exists; no appservice fan-out or namespace check. |
@@ -557,7 +557,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3934 | ❌ ● | 0/0 | Bulk push rules change endpoint | PUT /pushrules_bulk/.../actions and /enabled endpoints not implemented. |
 | MSC3933 | ❌ ● | 0/0 | Core push rules for Extensible Events | Extensible-event default underride push rules not added. |
 | MSC3932 | ❌ ● | 0/0 | Extensible events room version push rule feature flag | Extensible-event room version push rule gating not enabled. |
-| MSC3931 | ❌ ● | 0/0 | Push rule condition for room version features | room_version_supports push condition not enabled in tuwunel. |
+| MSC3931 | ❌ ● | 0/0 | Push rule condition for room version features | room_version_supports push condition not enabled in gaussmatrix. |
 | MSC3927 | ❌ ● | 0/0 | Extensible Events - Audio | Extensible m.audio event type not specifically dispatched. |
 | MSC3926 | ❌ ● | 0/0 | Disable server-default notifications for bot users by default | enable_predefined_push_rules registration body field not implemented. |
 | MSC3922 | ❌ ● | 0/0 | Removing SRV records from homeserver discovery | SRV record discovery still active; would need code removal. |
@@ -615,9 +615,9 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3672 | ❌ ● | 0/0 | Sharing ephemeral streams of location data | branch MSC; no m.beacon EDU support or location streaming |
 | MSC3664 | ❌ ● | 0/0 | Pushrules for relations | no related_event_match push rule condition implemented |
 | MSC3647 | ❌ ● | 0/0 | Bring Your Own Bridge - Decentralising Bridges | WIP bridge negotiation; no spec-level details, no server impl |
-| MSC3618 | ❌ ◐ | 0/0 | Simplify federation `/send` response | branch MSC; tuwunel returns full pdus map per current spec |
-| MSC3613 | ❌ ● | 0/0 | Combinatorial join rules | branch MSC; no combinatorial join_rules array logic in tuwunel |
-| MSC3593 | ❌ ● | 0/0 | Safety Controls through a generic Administration API | none of the proposed /admin/* endpoints exist; tuwunel uses admin room |
+| MSC3618 | ❌ ◐ | 0/0 | Simplify federation `/send` response | branch MSC; gaussmatrix returns full pdus map per current spec |
+| MSC3613 | ❌ ● | 0/0 | Combinatorial join rules | branch MSC; no combinatorial join_rules array logic in gaussmatrix |
+| MSC3593 | ❌ ● | 0/0 | Safety Controls through a generic Administration API | none of the proposed /admin/* endpoints exist; gaussmatrix uses admin room |
 | MSC3585 | ✅ ● | 100/100 | Allow the base event to be omitted from `/federation/v1/event_auth` response | event_auth handler omits the requested event itself per MSC |
 | MSC3575 | ✅ ◐ | ?/? | Sliding Sync (aka Sync v3) | [→ MSC4186] src/api/client/sync/v5.rs:62 |
 | MSC3574 | ❌ ● | 0/0 | Marking up resources | no m.markup.resource or annotation handling |
@@ -823,7 +823,7 @@ in the [Out of scope](#out-of-scope) section.
 | MSC3005 | ❌ ● | 0/0 | Streaming Federation Events | closed; no streaming federation transport |
 | MSC2957 | ❌ ● | 0/0 | Cryptographically Concealed Credentials | PAKE-style login flow; closed; not implemented |
 | MSC2912 | ❌ ● | 0/0 | Setting cross-signing keys during registration | no device_signing field accepted by /register |
-| MSC2839 | ❌ ◐ | 0/0 | Dynamic User-Interactive Authentication | closed; UIA flows are static in Tuwunel |
+| MSC2839 | ❌ ◐ | 0/0 | Dynamic User-Interactive Authentication | closed; UIA flows are static in GaussMatrix |
 | MSC2835 | ❌ ◐ | 0/10 | Add UIA to the /login endpoint | closed; /login does not consume UIA auth dict |
 | MSC2773 | ❌ ◐ | 0/0 | Room kinds | closed; no m.kind summary or m.room.kind handling |
 | MSC2631 | ✅ ◐ | 80/80 | Add `default_payload` to PusherData | ruma HttpPusherData flattens custom data; default_payload accepted via passth... |
@@ -853,7 +853,7 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC4444 | ⬛ ● | closed | Malicious PDUs | April Fools joke MSC, status closed |
 | MSC4441 | ⬛ ● | open | Encrypted User Profile Annotations via Account Data | Client-side only encrypted account data convention |
 | MSC4421 | ⬛ ● | closed | Standardize the spec on US English | spec house-style proposal (en-US); no protocol surface. |
-| MSC4415 | ⬛ ● | closed | Make `/_matrix/client/v3/admin/whois/{userId}` only available to admins | /_matrix/client/v3/admin/whois not implemented at all in Tuwunel. |
+| MSC4415 | ⬛ ● | closed | Make `/_matrix/client/v3/admin/whois/{userId}` only available to admins | /_matrix/client/v3/admin/whois not implemented at all in GaussMatrix. |
 | MSC4414 | ⬛ ● | open | Design decision - Errors | design-direction proposal with no technical changes. |
 | MSC4412 | ⬛ ● | open | Widget Base PostMessage API | widget postMessage protocol; entirely client/host-widget. |
 | MSC4411 | ⬛ ● | open | Widget State Event | widget state event schema only; server stores the state event opaquely. |
@@ -900,9 +900,9 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC4229 | ⬛ ● | open | Pass through `unsigned` data from `/keys/upload` to `/keys-query` | template/example proposal; no real change |
 | MSC4209 | ⬛ ● | open | Updating endpoints in-place | deprecation policy clarification; no code |
 | MSC4192 | ⬛ ● | open | Comparison of proposals for ignoring invites | comparison/research document, not a feature |
-| MSC4183 | ⬛ ● | merged | Additional Error Codes for submitToken endpoints | identity service API; Tuwunel is not an IS |
+| MSC4183 | ⬛ ● | merged | Additional Error Codes for submitToken endpoints | identity service API; GaussMatrix is not an IS |
 | MSC4179 | ⬛ ● | open | Moderation event hiding | client-side rendering hint |
-| MSC4178 | ⬛ ● | merged | Error codes for requestToken | new 3PID requestToken error codes; 3PID stack is out of scope for Tuwunel per... |
+| MSC4178 | ⬛ ● | merged | Error codes for requestToken | new 3PID requestToken error codes; 3PID stack is out of scope for GaussMatrix per... |
 | MSC4161 | ⬛ ● | open | Crypto terminology for non-technical users | crypto terminology guidance for clients |
 | MSC4159 | ⬛ ● | merged | Remove the deprecated name attribute on HTML anchor elements | client-side HTML rendering recommendation |
 | MSC4157 | ⬛ ● | open | Delayed Events (widget-api) | widget-api only; not a homeserver concern |
@@ -920,7 +920,7 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC4092 | ⬛ ● | open | Enforce tests around sensitive parts of the specification | process MSC about test enforcement; no protocol changes |
 | MSC4077 | ⬛ ● | merged | Improved process for handling deprecated HTML features | process MSC for HTML feature deprecation; no server work |
 | MSC4073 | ⬛ ● | open | Shepherd teams | process MSC about SCT shepherd teams; not protocol |
-| MSC4062 | ⬛ ◐ | open | Add a push rule tweak to disable email notification | Tuwunel has no email pusher; tweak only affects email pushers. |
+| MSC4062 | ⬛ ◐ | open | Add a push rule tweak to disable email notification | GaussMatrix has no email pusher; tweak only affects email pushers. |
 | MSC4052 | ⬛ ● | closed | Hiding read receipts UI in certain rooms | Pure client-side hint via m.hide_ui state event. |
 | MSC4050 | ⬛ ● | open | MXID verification | Pure client/third-party signaling via custom event types. |
 | MSC4039 | ⬛ ● | open | Access the Content repository with the Widget API | Widget API extension; entirely client-to-widget scope. |
@@ -1048,7 +1048,7 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC2644 | ⬛ ● | open | `matrix.to` URI syntax v2 | matrix.to URI syntax; client-only |
 | MSC2630 | ⬛ ◐ | merged | Checking public keys in SAS verification | Client SAS verification crypto; server transports key.verification events |
 | MSC2618 | ⬛ ● | open | Helping others with mandatory implementation guides | Spec process MSC; no homeserver behavior |
-| MSC2604 | ⬛ ◐ | merged | Parameters for Login Fallback | Client login fallback HTML page; Tuwunel does not serve /login/fallback |
+| MSC2604 | ⬛ ◐ | merged | Parameters for Login Fallback | Client login fallback HTML page; GaussMatrix does not serve /login/fallback |
 | MSC2589 | ⬛ ◐ | closed | Improve replies | Client reply rendering; closed MSC; server ignores reply_body fields |
 | MSC2582 | ⬛ ◐ | merged | Remove `mimetype` from `EncryptedFile` object | Removes mimetype example from spec; pure spec/client cleanup |
 | MSC2579 | ⬛ ○ | closed | Improved tagging support | Client tag-ordering account_data; server stores opaquely |
@@ -1064,12 +1064,12 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC2427 | ⬛ ◐ | open | Proposal for JSON-based message formatting | Client-only message formatting alternative to HTML |
 | MSC2425 | ⬛ ● | open | Remove Authentication on /submitToken Identity Service API | Identity Server endpoint; not a homeserver concern |
 | MSC2422 | ⬛ ◐ | merged | Allow `color` as attribute for `<font>` in messages | Client HTML sanitizer change for &lt;font color&gt; |
-| MSC2413 | ⬛ ● | open | Remove client_secret | 3PID-only proposal; Tuwunel does not support 3PID |
+| MSC2413 | ⬛ ● | open | Remove client_secret | 3PID-only proposal; GaussMatrix does not support 3PID |
 | MSC2399 | ⬛ ◐ | merged | Reporting that decryption keys are withheld | Client-only m.room_key.withheld to-device event |
 | MSC2398 | ⬛ ◐ | open | proposal to allow mxc:// in the "a" tag within messages | Client HTML rendering policy for &lt;a href=mxc:&gt; |
 | MSC2390 | ⬛ ◐ | closed | On the EDU-to-PDU transition. | Process MSC; closed; recommends no further EDU use |
-| MSC2389 | ⬛ ◐ | closed | Toward the EDU-to-PDU transition: Typing. | Typing as PDU; closed proposal, Tuwunel uses EDU |
-| MSC2388 | ⬛ ◐ | open | Toward the EDU-to-PDU transition: Read Receipts. | Receipts as PDU; superseded direction, Tuwunel uses EDU |
+| MSC2389 | ⬛ ◐ | closed | Toward the EDU-to-PDU transition: Typing. | Typing as PDU; closed proposal, GaussMatrix uses EDU |
+| MSC2388 | ⬛ ◐ | open | Toward the EDU-to-PDU transition: Read Receipts. | Receipts as PDU; superseded direction, GaussMatrix uses EDU |
 | MSC2385 | ⬛ ◐ | open | Disable URL Previews, alternative method | Client-only url_previews array on m.room.message |
 | MSC2376 | ⬛ ◐ | closed | Disable URL Previews | Client-only HTML attribute hint; server has no role |
 | MSC2366 | ⬛ ◐ | merged | Key verification flow additions: `m.key.verification.ready` and `m.key.verifi... | Client-side verification flow over to-device; server transports |
@@ -1083,7 +1083,7 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC2312 | ⬛ ● | merged | URI scheme for Matrix | Client-side URI scheme; no homeserver endpoint required |
 | MSC2299 | ⬛ ● | open | Proposal to add m.textfile msgtype | Client-only msgtype m.textfile |
 | MSC2291 | ⬛ ● | open | Configuration to Control Crawling | Bot-only advisory state event; no homeserver behavior |
-| MSC2290 | ⬛ ● | merged | Separate Endpoints for Binding Threepids | separate 3PID bind endpoints; 3PID stack is out of scope for Tuwunel per meth... |
+| MSC2290 | ⬛ ● | merged | Separate Endpoints for Binding Threepids | separate 3PID bind endpoints; 3PID stack is out of scope for GaussMatrix per meth... |
 | MSC2284 | ⬛ ● | merged | Making the identity server optional during discovery | Client-side .well-known FAIL_PROMPT behavior |
 | MSC2270 | ⬛ ◐ | open | Proposal for ignoring invites | Client account_data scheme; server stores account data transparently |
 | MSC2265 | ⬛ ◐ | merged | Proposal for mandating case folding when processing e-mail addresses | Email casefold only relevant inside 3PID code path; 3PID not impl |
@@ -1092,15 +1092,15 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC2241 | ⬛ ◐ | merged | Key verification in DMs | Client-side verification flow over m.room.message; server passes events trans... |
 | MSC2232 | ⬛ ● | open | Expose Homeserver Email Configuration in Registration Parameters | proposal text is the empty MSC template |
 | MSC2230 | ⬛ ◐ | merged | Store Identity Server in Account Data | client behavior over generic account data; HS already supports account data |
-| MSC2229 | ⬛ ● | merged | Allowing 3PID Owners to Rebind | [→ MSC2290] obsoleted by MSC2290; tuwunel disables 3PID |
+| MSC2229 | ⬛ ● | merged | Allowing 3PID Owners to Rebind | [→ MSC2290] obsoleted by MSC2290; gaussmatrix disables 3PID |
 | MSC2211 | ⬛ ● | open | Identity Servers Storing Threepid Hashes at Rest | identity server storage details; not HS |
 | MSC2192 | ⬛ ● | open | Inline widgets | client extensible event m.embed; no server logic |
 | MSC2191 | ⬛ ● | merged | Markup for mathematical messages | client formatted_body rendering only |
 | MSC2184 | ⬛ ● | merged | Allow the HTML `<details>` tag in messages | client HTML rendering; no server impact |
 | MSC2162 | ⬛ ◐ | open | Signaling Errors at Bridges | client/bridge event types; no homeserver enforcement |
 | MSC2140 | ⬛ ● | merged | Terms of Service API for Identity Servers and Integration Managers | IS+IM ToS API; HS-side 3pid/unbind+delete absent but 3PID disabled |
-| MSC2134 | ⬛ ● | merged | Identity Hash Lookups | identity-server only; tuwunel is HS |
-| MSC2078 | ⬛ ● | merged | Sending Third-Party Request Tokens via the Homeserver | 3PID requestToken via homeserver; 3PID stack is out of scope for Tuwunel per ... |
+| MSC2134 | ⬛ ● | merged | Identity Hash Lookups | identity-server only; gaussmatrix is HS |
+| MSC2078 | ⬛ ● | merged | Sending Third-Party Request Tokens via the Homeserver | 3PID requestToken via homeserver; 3PID stack is out of scope for GaussMatrix per ... |
 | MSC2063 | ⬛ ◐ | closed | Add "server information" public API proposal | closed; no real proposal text (template file only) |
 | MSC2010 | ⬛ ● | merged | MSC 2010: Proposal to add client-side spoilers | client-side rendering of data-mx-spoiler in formatted_body |
 | MSC1961 | ⬛ ● | merged | Integration manager authentication | merged; integration-manager auth API is on the manager, not homeserver |
@@ -1112,7 +1112,7 @@ place of the (uniformly empty) `Correct/Impl` cell.
 | MSC1951 | ⬛ ◐ | open | Custom emoji and sticker packs in Matrix | branch; client/integration manager concept; uses generic rooms |
 | MSC1935 | ⬛ ◐ | closed | Key validity enforcement | [→ MSC2076] closed; superseded by MSC2076 |
 | MSC1920 | ⬛ ◐ | open | Alternative texts for stickers | branch; client-side rendering field on m.sticker; no server logic |
-| MSC1915 | ⬛ ● | merged | MSC 1915 - Add unbind 3PID APIs | 3PID unbind APIs; 3PID stack is out of scope for Tuwunel per methodology |
+| MSC1915 | ⬛ ● | merged | MSC 1915 - Add unbind 3PID APIs | 3PID unbind APIs; 3PID stack is out of scope for GaussMatrix per methodology |
 | MSC1902 | ⬛ ● | open | Splitting the media repo into a client-side and server-side component | [→ MSC3916] |
 | MSC1849 | ⬛ ◐ | open | Proposal for aggregations via relations | [→ MSC2674/MSC2675/MSC2676] |
 | MSC1840 | ⬛ ● | closed | Typed rooms | closed; superseded by m.room.create type field used by MSC1772 |

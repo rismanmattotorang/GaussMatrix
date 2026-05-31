@@ -22,8 +22,8 @@ mod reset_password;
 use clap::Subcommand;
 use futures::FutureExt;
 use ruma::{OwnedDeviceId, OwnedEventId, OwnedRoomId, OwnedRoomOrAliasId, OwnedUserId, UserId};
-use tuwunel_core::Result;
-use tuwunel_service::Services;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::Services;
 
 use crate::admin_command_dispatch;
 

@@ -2,8 +2,8 @@
 
 use criterion::{Criterion, criterion_group, criterion_main};
 use tracing::Level;
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::result::ErrLog;
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::result::ErrLog;
 
 criterion_group!(
 	name = benches;
@@ -22,15 +22,15 @@ fn smoke(c: &mut Criterion) {
 
 	runtime
 		.block_on(async {
-			tuwunel::async_start(&server).await?;
-			let run = tuwunel::async_run(&server);
+			gaussmatrix::async_start(&server).await?;
+			let run = gaussmatrix::async_run(&server);
 			c.bench_function("smoke", |c| {
 				c.iter(|| {});
 			});
 
 			server.server.shutdown().log_err(Level::WARN).ok();
 			run.await?;
-			tuwunel::async_stop(&server).await
+			gaussmatrix::async_stop(&server).await
 		})
 		.unwrap();
 

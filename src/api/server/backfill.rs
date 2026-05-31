@@ -3,7 +3,7 @@ use std::cmp;
 use axum::extract::State;
 use futures::{FutureExt, StreamExt, TryStreamExt};
 use ruma::{MilliSecondsSinceUnixEpoch, api::federation::backfill::get_backfill};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	PduCount, Result,
 	utils::{IterStream, ReadyExt},
 };

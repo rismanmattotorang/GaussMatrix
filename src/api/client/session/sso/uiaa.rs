@@ -1,7 +1,7 @@
 use axum::extract::State;
 use ruma::api::client::uiaa::{AuthType, UiaaInfo, get_uiaa_fallback_page};
 use serde_json::Value as JsonValue;
-use tuwunel_core::{Err, Result, trace, utils::BoolExt};
+use gaussmatrix_core::{Err, Result, trace, utils::BoolExt};
 
 use crate::{Ruma, oidc::url_encode};
 

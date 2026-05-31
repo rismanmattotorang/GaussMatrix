@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use insta::{assert_debug_snapshot, with_settings};
-use tuwunel::{Args, Runtime, Server};
+use gaussmatrix::{Args, Runtime, Server};
 
 #[test]
 #[should_panic = "There was a problem with your configuration"]
@@ -15,7 +15,7 @@ fn listener_conf_err() {
 
 		let runtime = Runtime::new(Some(&args)).unwrap();
 		let server = Server::new(Some(&args), Some(&runtime)).unwrap();
-		let result = tuwunel::exec(&server, runtime);
+		let result = gaussmatrix::exec(&server, runtime);
 
 		assert_debug_snapshot!(result);
 	});

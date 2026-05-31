@@ -13,8 +13,8 @@ use http::{Method, StatusCode, Uri};
 use ruma::api::error::ErrorKind;
 use tokio::{sync::Notify, task, time::sleep};
 use tracing::Span;
-use tuwunel_core::{Error, Result, debug, debug_error, debug_warn, defer, error, trace};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Error, Result, debug, debug_error, debug_warn, defer, error, trace};
+use gaussmatrix_service::Services;
 
 #[tracing::instrument(
 	name = "request",

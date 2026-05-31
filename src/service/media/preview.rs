@@ -9,7 +9,7 @@ use std::{net::IpAddr, time::SystemTime};
 
 use ipaddress::IPAddress;
 use serde::Serialize;
-use tuwunel_core::{Err, Result, debug, err, implement};
+use gaussmatrix_core::{Err, Result, debug, err, implement};
 use url::{Host, Url};
 
 use super::Service;
@@ -160,7 +160,7 @@ pub async fn request_url_preview(&self, url: &Url) -> Result<UrlPreviewData> {
 pub async fn download_image(&self, response: reqwest::Response) -> Result<UrlPreviewData> {
 	use image::ImageReader;
 	use ruma::Mxc;
-	use tuwunel_core::utils::random_string;
+	use gaussmatrix_core::utils::random_string;
 
 	let image = response.bytes().await?;
 	let mxc = Mxc {

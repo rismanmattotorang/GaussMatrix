@@ -3,7 +3,7 @@ use std::{borrow::Borrow, iter::once};
 use axum::extract::State;
 use futures::{FutureExt, StreamExt, TryFutureExt, TryStreamExt, future::try_join};
 use ruma::{OwnedEventId, api::federation::event::get_room_state_ids};
-use tuwunel_core::{Result, at, err};
+use gaussmatrix_core::{Result, at, err};
 
 use super::AccessCheck;
 use crate::Ruma;

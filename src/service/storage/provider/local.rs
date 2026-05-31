@@ -1,7 +1,7 @@
 use std::{fs, sync::Arc};
 
 use object_store::local::LocalFileSystem;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	config::{StorageProvider, StorageProviderLocal},
 	debug, debug_info, error, trace,

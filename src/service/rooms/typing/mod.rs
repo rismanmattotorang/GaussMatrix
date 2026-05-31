@@ -10,7 +10,7 @@ use ruma::{
 	events::{EphemeralRoomEvent, typing::TypingEventContent},
 };
 use tokio::sync::{RwLock, broadcast};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, Server, debug_info, trace,
 	utils::{self, BoolExt, IterStream},
 };

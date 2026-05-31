@@ -2,7 +2,7 @@
 
 use std::{env, os::unix::process::CommandExt, process::Command};
 
-use tuwunel_core::{debug, info, utils};
+use gaussmatrix_core::{debug, info, utils};
 
 #[cold]
 pub fn restart() -> ! {

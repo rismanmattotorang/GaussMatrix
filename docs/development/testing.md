@@ -1,6 +1,6 @@
 # Testing and Delivery
 
-Tuwunel's CI is built on [Docker Buildx Bake](https://docs.docker.com/build/bake/),
+GaussMatrix's CI is built on [Docker Buildx Bake](https://docs.docker.com/build/bake/),
 a recipe tree for multi-stage builds that produces cache-friendly multi-layer
 images. Each layer accomplishes a specific task and its outputs are automatically
 reused by any subsequent layer that depends on it. The result is a large

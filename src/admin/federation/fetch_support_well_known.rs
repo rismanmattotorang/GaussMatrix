@@ -1,5 +1,5 @@
 use ruma::OwnedServerName;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::admin_command;
 

@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 pub use object_store::{GetResult, GetResultPayload, PutPayload, PutResult};
 use object_store::{aws::AmazonS3Builder, client::ClientOptions};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	config::{StorageProvider, StorageProviderS3},
 	debug, debug_info, error, trace,

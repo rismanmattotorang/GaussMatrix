@@ -1,5 +1,5 @@
 use ruma::{CanonicalJsonObject, CanonicalJsonValue, OwnedEventId, RoomVersionId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, implement,
 	matrix::{event::gen_event_id, room_version},
 };

@@ -2,8 +2,8 @@ use axum::extract::State;
 use ruma::{
 	DeviceId, UserId, api::client::keys::upload_keys, encryption::DeviceKeys, serde::Raw,
 };
-use tuwunel_core::{Err, Result, debug, err};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, debug, err};
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

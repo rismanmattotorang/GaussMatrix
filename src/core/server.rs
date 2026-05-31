@@ -70,7 +70,7 @@ impl Server {
 	}
 
 	pub fn reload(&self) -> Result {
-		if cfg!(any(not(tuwunel_mods), not(feature = "tuwunel_mods"))) {
+		if cfg!(any(not(gaussmatrix_mods), not(feature = "gaussmatrix_mods"))) {
 			return Err!("Reloading not enabled");
 		}
 

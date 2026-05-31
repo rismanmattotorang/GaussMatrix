@@ -3,12 +3,12 @@ mod v5;
 
 use futures::{FutureExt, StreamExt, pin_mut};
 use ruma::{RoomId, UserId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, PduCount, Result,
 	matrix::pdu::PduEvent,
 	utils::stream::{BroadbandExt, ReadyExt},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 pub(crate) use self::{
 	v3::{calculate_heroes, sync_events_route},

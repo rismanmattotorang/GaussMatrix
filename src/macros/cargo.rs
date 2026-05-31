@@ -29,14 +29,14 @@ fn manifest_path(member: Option<&str>) -> Result<PathBuf> {
 
 	let mut path: PathBuf = path.into();
 
-	// tuwunel/src/macros/ -> tuwunel/src/
+	// gaussmatrix/src/macros/ -> gaussmatrix/src/
 	path.pop();
 
 	if let Some(member) = member {
-		// tuwunel/$member/Cargo.toml
+		// gaussmatrix/$member/Cargo.toml
 		path.push(member);
 	} else {
-		// tuwunel/src/ -> tuwunel/
+		// gaussmatrix/src/ -> gaussmatrix/
 		path.pop();
 	}
 

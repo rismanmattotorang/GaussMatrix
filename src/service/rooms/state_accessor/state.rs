@@ -9,7 +9,7 @@ use ruma::{
 	},
 };
 use serde::Deserialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, err, implement,
 	matrix::{Event, Pdu, StateKey},
 	pair_of,

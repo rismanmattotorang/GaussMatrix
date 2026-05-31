@@ -10,7 +10,7 @@ pub(crate) fn get_crate_name() -> Option<String> {
 		| Err(_) => None,
 		| Ok(crate_name) => Some(
 			crate_name
-				.trim_start_matches("tuwunel_")
+				.trim_start_matches("gaussmatrix_")
 				.to_owned(),
 		),
 	}

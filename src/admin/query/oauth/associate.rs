@@ -1,5 +1,5 @@
 use ruma::OwnedUserId;
-use tuwunel_core::{Err, Result, apply, err, itertools::Itertools};
+use gaussmatrix_core::{Err, Result, apply, err, itertools::Itertools};
 
 use crate::admin_command;
 

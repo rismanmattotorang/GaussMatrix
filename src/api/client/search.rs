@@ -12,13 +12,13 @@ use ruma::{
 	serde::Raw,
 };
 use search_events::v3::{Request, Response};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, is_true,
 	matrix::Event,
 	result::FlatOk,
 	utils::{IterStream, option::OptionExt, stream::ReadyExt},
 };
-use tuwunel_service::{Services, rooms::search::RoomQuery};
+use gaussmatrix_service::{Services, rooms::search::RoomQuery};
 
 use crate::Ruma;
 

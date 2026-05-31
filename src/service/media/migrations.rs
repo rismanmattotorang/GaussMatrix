@@ -7,7 +7,7 @@ use std::{
 	time::Instant,
 };
 
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Config, Result, debug, debug_info, debug_warn, error,
 	error::inspect_debug_log,
 	info,
@@ -100,7 +100,7 @@ pub(crate) async fn checkup_sha256_media(services: &Services) -> Result {
 }
 
 async fn handle_media_check(
-	dbs: &(&Arc<tuwunel_database::Map>, &Arc<tuwunel_database::Map>),
+	dbs: &(&Arc<gaussmatrix_database::Map>, &Arc<gaussmatrix_database::Map>),
 	config: &Config,
 	files: &HashSet<OsString>,
 	key: &[u8],

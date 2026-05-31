@@ -1,20 +1,20 @@
 [Unit]
-Description=Tuwunel Matrix homeserver
+Description=GaussMatrix Matrix homeserver
 Wants=network-online.target
 After=network-online.target
-Documentation=https://tuwunel.chat/
+Documentation=https://gaussmatrix.dev/
 
 [Service]
-User=tuwunel
-Group=tuwunel
+User=gaussmatrix
+Group=gaussmatrix
 Type=notify
 WatchdogSec=30
 
-Environment="TUWUNEL_CONFIG=/etc/tuwunel/tuwunel.toml"
+Environment="GAUSSMATRIX_CONFIG=/etc/gaussmatrix/gaussmatrix.toml"
 
-ExecStart=/usr/sbin/tuwunel
+ExecStart=/usr/sbin/gaussmatrix
 
-ReadWritePaths=/var/lib/tuwunel /etc/tuwunel
+ReadWritePaths=/var/lib/gaussmatrix /etc/gaussmatrix
 
 AmbientCapabilities=
 CapabilityBoundingSet=
@@ -50,7 +50,7 @@ SystemCallFilter=@system-service @resources
 SystemCallFilter=~@clock @debug @module @mount @reboot @swap @cpu-emulation @obsolete @timer @chown @setuid @privileged @keyring @ipc
 SystemCallErrorNumber=EPERM
 
-RuntimeDirectory=tuwunel
+RuntimeDirectory=gaussmatrix
 RuntimeDirectoryMode=0750
 
 Restart=on-failure
@@ -64,4 +64,4 @@ StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
-Alias=matrix-tuwunel.service
+Alias=matrix-gaussmatrix.service

@@ -1,12 +1,12 @@
 # Storage providers
 
-Tuwunel stores media through a configurable provider layer that abstracts over
+GaussMatrix stores media through a configurable provider layer that abstracts over
 local filesystem and S3-compatible object storage. Multiple providers can be
 active simultaneously, which enables zero-downtime migrations.
 
 ## Default storage
 
-Without any explicit configuration, Tuwunel stores media in a subdirectory
+Without any explicit configuration, GaussMatrix stores media in a subdirectory
 called `media/` inside your `database_path`. This is represented internally
 as the implicit provider named `"media"`.
 
@@ -34,7 +34,7 @@ mounting a configuration file is inconvenient, please refer to the section on
 
 ```toml
 [global.storage_provider.media.local]
-base_path = "/var/lib/tuwunel/media"
+base_path = "/var/lib/gaussmatrix/media"
 create_if_missing = false
 delete_empty_directories = true
 startup_check = true
@@ -105,10 +105,10 @@ use_vhost_request = false
 The variable name is built from four parts joined by `__` (double underscore):
 
 ```
-TUWUNEL_STORAGE_PROVIDER__<NAME>__<brand>__<FIELD>
+GAUSSMATRIX_STORAGE_PROVIDER__<NAME>__<brand>__<FIELD>
 ```
 
-- **`TUWUNEL_STORAGE_PROVIDER`** — fixed prefix that maps to
+- **`GAUSSMATRIX_STORAGE_PROVIDER`** — fixed prefix that maps to
   `[global.storage_provider]`.
 - **`<NAME>`** — the provider name you reference in `media_storage_providers`
   (e.g., `MEDIA`, `MEDIA_ON_S3`).
@@ -118,28 +118,28 @@ TUWUNEL_STORAGE_PROVIDER__<NAME>__<brand>__<FIELD>
 #### Local filesystem example
 
 ```env
-TUWUNEL_STORAGE_PROVIDER__MEDIA__LOCAL__BASE_PATH="/var/lib/tuwunel/media"
-TUWUNEL_STORAGE_PROVIDER__MEDIA__LOCAL__CREATE_IF_MISSING="false"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA__LOCAL__BASE_PATH="/var/lib/gaussmatrix/media"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA__LOCAL__CREATE_IF_MISSING="false"
 ```
 
 #### S3 example
 
 ```env
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__BUCKET="my-matrix-media"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__REGION="us-east-1"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__KEY="AKIAIOSFODNN7EXAMPLE"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__SECRET="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__BUCKET="my-matrix-media"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__REGION="us-east-1"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__KEY="AKIAIOSFODNN7EXAMPLE"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__SECRET="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 ```
 
 #### Self-hosted S3-compatible example
 
 ```env
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__ENDPOINT="https://minio.example.com:9000"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__BUCKET="matrix-media"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__REGION="us-east-1"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__KEY="minioadmin"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__SECRET="minioadmin"
-TUWUNEL_STORAGE_PROVIDER__MEDIA_ON_S3__S3__USE_VHOST_REQUEST="false"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__ENDPOINT="https://minio.example.com:9000"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__BUCKET="matrix-media"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__REGION="us-east-1"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__KEY="minioadmin"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__SECRET="minioadmin"
+GAUSSMATRIX_STORAGE_PROVIDER__MEDIA_ON_S3__S3__USE_VHOST_REQUEST="false"
 ```
 
 The `media_storage_providers` and `store_media_on_providers` lists are
@@ -147,8 +147,8 @@ top-level settings and follow the standard env var pattern using TOML array
 syntax:
 
 ```env
-TUWUNEL_MEDIA_STORAGE_PROVIDERS='["media", "media_on_s3"]'
-TUWUNEL_STORE_MEDIA_ON_PROVIDERS='["media_on_s3"]'
+GAUSSMATRIX_MEDIA_STORAGE_PROVIDERS='["media", "media_on_s3"]'
+GAUSSMATRIX_STORE_MEDIA_ON_PROVIDERS='["media_on_s3"]'
 ```
 
 ## Migrating to a new storage provider
@@ -170,7 +170,7 @@ key    = "AKIAIOSFODNN7EXAMPLE"
 secret = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 ```
 
-Tuwunel now writes new media to S3 and reads from whichever provider holds
+GaussMatrix now writes new media to S3 and reads from whichever provider holds
 the file, falling back to local if not found on S3.
 
 **Step 2** — Copy existing files to the new provider using the storage sync
@@ -213,10 +213,10 @@ verifying provider state.
 
 ## Startup checks
 
-These options control what Tuwunel verifies about stored media at startup.
+These options control what GaussMatrix verifies about stored media at startup.
 
 | Option | Default | Description |
 |---|---|---|
 | `media_startup_check` | `true` | Scan the media directory at startup. Removes database entries for files that no longer exist on disk (when `prune_missing_media` is enabled), and upgrades Conduit-era symlinks (when `media_compat_file_link` is enabled). Disable if startup is slow due to a large media directory and neither check applies to you. |
 | `prune_missing_media` | `false` | During the startup scan, delete database metadata for any media file that is missing from disk. **Caution:** if the storage directory is temporarily inaccessible or miss-mounted, this will permanently destroy metadata for all affected files. |
-| `media_compat_file_link` | `false` | Create Conduit-compatible symlinks alongside Tuwunel's media files. Only needed if you intend to switch back to Conduit. Requires `media_startup_check = true` to take effect. |
+| `media_compat_file_link` | `false` | Create Conduit-compatible symlinks alongside GaussMatrix's media files. Only needed if you intend to switch back to Conduit. Requires `media_startup_check = true` to take effect. |

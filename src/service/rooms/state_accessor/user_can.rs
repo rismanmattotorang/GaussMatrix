@@ -9,7 +9,7 @@ use ruma::{
 		},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, implement,
 	matrix::{Event, StateKey},
 	pdu::PduBuilder,

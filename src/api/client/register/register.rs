@@ -8,8 +8,8 @@ use ruma::{
 		uiaa::{AuthFlow, AuthType, UiaaInfo},
 	},
 };
-use tuwunel_core::{Err, Error, Result, debug_info, debug_warn, info, utils};
-use tuwunel_service::users::{Register, device::generate_refresh_token};
+use gaussmatrix_core::{Err, Error, Result, debug_info, debug_warn, info, utils};
+use gaussmatrix_service::users::{Register, device::generate_refresh_token};
 
 use super::{SESSION_ID_LENGTH, is_matrix_appservice_irc};
 use crate::{ClientIp, Ruma};

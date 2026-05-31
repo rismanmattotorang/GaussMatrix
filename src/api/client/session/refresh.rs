@@ -3,11 +3,11 @@ use ruma::api::{
 	client::session::refresh_token::v3::{Request, Response},
 	error::{ErrorKind, UnknownTokenErrorData},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug_info, err,
 	utils::{BoolExt, future::OptionFutureExt, time::timepoint_has_passed},
 };
-use tuwunel_service::users::device::generate_refresh_token;
+use gaussmatrix_service::users::device::generate_refresh_token;
 
 use crate::{ClientIp, Ruma};
 

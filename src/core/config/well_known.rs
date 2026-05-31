@@ -4,7 +4,7 @@ use ruma::api::{
 	client::{discovery::discover_support::Contact, rtc::RtcTransport},
 	identity_service::tos::get_terms_of_service::v2::{LocalizedPolicy, Policies},
 };
-use tuwunel_macros::implement;
+use gaussmatrix_macros::implement;
 
 use crate::{Result, err, error::inspect_log};
 

@@ -7,7 +7,7 @@ use ruma::{
 		tag::{TagEvent, TagEventContent},
 	},
 };
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{admin_command, utils::parse_active_local_user_id};
 

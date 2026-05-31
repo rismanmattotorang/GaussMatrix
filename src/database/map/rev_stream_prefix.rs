@@ -2,7 +2,7 @@ use std::{convert::AsRef, fmt::Debug, sync::Arc};
 
 use futures::{Stream, StreamExt, TryStreamExt, future};
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Result, implement};
+use gaussmatrix_core::{Result, implement};
 
 use crate::keyval::{KeyVal, result_deserialize, serialize_key};
 

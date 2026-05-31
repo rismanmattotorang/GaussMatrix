@@ -5,7 +5,7 @@ use ruma::{
 		room::power_levels::{RoomPowerLevels, RoomPowerLevelsEventContent},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result,
 	matrix::{Event, pdu::PduBuilder},
 };

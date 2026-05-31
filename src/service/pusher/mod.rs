@@ -18,7 +18,7 @@ use ruma::{
 	serde::Raw,
 	uint,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, implement,
 	utils::{
 		MutexMap,
@@ -26,7 +26,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, ReadyExt, TryIgnore},
 	},
 };
-use tuwunel_database::{Database, Deserialized, Ignore, Interfix, Json, Map};
+use gaussmatrix_database::{Database, Deserialized, Ignore, Interfix, Json, Map};
 
 pub use self::append::Notified;
 

@@ -6,7 +6,7 @@ use ruma::{
 	RoomId,
 	api::{error::ErrorKind, federation::authorization::get_event_authorization},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result,
 	utils::stream::{BroadbandExt, ReadyExt},
 };

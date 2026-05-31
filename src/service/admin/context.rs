@@ -7,7 +7,7 @@ use futures::{
 };
 use ruma::EventId;
 use tokio::time::Instant;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Services;
 

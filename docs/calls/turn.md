@@ -1,7 +1,7 @@
 # Setting up TURN/STUN
 
 In order to make or receive legacy calls in Matrix, a TURN server is required.
-Tuwunel suggests using [Coturn](https://github.com/coturn/coturn) for this
+GaussMatrix suggests using [Coturn](https://github.com/coturn/coturn) for this
 purpose, which is also available as a Docker image.
 
 > [!NOTE]
@@ -28,9 +28,9 @@ realm=<your server domain>
 A common way to generate a suitable alphanumeric secret key is by using
 `pwgen -s 64 1`.
 
-These same values need to be set in Tuwunel. See the [example
+These same values need to be set in GaussMatrix. See the [example
 config](../configuration/examples.md) in the TURN section for configuring
-these and restart Tuwunel after.
+these and restart GaussMatrix after.
 
 `turn_secret` or a path to `turn_secret_file` must have a value of your
 coturn `static-auth-secret`, or use `turn_username` and `turn_password`
@@ -45,7 +45,7 @@ If you are using TURN over TLS, you can replace `turn:` with `turns:` in the
 over TLS. This is highly recommended.
 
 If you need unauthenticated access to the TURN URIs, or some clients may be
-having trouble, you can enable `turn_guest_access` in Tuwunel which disables
+having trouble, you can enable `turn_guest_access` in GaussMatrix which disables
 authentication for the TURN URI endpoint
 `/_matrix/client/v3/voip/turnServer`.
 

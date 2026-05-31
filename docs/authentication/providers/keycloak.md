@@ -16,14 +16,14 @@ Keycloak is a self-hostable OpenID Connect provider.
 
 3. Note the **realm** you created the client in.
 
-## Tuwunel configuration
+## GaussMatrix configuration
 
 > [!IMPORTANT]
 > Ensure your Matrix `.well-known` values are being served correctly before
 > starting. You can verify them with
 > [matrixtest](../../calls/matrix_rtc.md#troubleshooting).
 
-Add the following to your `tuwunel.toml`. Replace the placeholders with the
+Add the following to your `gaussmatrix.toml`. Replace the placeholders with the
 values from your Keycloak client.
 
 ```toml
@@ -44,13 +44,13 @@ for identity providers you self-host and fully control — see
 ## Environment variables
 
 If you prefer environment variables (e.g. in `docker-compose.yaml` or a
-`tuwunel.env` file):
+`gaussmatrix.env` file):
 
 ```env
-TUWUNEL_IDENTITY_PROVIDER__0__BRAND="keycloak"
-TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_ID="<client_id>"
-TUWUNEL_IDENTITY_PROVIDER__0__CLIENT_SECRET="<client_secret>"
-TUWUNEL_IDENTITY_PROVIDER__0__ISSUER_URL="https://<your.keycloak.example.com>/realms/<realm_name>"
-TUWUNEL_IDENTITY_PROVIDER__0__CALLBACK_URL="https://<your.matrix.example.com>/_matrix/client/unstable/login/sso/callback/<client_id>"
-TUWUNEL_IDENTITY_PROVIDER__0__TRUSTED="true"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__BRAND="keycloak"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CLIENT_ID="<client_id>"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CLIENT_SECRET="<client_secret>"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__ISSUER_URL="https://<your.keycloak.example.com>/realms/<realm_name>"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__CALLBACK_URL="https://<your.matrix.example.com>/_matrix/client/unstable/login/sso/callback/<client_id>"
+GAUSSMATRIX_IDENTITY_PROVIDER__0__TRUSTED="true"
 ```

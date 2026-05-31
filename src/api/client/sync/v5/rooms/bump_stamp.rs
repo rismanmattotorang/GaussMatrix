@@ -5,7 +5,7 @@ use ruma::{
 		self, Beacon, CallInvite, PollStart, RoomEncrypted, RoomMessage, Sticker,
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	is_equal_to,
 	matrix::{
 		Event,
@@ -13,7 +13,7 @@ use tuwunel_core::{
 	},
 	utils::stream::ReadyExt,
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 /// MUST be sorted by `TimelineEventType::event_type_str()` for `binary_search`.
 static DEFAULT_BUMP_TYPES: [TimelineEventType; 6] = [
@@ -69,7 +69,7 @@ fn is_bumpable_pdu(pdu: &PduEvent, sender_user: &UserId) -> bool {
 		.is_ok()
 }
 
-#[cfg_attr(debug_assertions, tuwunel_core::ctor(unsafe))]
+#[cfg_attr(debug_assertions, gaussmatrix_core::ctor(unsafe))]
 fn _is_sorted() {
 	debug_assert!(
 		DEFAULT_BUMP_TYPES.is_sorted(),
@@ -84,7 +84,7 @@ mod tests {
 		user_id,
 	};
 	use serde_json::{json, value::to_raw_value};
-	use tuwunel_core::matrix::{StateKey, pdu::PduEvent};
+	use gaussmatrix_core::matrix::{StateKey, pdu::PduEvent};
 
 	use super::{DEFAULT_BUMP_TYPES, is_bumpable_pdu};
 

@@ -1,10 +1,10 @@
 use futures::{StreamExt, future::join};
 use ruma::{api::client::sync::sync_events::v5::response, events::AnyRawAccountDataEvent};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, extract_variant,
 	utils::{IterStream, ReadyExt, stream::BroadbandExt},
 };
-use tuwunel_service::sync::Room;
+use gaussmatrix_service::sync::Room;
 
 use super::{Connection, SyncInfo, Window, selector};
 use crate::client::is_empty_account_data_event;

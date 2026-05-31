@@ -1,6 +1,6 @@
 //! Synapse-compatible shared-secret registration backend.
 //!
-//! Pairs with the HTTP handlers in `tuwunel_api::client::admin` that serve
+//! Pairs with the HTTP handlers in `gaussmatrix_api::client::admin` that serve
 //! `/_synapse/admin/v1/register`. Owns:
 //!
 //! 1. the resolved shared secret (from `registration_shared_secret` or its
@@ -17,7 +17,7 @@ use std::{
 	time::{Duration, Instant},
 };
 
-use tuwunel_core::{Config, error, implement, utils};
+use gaussmatrix_core::{Config, error, implement, utils};
 
 type Nonces = BTreeMap<String, Instant>;
 

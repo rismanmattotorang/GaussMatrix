@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::StreamExt;
 use ruma::api::client::device::delete_devices::{self, v3::Response};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug,
 	utils::stream::{IterStream, automatic_width},
 };

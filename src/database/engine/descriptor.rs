@@ -20,7 +20,7 @@ use rocksdb::{
 	DBCompactionPri as CompactionPri, DBCompactionStyle as CompactionStyle,
 	DBCompressionType as CompressionType,
 };
-use tuwunel_core::utils::string::EMPTY;
+use gaussmatrix_core::utils::string::EMPTY;
 
 use super::cf_opts::SENTINEL_COMPRESSION_LEVEL;
 

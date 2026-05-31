@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use ruma::{OwnedRoomId, OwnedUserId};
 use tokio::time::Instant;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command;
 

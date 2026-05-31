@@ -9,8 +9,8 @@ use ruma::{
 	},
 	to_device::DeviceIdOrAllDevices,
 };
-use tuwunel_core::{Error, Result, utils::ReadyExt};
-use tuwunel_service::sending::EduBuf;
+use gaussmatrix_core::{Error, Result, utils::ReadyExt};
+use gaussmatrix_service::sending::EduBuf;
 
 use crate::Ruma;
 

@@ -1,4 +1,4 @@
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command;
 
@@ -17,7 +17,7 @@ pub(super) async fn memory_stats(&self, opts: Option<String>) -> Result {
 		})
 		.collect();
 
-	let stats = tuwunel_core::alloc::memory_stats(&opts).unwrap_or_default();
+	let stats = gaussmatrix_core::alloc::memory_stats(&opts).unwrap_or_default();
 
 	self.write_str("```\n").await?;
 	self.write_str(&stats).await?;

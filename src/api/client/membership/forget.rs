@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::pin_mut;
 use ruma::{api::client::membership::forget_room, events::room::member::MembershipState};
-use tuwunel_core::{Err, Result, is_matching, result::NotFound, utils::FutureBoolExt};
+use gaussmatrix_core::{Err, Result, is_matching, result::NotFound, utils::FutureBoolExt};
 
 use crate::Ruma;
 

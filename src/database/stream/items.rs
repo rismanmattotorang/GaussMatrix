@@ -5,7 +5,7 @@ use futures::{
 	stream::FusedStream,
 	task::{Context, Poll},
 };
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use super::{Cursor, State, keyval_longevity};
 use crate::keyval::KeyVal;

@@ -10,7 +10,7 @@ use std::{
 use axum::{Extension, Router, extract::ConnectInfo};
 use axum_server::Handle;
 use futures::{FutureExt, future::BoxFuture};
-use tuwunel_core::{Result, err, warn};
+use gaussmatrix_core::{Result, err, warn};
 
 #[tracing::instrument(skip_all, level = "debug")]
 pub(super) async fn serve<'a>(

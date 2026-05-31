@@ -3,14 +3,14 @@ use std::{borrow::Borrow, mem::size_of_val, sync::Arc};
 use futures::{FutureExt, Stream, StreamExt, pin_mut};
 use ruma::{EventId, OwnedRoomId, RoomId, events::StateEventType};
 use serde::Deserialize;
-pub use tuwunel_core::matrix::{ShortEventId, ShortId, ShortRoomId, ShortStateKey};
-use tuwunel_core::{
+pub use gaussmatrix_core::matrix::{ShortEventId, ShortId, ShortRoomId, ShortStateKey};
+use gaussmatrix_core::{
 	Err, Result, err, implement,
 	matrix::StateKey,
 	utils,
 	utils::{IterStream, stream::ReadyExt},
 };
-use tuwunel_database::{Deserialized, Get, Map, Qry};
+use gaussmatrix_database::{Deserialized, Get, Map, Qry};
 
 pub struct Service {
 	db: Data,

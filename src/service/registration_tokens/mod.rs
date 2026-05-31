@@ -5,7 +5,7 @@ use std::{collections::HashSet, sync::Arc};
 use data::Data;
 pub use data::{DatabaseTokenInfo, TokenExpires};
 use futures::{Stream, StreamExt, pin_mut};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, error,
 	utils::{self, IterStream},
 };

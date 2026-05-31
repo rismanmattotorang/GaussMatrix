@@ -6,13 +6,13 @@ use ruma::{
 	events::{StateEventType, room::power_levels::RoomPowerLevelsEventContent},
 	int,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	itertools::Itertools,
 	utils::{StreamTools, stream::TryIgnore},
 	warn,
 };
-use tuwunel_database::Ignore;
+use gaussmatrix_database::Ignore;
 
 #[implement(super::Service)]
 #[tracing::instrument(level = "debug", skip(self, servers))]

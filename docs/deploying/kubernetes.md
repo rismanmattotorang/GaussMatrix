@@ -1,9 +1,9 @@
-# Tuwunel for Kubernetes
+# GaussMatrix for Kubernetes
 
-Tuwunel doesn't support horizontal scalability or distributed loading
+GaussMatrix doesn't support horizontal scalability or distributed loading
 natively, however a community maintained Helm Chart is available here to run
-Tuwunel on Kubernetes: <https://github.com/AreYouLoco/tuwunel-helm> and the
+GaussMatrix on Kubernetes: <https://github.com/AreYouLoco/gaussmatrix-helm> and the
 legacy conduwuit version: <https://gitlab.cronce.io/charts/conduwuit>.
 
 Should changes need to be made, please reach out to the maintainer in our
-Matrix room as this is not maintained/controlled by the Tuwunel maintainers.
+Matrix room as this is not maintained/controlled by the GaussMatrix maintainers.

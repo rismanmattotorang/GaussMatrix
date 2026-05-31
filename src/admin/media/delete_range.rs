@@ -1,4 +1,4 @@
-use tuwunel_core::{Err, Result, utils::time::parse_timepoint_ago};
+use gaussmatrix_core::{Err, Result, utils::time::parse_timepoint_ago};
 
 use crate::admin_command;
 

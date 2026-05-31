@@ -4,7 +4,7 @@ use futures::{FutureExt, Stream, StreamExt, TryFutureExt, TryStreamExt, future::
 use rocksdb::Direction;
 use serde::Deserialize;
 use tokio::task;
-use tuwunel_core::{Result, implement};
+use gaussmatrix_core::{Result, implement};
 
 use super::stream::is_cached;
 use crate::{keyval, keyval::Key, stream};

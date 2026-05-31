@@ -17,13 +17,13 @@ use ruma::{
 	push,
 	serde::{JsonObject, Raw},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, debug_warn, err, extract_variant,
 	matrix::{Event, PduCount, PduEvent, event::gen_event_id},
 	utils,
 	utils::hash::sha256,
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{ClientIp, Ruma};
 

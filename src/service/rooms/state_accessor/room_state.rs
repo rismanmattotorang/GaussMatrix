@@ -1,7 +1,7 @@
 use futures::{Stream, StreamExt, TryFutureExt};
 use ruma::{OwnedEventId, RoomId, events::StateEventType};
 use serde::Deserialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, implement,
 	matrix::{Event, Pdu, StateKey},
 };

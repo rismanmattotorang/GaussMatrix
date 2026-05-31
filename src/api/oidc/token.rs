@@ -11,7 +11,7 @@ use http::{
 use ruma::OwnedDeviceId;
 use serde::Deserialize;
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, err, info,
 	utils::{
 		BoolExt,
@@ -19,7 +19,7 @@ use tuwunel_core::{
 		time::{now, timepoint_has_passed},
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	oauth::server::{IdTokenClaims, Server, extract_device_id},
 	users::device::generate_refresh_token,

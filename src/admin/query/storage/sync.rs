@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use futures::{TryStreamExt, future::try_join};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	utils::stream::{IterStream, TryBroadbandExt},
 };

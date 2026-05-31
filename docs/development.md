@@ -6,56 +6,56 @@ it, you can safely ignore this page._
 
 ### Rust Documentation
 
-Tuwunel's rustdocs are hosted within this book under the [`/docs`][rustdocs]
+GaussMatrix's rustdocs are hosted within this book under the [`/docs`][rustdocs]
 directory. Developers may build the same documentation locally using `cargo doc`.
 
-### Tuwunel project layout
+### GaussMatrix project layout
 
-Tuwunel uses a collection of sub-crates, packages, or workspace members
+GaussMatrix uses a collection of sub-crates, packages, or workspace members
 that indicate what each general area of code is for. All of the workspace
 members are under `src/`. The workspace definition is at the top level
 `Cargo.toml`. See the Rust documentation on [Workspaces][workspaces] for
 general questions and information on Cargo workspaces.
 
-Tuwunel's crates form a directed acyclic-graph without circular dependencies.
+GaussMatrix's crates form a directed acyclic-graph without circular dependencies.
 Listed here from the top are the most abstract down to the most dependent at
 the bottom. Crates only have visibility into other crates listed above them;
 they cannot see structs or call functions in any crate listed below them.
 
-- `tuwunel_macros` are Tuwunel Rust [macros][macros] like general helper macros,
+- `gaussmatrix_macros` are GaussMatrix Rust [macros][macros] like general helper macros,
 logging and error handling macros, and [syn][syn] and
 [procedural macros][proc-macro].
 
-- [`tuwunel_core`][tuwunel-core] is core Tuwunel functionality like config
+- [`gaussmatrix_core`][gaussmatrix-core] is core GaussMatrix functionality like config
 loading, error definitions, global utilities, logging infrastructure, etc.
 
-- [`tuwunel_database`][tuwunel-database] is RocksDB encapsulation, interface
+- [`gaussmatrix_database`][gaussmatrix-database] is RocksDB encapsulation, interface
 wrappers, configurations, and our opinionated asynchronous database frontend.
 
-- [`tuwunel_service`][tuwunel-service] is stateful runtime functionality
+- [`gaussmatrix_service`][gaussmatrix-service] is stateful runtime functionality
 at the heart of the application. This crate is divided into "services" each
 with "workers" and queues and all of the moving parts that attend to the
 tasks of sending messages and notifications, etc. Each service attempts to
 encapsulate any database tables it requires for its persistent state.
 Services call other services and they do not form an acyclic graph, for now.
 
-- [`tuwunel_api`][tuwunel-api] is the stateless runtime functionality which
+- [`gaussmatrix_api`][gaussmatrix-api] is the stateless runtime functionality which
 implements the Matrix C-S and S-S API's in a broad set of http handlers. These
 handlers call various services to query or update their state as necessary.
 They do not interface with raw data or database functions except through a
 service.
 
-- [`tuwunel_admin`][tuwunel-admin] is a module that implements the admin
-room as a broad set of command API handlers. Similar to `tuwunel_api` these
+- [`gaussmatrix_admin`][gaussmatrix-admin] is a module that implements the admin
+room as a broad set of command API handlers. Similar to `gaussmatrix_api` these
 handlers also interface with various services as necessary. Currently the
-admin crate does not call into `tuwunel_api` as a dependency, but this is
+admin crate does not call into `gaussmatrix_api` as a dependency, but this is
 not intentional and subject to change.
 
-- [`tuwunel_router`][tuwunel-router] is the webserver and request handling bits,
+- [`gaussmatrix_router`][gaussmatrix-router] is the webserver and request handling bits,
 using axum, tower, tower-http, hyper, etc, and the [server state][state] to
-drive the `tuwunel_api` handlers.
+drive the `gaussmatrix_api` handlers.
 
-- [`main`][tuwunel-main] is the binary executable. This is where the `main()`
+- [`main`][gaussmatrix-main] is the binary executable. This is where the `main()`
 function lives, tokio worker and async initialisation, Sentry initialisation,
 [clap][clap] init, and signal handling. If you are adding new
 [Rust features][features], they *must* go here. This crate is also capable of
@@ -69,7 +69,7 @@ you truly find yourself needing another crate, we recommend reaching out to us i
 the Matrix room for discussions about it beforehand.
 
 The primary inspiration for this design was apart of hot reloadable development,
-to support "Tuwunel as a library" where specific parts can simply be swapped out.
+to support "GaussMatrix as a library" where specific parts can simply be swapped out.
 There is evidence Conduit wanted to go this route too as `axum` is technically an
 optional feature in Conduit, and can be compiled without the binary or axum library
 for handling inbound web requests; but it was never completed or worked.
@@ -83,7 +83,7 @@ the said workspace crate(s) must define the feature there in its `Cargo.toml`.
 
 So, if this is adding a feature to the API such as `woof`, you define the feature
 in the `api` crate's `Cargo.toml` as `woof = []`. The feature definition in `main`'s
-`Cargo.toml` will be `woof = ["tuwunel-api/woof"]`.
+`Cargo.toml` will be `woof = ["gaussmatrix-api/woof"]`.
 
 The rationale for this is due to Rust / Cargo not supporting
 ["workspace level features"][9], we must make a choice of; either scattering
@@ -99,10 +99,10 @@ do this if Rust supported workspace-level features to begin with.
 
 ## List of forked dependencies
 
-During Tuwunel development, we have had to fork
+During GaussMatrix development, we have had to fork
 some dependencies to support our use-cases in some areas. This ranges from
 things said upstream project won't accept for any reason, faster-paced
-development (unresponsive or slow upstream), Tuwunel-specific usecases, or
+development (unresponsive or slow upstream), GaussMatrix-specific usecases, or
 lack of time to upstream some things.
 
 - [ruma/ruma][1]: <https://github.com/matrix-construct/ruma> - various performance
@@ -115,7 +115,7 @@ builds seem to be broken on upstream, fixes some broken/suspicious code in
 places, additional safety measures, and support redzones for Valgrind
 - [zyansheep/rustyline-async][4]:
 <https://github.com/matrix-construct/rustyline-async> - tab completion callback and
-`CTRL+\` signal quit event for Tuwunel console CLI
+`CTRL+\` signal quit event for GaussMatrix console CLI
 - [rust-rocksdb/rust-rocksdb][5]:
 <https://github.com/matrix-construct/rust-rocksdb-zaidoon1> - [`@zaidoon1`][8]'s fork
 has quicker updates, more up to date dependencies, etc. Our fork fixes musl build
@@ -128,7 +128,7 @@ alongside other logging/metrics things
 ## Debugging with `tokio-console`
 
 [`tokio-console`][7] can be a useful tool for debugging and profiling. To make a
-`tokio-console`-enabled build of Tuwunel, enable the `tokio_console` feature,
+`tokio-console`-enabled build of GaussMatrix, enable the `tokio_console` feature,
 disable the default `release_max_log_level` feature, and set the `--cfg
 tokio_unstable` flag to enable experimental tokio APIs. A build might look like
 this:
@@ -140,7 +140,7 @@ RUSTFLAGS="--cfg tokio_unstable" cargo +nightly build \
     --features=systemd,element_hacks,gzip_compression,brotli_compression,zstd_compression,tokio_console
 ```
 
-You will also need to enable the `tokio_console` config option in Tuwunel when
+You will also need to enable the `tokio_console` config option in GaussMatrix when
 starting it. This was due to tokio-console causing gradual memory leak/usage
 if left enabled.
 
@@ -160,12 +160,12 @@ if left enabled.
 [clap]: https://docs.rs/clap/latest/clap/
 [features]: https://doc.rust-lang.org/cargo/reference/features.html
 [state]: https://docs.rs/axum/latest/axum/extract/struct.State.html
-[rustdocs]: https://matrix-construct.github.io/tuwunel/docs/tuwunel
-[tuwunel-macros]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_macros
-[tuwunel-core]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_core
-[tuwunel-database]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_database
-[tuwunel-service]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_service
-[tuwunel-api]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_api
-[tuwunel-admin]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_admin
-[tuwunel-router]: https://matrix-construct.github.io/tuwunel/docs/tuwunel_router
-[tuwunel-main]: https://matrix-construct.github.io/tuwunel/docs/tuwunel
+[rustdocs]: https://gaussmatrix.dev/docs/gaussmatrix
+[gaussmatrix-macros]: https://gaussmatrix.dev/docs/gaussmatrix_macros
+[gaussmatrix-core]: https://gaussmatrix.dev/docs/gaussmatrix_core
+[gaussmatrix-database]: https://gaussmatrix.dev/docs/gaussmatrix_database
+[gaussmatrix-service]: https://gaussmatrix.dev/docs/gaussmatrix_service
+[gaussmatrix-api]: https://gaussmatrix.dev/docs/gaussmatrix_api
+[gaussmatrix-admin]: https://gaussmatrix.dev/docs/gaussmatrix_admin
+[gaussmatrix-router]: https://gaussmatrix.dev/docs/gaussmatrix_router
+[gaussmatrix-main]: https://gaussmatrix.dev/docs/gaussmatrix

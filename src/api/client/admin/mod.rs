@@ -7,7 +7,7 @@ mod suspend_user;
 
 use futures::future::join3;
 use ruma::UserId;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 pub(crate) use self::{
 	get_nonce::admin_register_nonce_route, is_user_locked::is_user_locked_route,

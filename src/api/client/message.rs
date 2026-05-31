@@ -9,7 +9,7 @@ use ruma::{
 	events::{AnyStateEvent, StateEventType, TimelineEventType, TimelineEventType::*},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at,
 	matrix::{
 		event::{Event, Matches},
@@ -22,7 +22,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, TryIgnore, WidebandExt},
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	rooms::{
 		lazy_loading,
@@ -359,7 +359,7 @@ pub(crate) async fn add_membership_unsigned(
 	(count, with_membership(services, pdu, user_id, encrypted).await)
 }
 
-#[cfg_attr(debug_assertions, tuwunel_core::ctor(unsafe))]
+#[cfg_attr(debug_assertions, gaussmatrix_core::ctor(unsafe))]
 fn _is_sorted() {
 	debug_assert!(
 		IGNORED_MESSAGE_TYPES.is_sorted(),

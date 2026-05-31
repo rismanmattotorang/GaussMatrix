@@ -6,7 +6,7 @@ The upstream reference is the Matrix [Application Service API specification](htt
 
 ## Registration
 
-Tuwunel supports three registration methods. They coexist and are all loaded on startup.
+GaussMatrix supports three registration methods. They coexist and are all loaded on startup.
 
 ### Admin room
 
@@ -31,7 +31,7 @@ The registration is persisted in the database and survives restarts. Registering
 
 ### Server configuration
 
-Application services can be declared inline in `tuwunel.toml`. The TOML section key becomes the registration ID unless `id` is explicitly set:
+Application services can be declared inline in `gaussmatrix.toml`. The TOML section key becomes the registration ID unless `id` is explicitly set:
 
 ```toml
 [global.appservice.my-bridge]
@@ -53,7 +53,7 @@ Point `appservice_dir` at a directory containing YAML registration files. Every 
 
 ```toml
 [global]
-appservice_dir = "/etc/tuwunel/appservices"
+appservice_dir = "/etc/gaussmatrix/appservices"
 ```
 
 Files use the same YAML format that bridges produce for Synapse. New or removed files are not picked up without a restart.
@@ -118,4 +118,4 @@ These options go in the top-level `[global]` section:
 
 ## Getting help
 
-For setup questions, join [#tuwunel:matrix.org](https://matrix.to/#/#tuwunel:matrix.org) or [open an issue](https://github.com/matrix-construct/tuwunel/issues/new).
+For setup questions, join [#gaussmatrix:matrix.org](https://matrix.to/#/#gaussmatrix:matrix.org) or [open an issue](https://github.com/rismanmattotorang/gaussmatrix/issues/new).

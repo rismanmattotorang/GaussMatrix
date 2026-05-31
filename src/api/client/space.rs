@@ -13,7 +13,7 @@ use futures::{
 use ruma::{
 	OwnedRoomId, OwnedServerName, RoomId, UInt, UserId, api::client::space::get_hierarchy,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_error, error,
 	smallvec::SmallVec,
 	trace,
@@ -22,7 +22,7 @@ use tuwunel_core::{
 		stream::{IterStream, ReadyExt, WidebandExt},
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	rooms::{
 		short::ShortRoomId,

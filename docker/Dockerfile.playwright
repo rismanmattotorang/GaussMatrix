@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.11-labs
 
-# Tuwunel server under test. Modeled after complement-testee
+# GaussMatrix server under test. Modeled after complement-testee
 # (docker/Dockerfile.complement). Inherits from `install` via
 # `--build-context input=target:install`. Bakes in a playwright.toml that
 # disables federation, opens registration, and removes rate limits so the
@@ -23,7 +23,7 @@ COPY <<EOF /playwright/playwright.toml
     new_user_displayname_suffix = ""
     rc_messages_per_second = 10000
     rc_message_burst_count = 10000
-    log = "warn,tuwunel=info"
+    log = "warn,gaussmatrix=info"
     log_colors = false
     log_thread_ids = false
     log_span_events = "NONE"
@@ -34,8 +34,8 @@ COPY <<EOF /playwright/playwright.toml
     trusted_servers = []
     ip_range_denylist = []
 EOF
-ENV TUWUNEL_CONFIG="/playwright/playwright.toml"
-ENTRYPOINT tuwunel -Oserver_name=\""$SERVER_NAME\""
+ENV GAUSSMATRIX_CONFIG="/playwright/playwright.toml"
+ENTRYPOINT gaussmatrix -Oserver_name=\""$SERVER_NAME\""
 
 
 # Playwright runtime image with element-web pre-built. The official Microsoft
@@ -58,12 +58,12 @@ WORKDIR /usr/src/element-web
 RUN --mount=type=cache,target=/root/.local/share/pnpm,sharing=locked \
     pnpm install --frozen-lockfile
 
-# Tuwunel HomeserverContainer. Out-of-lined to docker/playwright.tuwunel.ts in
+# GaussMatrix HomeserverContainer. Out-of-lined to docker/playwright.gaussmatrix.ts in
 # the workspace so it gets TS tooling and proper diffs; pulled in from the
 # source stage. Mirrors the shape of element-web's
 # apps/web/playwright/testcontainers/synapse.ts.
-COPY --link --from=source /usr/src/tuwunel/docker/playwright.tuwunel.ts \
-     /usr/src/element-web/apps/web/playwright/testcontainers/tuwunel.ts
+COPY --link --from=source /usr/src/gaussmatrix/docker/playwright.gaussmatrix.ts \
+     /usr/src/element-web/apps/web/playwright/testcontainers/gaussmatrix.ts
 
 # Apply overlay patches to upstream element-web. Idempotent: grep-guards
 # protect re-runs from the buildkit cache.
@@ -77,31 +77,31 @@ CONFIG=apps/web/playwright.config.ts
 PLUGIN=apps/web/playwright/plugins/homeserver/index.ts
 
 # 1. services.ts: import + switch arm.
-if ! grep -q '"tuwunel"' "$SERVICES"; then
+if ! grep -q '"gaussmatrix"' "$SERVICES"; then
     sed -i '/import { DendriteContainer, PineconeContainer } from "\.\/testcontainers\/dendrite";/a\
-import { TuwunelContainer } from "./testcontainers/tuwunel";' "$SERVICES"
+import { GaussMatrixContainer } from "./testcontainers/gaussmatrix";' "$SERVICES"
 
     sed -i '/case "pinecone":/i\
-                case "tuwunel":\
-                    container = new TuwunelContainer();\
+                case "gaussmatrix":\
+                    container = new GaussMatrixContainer();\
                     break;' "$SERVICES"
 fi
 
 # 2. plugins/homeserver/index.ts: extend HomeserverType union.
-if [ -f "$PLUGIN" ] && ! grep -q '"tuwunel"' "$PLUGIN"; then
-    sed -i 's/"synapse" | "dendrite" | "pinecone"/"synapse" | "dendrite" | "pinecone" | "tuwunel"/' "$PLUGIN"
+if [ -f "$PLUGIN" ] && ! grep -q '"gaussmatrix"' "$PLUGIN"; then
+    sed -i 's/"synapse" | "dendrite" | "pinecone"/"synapse" | "dendrite" | "pinecone" | "gaussmatrix"/' "$PLUGIN"
 fi
 
-# 3. playwright.config.ts: register a Tuwunel project entry after Pinecone.
-if ! grep -q 'homeserverType: "tuwunel"' "$CONFIG"; then
+# 3. playwright.config.ts: register a GaussMatrix project entry after Pinecone.
+if ! grep -q 'homeserverType: "gaussmatrix"' "$CONFIG"; then
     sed -i '/homeserverType: "pinecone"/,/ignoreSnapshots: true,/ {
         /ignoreSnapshots: true,/a\
         },\
         {\
-            name: "Tuwunel",\
+            name: "GaussMatrix",\
             use: {\
                 ...chromeProject,\
-                homeserverType: "tuwunel",\
+                homeserverType: "gaussmatrix",\
             },\
             ignoreSnapshots: true,
     }' "$CONFIG"
@@ -109,8 +109,8 @@ fi
 
 # 4. Confirm overlays applied (grep, not playwright test --list, since the
 #    playwright-common package's lib/ is not built yet).
-grep -q 'TuwunelContainer' "$SERVICES"
-grep -q 'name: "Tuwunel"' "$CONFIG"
+grep -q 'GaussMatrixContainer' "$SERVICES"
+grep -q 'name: "GaussMatrix"' "$CONFIG"
 EOF
 RUN chmod +x /playwright/patch.sh && /playwright/patch.sh
 
@@ -170,7 +170,7 @@ cd /usr/src/element-web/apps/web
 # docker/playwright_summarise.sh needs a stable input set.
 PLAYWRIGHT_JSON_OUTPUT_NAME=/playwright/out/results.json \\
 npx playwright test \\
-    --project=Tuwunel \\
+    --project=GaussMatrix \\
     --grep="\${playwright_run}" \\
     --grep-invert="\${playwright_skip}" \\
     --shard="\${playwright_shard}" \\

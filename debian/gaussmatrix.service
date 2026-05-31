@@ -1,27 +1,21 @@
 [Unit]
-Description=Tuwunel Matrix homeserver
+Description=GaussMatrix Matrix homeserver
 Wants=network-online.target
 After=network-online.target
-Documentation=https://tuwunel.chat/
-RequiresMountsFor=/var/lib/private/tuwunel
+Documentation=https://gaussmatrix.dev/
 
 [Service]
-DynamicUser=yes
-Type=notify-reload
-ReloadSignal=SIGUSR1
+User=gaussmatrix
+Group=gaussmatrix
+Type=notify
 WatchdogSec=30
 
-TTYPath=/dev/tty25
-DeviceAllow=char-tty
-StandardInput=tty-force
-StandardOutput=tty
-StandardError=journal+console
-TTYReset=yes
-# uncomment to allow buffer to be cleared every restart
-TTYVTDisallocate=no
+Environment="GAUSSMATRIX_CONFIG=/etc/gaussmatrix/gaussmatrix.toml"
+Environment="MALLOC_CONF=background_thread:false"
 
-TTYColumns=120
-TTYRows=40
+ExecStart=/usr/sbin/gaussmatrix
+
+ReadWritePaths=/var/lib/gaussmatrix /etc/gaussmatrix
 
 AmbientCapabilities=
 CapabilityBoundingSet=
@@ -56,27 +50,20 @@ SystemCallArchitectures=native
 SystemCallFilter=@system-service @resources
 SystemCallFilter=~@clock @debug @module @mount @reboot @swap @cpu-emulation @obsolete @timer @chown @setuid @privileged @keyring @ipc
 SystemCallErrorNumber=EPERM
-StateDirectory=tuwunel
+#StateDirectory=gaussmatrix
 
-RuntimeDirectory=tuwunel
+RuntimeDirectory=gaussmatrix
 RuntimeDirectoryMode=0750
 
-Environment="TUWUNEL_CONFIG=/etc/tuwunel/tuwunel.toml"
-BindPaths=/var/lib/private/tuwunel:/var/lib/conduwuit
-BindPaths=/var/lib/private/tuwunel:/var/lib/private/conduwuit
-BindPaths=/var/lib/private/tuwunel:/var/lib/matrix-conduit
-BindPaths=/var/lib/private/tuwunel:/var/lib/private/matrix-conduit
-
-ExecStart=/usr/bin/tuwunel
 Restart=on-failure
 RestartSec=5
 
-TimeoutStopSec=4m
-TimeoutStartSec=4m
+TimeoutStopSec=2m
+TimeoutStartSec=2m
 
 StartLimitInterval=1m
 StartLimitBurst=5
 
 [Install]
 WantedBy=multi-user.target
-Alias=matrix-tuwunel.service
+Alias=matrix-gaussmatrix.service

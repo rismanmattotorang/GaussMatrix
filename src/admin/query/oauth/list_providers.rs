@@ -1,6 +1,6 @@
 use futures::TryStreamExt;
-use tuwunel_core::{Result, utils::stream::IterStream};
-use tuwunel_service::oauth::Provider;
+use gaussmatrix_core::{Result, utils::stream::IterStream};
+use gaussmatrix_service::oauth::Provider;
 
 use crate::admin_command;
 

@@ -131,7 +131,7 @@ Runs on `bench` profile with `all` features and `nightly` on `x86_64-v3`.
 
 #### Smoke Tests (`smoke`)
 
-Smoke tests exercise a running Tuwunel binary without a full client.
+Smoke tests exercise a running GaussMatrix binary without a full client.
 These tests run on main and test branches; some are skipped on pull
 requests to reduce costs of scaling public contribution.
 
@@ -159,7 +159,7 @@ routine code changes.
 #### Matrix Rust SDK Integration Tests (`rust-sdk-integ`)
 
 Runs the [matrix-rust-sdk](https://github.com/matrix-org/matrix-rust-sdk)
-client-server integration test suite against a live Tuwunel process. A Tuwunel
+client-server integration test suite against a live GaussMatrix process. A GaussMatrix
 binary from a prior build layer is started in the background while `cargo test`
 runs the SDK's integration test crate right in the docker builder.
 
@@ -178,7 +178,7 @@ For the above two matrix variations `rust-sdk-integ` is run for both and
 
 See [Complement Testing](complement.md) for full details. Briefly: the
 [Complement](https://github.com/matrix-org/complement) suite runs its Go tests
-against containerized Tuwunel instances via the Docker daemon, verifying
+against containerized GaussMatrix instances via the Docker daemon, verifying
 conformance to the Matrix client-server and server-server specifications.
 
 The `complement` job builds two images (tester and testee) via `bake.yml`.
@@ -187,7 +187,7 @@ from the tester container, and runs `git diff` against the stored baseline.
 The diff is uploaded as an artifact regardless of pass/fail, so reviewers can
 see exactly what changed in compliance.
 
-A file named `tests/complement/tuwunel.log` contains the server logs from the
+A file named `tests/complement/gaussmatrix.log` contains the server logs from the
 last run extracted from the testee container and is also uploaded as an
 artifact.
 
@@ -212,7 +212,7 @@ Builds the Rust API documentation with `cargo doc`. Runs on `release` profile,
 `all` features, `nightly`, `x86_64-v1`.
 
 - Bake target: `docs`
-- Output: `/usr/src/tuwunel/target/<triple>/doc/`
+- Output: `/usr/src/gaussmatrix/target/<triple>/doc/`
 
 #### mdBook (`book`)
 
@@ -273,7 +273,7 @@ releases.
 
 Pushes container images to two registries simultaneously:
 
-- **GitHub Container Registry** (`ghcr.io/matrix-construct/tuwunel`)
+- **GitHub Container Registry** (`ghcr.io/rismanmattotorang/gaussmatrix`)
 - **Docker Hub** (`docker.io`)
 
 Images are compressed with zstd at level 11. Each image is tagged with the

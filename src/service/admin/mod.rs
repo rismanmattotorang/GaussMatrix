@@ -21,7 +21,7 @@ use ruma::{
 	events::room::message::{Relation, RoomMessageEventContent},
 };
 use tokio::sync::mpsc;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Event, Result, debug, err, error, error::default_log, pdu::PduBuilder,
 };
 

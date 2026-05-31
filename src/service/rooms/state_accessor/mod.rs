@@ -27,7 +27,7 @@ use ruma::{
 	},
 	room::RoomType,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, is_true,
 	matrix::{Pdu, room_version},
 	utils::BoolExt,

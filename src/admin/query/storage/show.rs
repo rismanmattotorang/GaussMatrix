@@ -1,4 +1,4 @@
-use tuwunel_core::{Result, utils::string::SplitInfallible};
+use gaussmatrix_core::{Result, utils::string::SplitInfallible};
 
 use crate::admin_command;
 

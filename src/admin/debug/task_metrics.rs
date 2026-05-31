@@ -1,4 +1,4 @@
-use tuwunel_core::{Result, tokio_metrics::TaskMonitor};
+use gaussmatrix_core::{Result, tokio_metrics::TaskMonitor};
 
 use crate::admin_command;
 

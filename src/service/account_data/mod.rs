@@ -14,11 +14,11 @@ use ruma::{
 };
 use serde::Deserialize;
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, err, implement,
 	utils::{ReadyExt, result::LogErr, stream::TryIgnore},
 };
-use tuwunel_database::{Deserialized, Handle, Ignore, Interfix, Json, Map};
+use gaussmatrix_database::{Deserialized, Handle, Ignore, Interfix, Json, Map};
 
 pub struct Service {
 	services: Arc<crate::services::OnceServices>,

@@ -1,6 +1,6 @@
 use futures::StreamExt;
 use ruma::{OwnedRoomAliasId, OwnedRoomId};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{Context, admin_command};
 

@@ -28,7 +28,7 @@ use ruma::{
 	api::client::discovery::discover_support::ContactRole,
 };
 use serde::{Deserialize, de::IgnoredAny};
-use tuwunel_macros::config_example_generator;
+use gaussmatrix_macros::config_example_generator;
 use url::Url;
 
 pub use self::{check::check, ip_source::IpSource, manager::Manager};
@@ -45,7 +45,7 @@ use crate::{
 	},
 };
 
-/// All the config options for tuwunel.
+/// All the config options for gaussmatrix.
 #[expect(rustdoc::broken_intra_doc_links, rustdoc::bare_urls)]
 #[derive(Clone, Deserialize)]
 #[config_example_generator(
@@ -81,7 +81,7 @@ pub struct Config {
 	/// suffix for user and room IDs/aliases.
 	///
 	/// See the docs for reverse proxying and delegation:
-	/// https://tuwunel.chat/deploying/generic.html#setting-up-the-reverse-proxy
+	/// https://gaussmatrix.dev/deploying/generic.html#setting-up-the-reverse-proxy
 	///
 	/// Also see the `[global.well_known]` config section at the very bottom.
 	///
@@ -96,10 +96,10 @@ pub struct Config {
 	#[cfg_attr(test, serde(default = "default_server_name"))]
 	pub server_name: OwnedServerName,
 
-	/// This is the only directory where tuwunel will save its data, including
+	/// This is the only directory where gaussmatrix will save its data, including
 	/// media. Note: this was previously "/var/lib/matrix-conduit".
 	///
-	/// default: "/var/lib/tuwunel"
+	/// default: "/var/lib/gaussmatrix"
 	#[serde(default = "default_database_path")]
 	pub database_path: PathBuf,
 
@@ -115,7 +115,7 @@ pub struct Config {
 	pub new_user_displayname_suffix: String,
 
 	#[expect(clippy::doc_link_with_quotes)]
-	/// The default address (IPv4 or IPv6) tuwunel will listen on.
+	/// The default address (IPv4 or IPv6) gaussmatrix will listen on.
 	///
 	/// If you are using Docker or a container NAT networking setup, this must
 	/// be "0.0.0.0".
@@ -127,10 +127,10 @@ pub struct Config {
 	#[serde(default)]
 	address: Option<ListeningAddr>,
 
-	/// The port(s) tuwunel will listen on.
+	/// The port(s) gaussmatrix will listen on.
 	///
 	/// For reverse proxying, see:
-	/// https://tuwunel.chat/deploying/generic.html#setting-up-the-reverse-proxy
+	/// https://gaussmatrix.dev/deploying/generic.html#setting-up-the-reverse-proxy
 	///
 	/// If you are using Docker, don't change this, you'll need to map an
 	/// external port to this.
@@ -145,13 +145,13 @@ pub struct Config {
 	#[serde(default)]
 	pub tls: TlsConfig,
 
-	/// The UNIX socket tuwunel will listen on.
+	/// The UNIX socket gaussmatrix will listen on.
 	///
 	/// Remember to make sure that your reverse proxy has access to this socket
-	/// file, either by adding your reverse proxy to the 'tuwunel' group or
+	/// file, either by adding your reverse proxy to the 'gaussmatrix' group or
 	/// granting world R/W permissions with `unix_socket_perms` (666 minimum).
 	///
-	/// example: "/run/tuwunel/tuwunel.sock"
+	/// example: "/run/gaussmatrix/gaussmatrix.sock"
 	pub unix_socket_path: Option<PathBuf>,
 
 	/// The default permissions (in octal) to create the UNIX socket with.
@@ -160,7 +160,7 @@ pub struct Config {
 	#[serde(default = "default_unix_socket_perms")]
 	pub unix_socket_perms: u32,
 
-	/// Error on startup if any config option specified is unknown to Tuwunel.
+	/// Error on startup if any config option specified is unknown to GaussMatrix.
 	///
 	/// This is false by default to allow easier deprecation or removal of
 	/// config options in the future without breaking existing deployments. The
@@ -169,15 +169,15 @@ pub struct Config {
 	#[serde(default)]
 	pub error_on_unknown_config_opts: bool,
 
-	/// tuwunel supports online database backups using RocksDB's Backup engine
-	/// API. To use this, set a database backup path that tuwunel can write
+	/// gaussmatrix supports online database backups using RocksDB's Backup engine
+	/// API. To use this, set a database backup path that gaussmatrix can write
 	/// to.
 	///
 	/// For more information, see:
-	/// https://tuwunel.chat/maintenance.html#backups
+	/// https://gaussmatrix.dev/maintenance.html#backups
 	///
 	/// reloadable: yes
-	/// example: "/opt/tuwunel-db-backups"
+	/// example: "/opt/gaussmatrix-db-backups"
 	pub database_backup_path: Option<PathBuf>,
 
 	/// The amount of online RocksDB database backups to keep/retain, if using
@@ -188,7 +188,7 @@ pub struct Config {
 	#[serde(default = "default_database_backups_to_keep")]
 	pub database_backups_to_keep: i16,
 
-	/// Set this to any float value to multiply tuwunel's in-memory LRU caches
+	/// Set this to any float value to multiply gaussmatrix's in-memory LRU caches
 	/// with such as "auth_chain_cache_capacity".
 	///
 	/// May be useful if you have significant memory to spare to increase
@@ -206,7 +206,7 @@ pub struct Config {
 	)]
 	pub cache_capacity_modifier: f64,
 
-	/// Set this to any float value in megabytes for tuwunel to tell the
+	/// Set this to any float value in megabytes for gaussmatrix to tell the
 	/// database engine that this much memory is available for database read
 	/// caches.
 	///
@@ -222,7 +222,7 @@ pub struct Config {
 	#[serde(default = "default_db_cache_capacity_mb")]
 	pub db_cache_capacity_mb: f64,
 
-	/// Set this to any float value in megabytes for tuwunel to tell the
+	/// Set this to any float value in megabytes for gaussmatrix to tell the
 	/// database engine that this much memory is available for database write
 	/// caches.
 	///
@@ -376,9 +376,9 @@ pub struct Config {
 	/// Enable using *only* TCP for querying your specified nameservers instead
 	/// of UDP.
 	///
-	/// If you are running tuwunel in a container environment, this config
+	/// If you are running gaussmatrix in a container environment, this config
 	/// option may need to be enabled. For more details, see:
-	/// https://tuwunel.chat/troubleshooting.html#potential-dns-issues-when-using-docker
+	/// https://gaussmatrix.dev/troubleshooting.html#potential-dns-issues-when-using-docker
 	#[serde(default)]
 	pub query_over_tcp_only: bool,
 
@@ -650,7 +650,7 @@ pub struct Config {
 	/// "connect_info"; that source requires a TCP peer address.
 	///
 	/// WARNING: A header-based value without a trusted reverse proxy in
-	/// front of tuwunel allows clients to forge their IP. Changing this
+	/// front of gaussmatrix allows clients to forge their IP. Changing this
 	/// value requires a server restart.
 	///
 	/// default: unset
@@ -673,7 +673,7 @@ pub struct Config {
 	/// Docker bridge network without `network_mode: host`).
 	///
 	/// NOTE: If you configure an entire subnet here, be sure that it
-	/// does not include the address Tuwunel receives external traffic
+	/// does not include the address GaussMatrix receives external traffic
 	/// from, i.e. that of your proxy. This would, for example, happen
 	/// if you deployed the proxy in a common bridge network with your
 	/// other components (e.g. in a Compose deployment) and specified
@@ -738,10 +738,10 @@ pub struct Config {
 	/// tokens. Multiple tokens can be added if you separate them with
 	/// whitespace
 	///
-	/// tuwunel must be able to access the file, and it must not be empty
+	/// gaussmatrix must be able to access the file, and it must not be empty
 	///
 	/// reloadable: yes
-	/// example: "/etc/tuwunel/.reg_token"
+	/// example: "/etc/gaussmatrix/.reg_token"
 	pub registration_token_file: Option<PathBuf>,
 
 	/// A pre-shared secret enabling out-of-band account creation via the
@@ -763,7 +763,7 @@ pub struct Config {
 	/// `registration_shared_secret` when both are set.
 	///
 	/// reloadable: yes
-	/// example: "/etc/tuwunel/.reg_shared_secret"
+	/// example: "/etc/gaussmatrix/.reg_shared_secret"
 	pub registration_shared_secret_file: Option<PathBuf>,
 
 	/// Controls whether encrypted rooms and events are allowed.
@@ -949,12 +949,12 @@ pub struct Config {
 	pub allow_room_creation: bool,
 
 	/// Set to false to disable users from joining or creating room versions
-	/// that aren't officially supported by tuwunel. Unstable room versions may
+	/// that aren't officially supported by gaussmatrix. Unstable room versions may
 	/// have flawed specifications or our implementation may be non-conforming.
 	/// Correct operation may not be guaranteed, but incorrect operation may be
 	/// tolerable and unnoticed.
 	///
-	/// tuwunel officially supports room versions 6+. tuwunel has slightly
+	/// gaussmatrix officially supports room versions 6+. gaussmatrix has slightly
 	/// experimental (though works fine in practice) support for versions 3 - 5.
 	///
 	/// reloadable: yes
@@ -992,7 +992,7 @@ pub struct Config {
 	#[serde(default = "default_policy_server_request_timeout")]
 	pub policy_server_request_timeout: u64,
 
-	/// Default room version tuwunel will create rooms with.
+	/// Default room version gaussmatrix will create rooms with.
 	///
 	/// The default is prescribed by the spec, but may be selected by developer
 	/// recommendation. To prevent stale documentation we no longer list it
@@ -1069,7 +1069,7 @@ pub struct Config {
 	/// Servers listed here will be used to gather public keys of other servers
 	/// (notary trusted key servers).
 	///
-	/// Currently, tuwunel doesn't support inbound batched key requests, so
+	/// Currently, gaussmatrix doesn't support inbound batched key requests, so
 	/// this list should only contain other Synapse servers.
 	///
 	/// reloadable: yes
@@ -1127,7 +1127,7 @@ pub struct Config {
 	#[serde(default = "default_trusted_server_batch_concurrency")]
 	pub trusted_server_batch_concurrency: usize,
 
-	/// Max log level for tuwunel. Allows debug, info, warn, or error.
+	/// Max log level for gaussmatrix. Allows debug, info, warn, or error.
 	///
 	/// See also:
 	/// https://docs.rs/tracing-subscriber/latest/tracing_subscriber/filter/struct.EnvFilter.html#directives
@@ -1156,7 +1156,7 @@ pub struct Config {
 	#[serde(default = "default_log_span_events")]
 	pub log_span_events: String,
 
-	/// Configures whether TUWUNEL_LOG EnvFilter matches values using regular
+	/// Configures whether GAUSSMATRIX_LOG EnvFilter matches values using regular
 	/// expressions. See the tracing_subscriber documentation on Directives.
 	///
 	/// default: true
@@ -1359,7 +1359,7 @@ pub struct Config {
 	/// This takes priority over "turn_secret" first, and falls back to
 	/// "turn_secret" if invalid or failed to open.
 	///
-	/// example: "/etc/tuwunel/.turn_secret"
+	/// example: "/etc/gaussmatrix/.turn_secret"
 	pub turn_secret_file: Option<PathBuf>,
 
 	/// TURN TTL, in seconds.
@@ -1370,12 +1370,12 @@ pub struct Config {
 	pub turn_ttl: u64,
 
 	#[expect(clippy::doc_link_with_quotes)]
-	/// List/vector of room IDs or room aliases that tuwunel will make newly
+	/// List/vector of room IDs or room aliases that gaussmatrix will make newly
 	/// registered users join. The rooms specified must be rooms that you have
 	/// joined at least once on the server, and must be public.
 	///
 	/// reloadable: yes
-	/// example: ["#tuwunel:grin.hu",
+	/// example: ["#gaussmatrix:grin.hu",
 	/// "!l2xV0sd51lraysuRcsWVECge4NULaH3g-ou95vgDgiM"]
 	///
 	/// default: []
@@ -1402,9 +1402,9 @@ pub struct Config {
 	#[serde(default)]
 	pub auto_deactivate_banned_room_attempts: bool,
 
-	/// RocksDB log level. This is not the same as tuwunel's log level. This
+	/// RocksDB log level. This is not the same as gaussmatrix's log level. This
 	/// is the log level for the RocksDB engine/library which show up in your
-	/// database folder/path as `LOG` files. tuwunel will log RocksDB errors
+	/// database folder/path as `LOG` files. gaussmatrix will log RocksDB errors
 	/// as normal through tracing or panics if severe for safety.
 	///
 	/// default: "error"
@@ -1492,7 +1492,7 @@ pub struct Config {
 	/// as they all differ. See their `kDefaultCompressionLevel`.
 	///
 	/// Note when using the default value we may override it with a setting
-	/// tailored specifically tuwunel.
+	/// tailored specifically gaussmatrix.
 	///
 	/// default: 32767
 	#[serde(default = "default_rocksdb_compression_level")]
@@ -1510,7 +1510,7 @@ pub struct Config {
 	/// algorithm.
 	///
 	/// Note when using the default value we may override it with a setting
-	/// tailored specifically tuwunel.
+	/// tailored specifically gaussmatrix.
 	///
 	/// default: 32767
 	#[serde(default = "default_rocksdb_bottommost_compression_level")]
@@ -1552,13 +1552,13 @@ pub struct Config {
 	/// 0 = AbsoluteConsistency
 	/// 1 = TolerateCorruptedTailRecords (default)
 	/// 2 = PointInTime (use me if trying to recover)
-	/// 3 = SkipAnyCorruptedRecord (you now voided your tuwunel warranty)
+	/// 3 = SkipAnyCorruptedRecord (you now voided your gaussmatrix warranty)
 	///
 	/// For more information on these modes, see:
 	/// https://github.com/facebook/rocksdb/wiki/WAL-Recovery-Modes
 	///
 	/// For more details on recovering a corrupt database, see:
-	/// https://tuwunel.chat/troubleshooting.html#database-corruption
+	/// https://gaussmatrix.dev/troubleshooting.html#database-corruption
 	///
 	/// default: 1
 	#[serde(default = "default_rocksdb_recovery_mode")]
@@ -1602,7 +1602,7 @@ pub struct Config {
 	/// - Disabling repair mode and restarting the server is recommended after
 	///   running the repair.
 	///
-	/// See https://tuwunel.chat/troubleshooting.html#database-corruption for more details on recovering a corrupt database.
+	/// See https://gaussmatrix.dev/troubleshooting.html#database-corruption for more details on recovering a corrupt database.
 	#[serde(default)]
 	pub rocksdb_repair: bool,
 
@@ -1627,7 +1627,7 @@ pub struct Config {
 	/// Enables RocksDB compaction. You should never ever have to set this
 	/// option to false. If you for some reason find yourself needing to use
 	/// this option as part of troubleshooting or a bug, please reach out to us
-	/// in the tuwunel Matrix room with information and details.
+	/// in the gaussmatrix Matrix room with information and details.
 	///
 	/// Disabling compaction will lead to a significantly bloated and
 	/// explosively large database, gradually poor performance, unnecessarily
@@ -1686,7 +1686,7 @@ pub struct Config {
 	/// purposes such as recovering/recreating your admin room, or inviting
 	/// yourself back.
 	///
-	/// See https://tuwunel.chat/troubleshooting.html#lost-access-to-admin-room
+	/// See https://gaussmatrix.dev/troubleshooting.html#lost-access-to-admin-room
 	/// for other ways to get back into your admin room.
 	///
 	/// Once this password is unset, all sessions will be logged out for
@@ -1730,7 +1730,7 @@ pub struct Config {
 
 	/// Allow local (your server only) presence updates/requests.
 	///
-	/// Note that presence on tuwunel is very fast unlike Synapse's. If using
+	/// Note that presence on gaussmatrix is very fast unlike Synapse's. If using
 	/// outgoing presence, this MUST be enabled.
 	/// reloadable: yes
 	#[serde(default = "true_fn")]
@@ -1740,7 +1740,7 @@ pub struct Config {
 	///
 	/// This option receives presence updates from other servers, but does not
 	/// send any unless `allow_outgoing_presence` is true. Note that presence on
-	/// tuwunel is very fast unlike Synapse's.
+	/// gaussmatrix is very fast unlike Synapse's.
 	/// reloadable: yes
 	#[serde(default = "true_fn")]
 	pub allow_incoming_presence: bool,
@@ -1749,7 +1749,7 @@ pub struct Config {
 	///
 	/// This option sends presence updates to other servers, but does not
 	/// receive any unless `allow_incoming_presence` is true. Note that presence
-	/// on tuwunel is very fast unlike Synapse's. If using outgoing presence,
+	/// on gaussmatrix is very fast unlike Synapse's. If using outgoing presence,
 	/// you MUST enable `allow_local_presence` as well.
 	/// reloadable: yes
 	#[serde(default = "true_fn")]
@@ -1833,8 +1833,8 @@ pub struct Config {
 	#[serde(default = "default_typing_client_timeout_max_s")]
 	pub typing_client_timeout_max_s: u64,
 
-	/// Set this to true for tuwunel to compress HTTP response bodies using
-	/// zstd. This option does nothing if tuwunel was not built with
+	/// Set this to true for gaussmatrix to compress HTTP response bodies using
+	/// zstd. This option does nothing if gaussmatrix was not built with
 	/// `zstd_compression` feature. Please be aware that enabling HTTP
 	/// compression may weaken TLS. Most users should not need to enable this.
 	/// See https://breachattack.com/ and https://wikipedia.org/wiki/BREACH
@@ -1842,8 +1842,8 @@ pub struct Config {
 	#[serde(default)]
 	pub zstd_compression: bool,
 
-	/// Set this to true for tuwunel to compress HTTP response bodies using
-	/// gzip. This option does nothing if tuwunel was not built with
+	/// Set this to true for gaussmatrix to compress HTTP response bodies using
+	/// gzip. This option does nothing if gaussmatrix was not built with
 	/// `gzip_compression` feature. Please be aware that enabling HTTP
 	/// compression may weaken TLS. Most users should not need to enable this.
 	/// See https://breachattack.com/ and https://wikipedia.org/wiki/BREACH before
@@ -1854,8 +1854,8 @@ pub struct Config {
 	#[serde(default)]
 	pub gzip_compression: bool,
 
-	/// Set this to true for tuwunel to compress HTTP response bodies using
-	/// brotli. This option does nothing if tuwunel was not built with
+	/// Set this to true for gaussmatrix to compress HTTP response bodies using
+	/// brotli. This option does nothing if gaussmatrix was not built with
 	/// `brotli_compression` feature. Please be aware that enabling HTTP
 	/// compression may weaken TLS. Most users should not need to enable this.
 	/// See https://breachattack.com/ and https://wikipedia.org/wiki/BREACH
@@ -1908,7 +1908,7 @@ pub struct Config {
 
 	/// Check consistency of the media directory at startup:
 	/// 1. When `media_compat_file_link` is enabled, this check will upgrade
-	///    media when switching back and forth between Conduit and tuwunel. Both
+	///    media when switching back and forth between Conduit and gaussmatrix. Both
 	///    options must be enabled to handle this.
 	/// 2. When media is deleted from the directory, this check will also delete
 	///    its database entry.
@@ -1926,7 +1926,7 @@ pub struct Config {
 	/// Otherwise setting this to false reduces filesystem clutter and overhead
 	/// for managing these symlinks in the directory. This is now disabled by
 	/// default. You may still return to upstream Conduit but you have to run
-	/// tuwunel at least once with this set to true and allow the
+	/// gaussmatrix at least once with this set to true and allow the
 	/// media_startup_check to take place before shutting down to return to
 	/// Conduit.
 	#[serde(default)]
@@ -1985,7 +1985,7 @@ pub struct Config {
 	#[serde(default)]
 	pub store_media_on_providers: BTreeSet<String>,
 
-	/// Vector list of regex patterns of server names that tuwunel will refuse
+	/// Vector list of regex patterns of server names that gaussmatrix will refuse
 	/// to download remote media from.
 	///
 	/// reloadable: yes
@@ -2047,7 +2047,7 @@ pub struct Config {
 
 	#[expect(clippy::doc_link_with_quotes)]
 	/// Vector list of IPv4 and IPv6 CIDR ranges / subnets *in quotes* that you
-	/// do not want tuwunel to send outbound requests to. Defaults to
+	/// do not want gaussmatrix to send outbound requests to. Defaults to
 	/// RFC1918, unroutable, loopback, multicast, and testnet addresses for
 	/// security.
 	///
@@ -2265,7 +2265,7 @@ pub struct Config {
 
 	/// Allow admins to enter commands in rooms other than "#admins" (admin
 	/// room) by prefixing your message with "\!admin" or "\\!admin" followed up
-	/// a normal tuwunel admin command. The reply will be publicly visible to
+	/// a normal gaussmatrix admin command. The reply will be publicly visible to
 	/// the room, originating from the sender.
 	///
 	/// reloadable: yes
@@ -2273,8 +2273,8 @@ pub struct Config {
 	#[serde(default = "true_fn")]
 	pub admin_escape_commands: bool,
 
-	/// Automatically activate the tuwunel admin room console / CLI on
-	/// startup. This option can also be enabled with `--console` tuwunel
+	/// Automatically activate the gaussmatrix admin room console / CLI on
+	/// startup. This option can also be enabled with `--console` gaussmatrix
 	/// argument.
 	#[serde(default)]
 	pub admin_console_automatic: bool,
@@ -2282,10 +2282,10 @@ pub struct Config {
 	#[expect(clippy::doc_link_with_quotes)]
 	/// List of admin commands to execute on startup.
 	///
-	/// This option can also be configured with the `--execute` tuwunel
+	/// This option can also be configured with the `--execute` gaussmatrix
 	/// argument and can take standard shell commands and environment variables
 	///
-	/// For example: `./tuwunel --execute "server admin-notice tuwunel has
+	/// For example: `./gaussmatrix --execute "server admin-notice gaussmatrix has
 	/// started up at $(date)"`
 	///
 	/// example: admin_execute = ["debug ping puppygock.gay", "debug echo hi"]`
@@ -2296,7 +2296,7 @@ pub struct Config {
 
 	/// Ignore errors in startup commands.
 	///
-	/// If false, tuwunel will error and fail to start if an admin execute
+	/// If false, gaussmatrix will error and fail to start if an admin execute
 	/// command (`--execute` / `admin_execute`) fails.
 	/// reloadable: yes
 	#[serde(default)]
@@ -2324,7 +2324,7 @@ pub struct Config {
 	/// The default room tag to apply on the admin room.
 	///
 	/// On some clients like Element, the room tag "m.server_notice" is a
-	/// special pinned room at the very bottom of your room list. The tuwunel
+	/// special pinned room at the very bottom of your room list. The gaussmatrix
 	/// admin room can be pinned here so you always have an easy-to-access
 	/// shortcut dedicated to your admin room.
 	///
@@ -2359,7 +2359,7 @@ pub struct Config {
 	pub federate_admin_room: bool,
 
 	/// Sentry.io crash/panic reporting, performance monitoring/metrics, etc.
-	/// This is NOT enabled by default. tuwunel's default Sentry reporting
+	/// This is NOT enabled by default. gaussmatrix's default Sentry reporting
 	/// endpoint domain is `o4509498990067712.ingest.us.sentry.io`.
 	#[serde(default)]
 	pub sentry: bool,
@@ -2371,7 +2371,7 @@ pub struct Config {
 	#[serde(default = "default_sentry_endpoint")]
 	pub sentry_endpoint: Option<Url>,
 
-	/// Report your tuwunel server_name in Sentry.io crash reports and
+	/// Report your gaussmatrix server_name in Sentry.io crash reports and
 	/// metrics.
 	#[serde(default)]
 	pub sentry_send_server_name: bool,
@@ -2412,7 +2412,7 @@ pub struct Config {
 	/// Enable the tokio-console. This option is only relevant to developers.
 	///
 	///	For more information, see:
-	/// https://tuwunel.chat/development.html#debugging-with-tokio-console
+	/// https://gaussmatrix.dev/development.html#debugging-with-tokio-console
 	#[serde(default)]
 	pub tokio_console: bool,
 
@@ -3145,7 +3145,7 @@ pub struct LdapConfig {
 	#[serde(default)]
 	pub admin_base_dn: String,
 
-	/// The LDAP search filter to find administrative users for tuwunel.
+	/// The LDAP search filter to find administrative users for gaussmatrix.
 	///
 	/// If left blank, administrative state must be configured manually for each
 	/// user.
@@ -3154,7 +3154,7 @@ pub struct LdapConfig {
 	/// entered username for more complex filters.
 	///
 	/// reloadable: yes
-	/// example: "(objectClass=tuwunelAdmin)" or "(uid={username})"
+	/// example: "(objectClass=gaussmatrixAdmin)" or "(uid={username})"
 	///
 	/// default:
 	#[serde(default)]
@@ -3315,9 +3315,9 @@ pub struct IdentityProvider {
 	/// each OAuth exchange, must exist and must be non-empty; leading and
 	/// trailing whitespace is trimmed. Under systemd the path must be visible
 	/// to the service after sandboxing (`ReadWritePaths` / `ProtectHome`),
-	/// typically by placing the file under `/etc/tuwunel/`.
+	/// typically by placing the file under `/etc/gaussmatrix/`.
 	///
-	/// example: "/etc/tuwunel/.client_secret"
+	/// example: "/etc/gaussmatrix/.client_secret"
 	pub client_secret_file: Option<PathBuf>,
 
 	/// Issuer URL the provider publishes for you. We have pre-supplied default
@@ -3330,7 +3330,7 @@ pub struct IdentityProvider {
 	pub issuer_url: Option<Url>,
 
 	/// The callback URL configured when registering the OAuth application with
-	/// the provider. Tuwunel's callback URL must be strictly formatted exactly
+	/// the provider. GaussMatrix's callback URL must be strictly formatted exactly
 	/// as instructed. The URL host must point directly at the matrix server and
 	/// use the following path:
 	/// `/_matrix/client/unstable/login/sso/callback/<client_id>` where
@@ -3382,7 +3382,7 @@ pub struct IdentityProvider {
 	pub scope: BTreeSet<String>,
 
 	/// Optional list of userinfo claims which shape and restrict the way we
-	/// compute a Matrix UserId for new registrations. Reviewing Tuwunel's
+	/// compute a Matrix UserId for new registrations. Reviewing GaussMatrix's
 	/// documentation will be necessary for a complete description in detail. An
 	/// empty array imposes no restriction here, avoiding generated fallbacks as
 	/// much as possible.
@@ -3821,9 +3821,9 @@ impl From<AppServiceNamespace> for ruma::api::appservice::Namespace {
 	}
 }
 
-/// Items matched here will not generate an "unknown to tuwunel" warning when
+/// Items matched here will not generate an "unknown to gaussmatrix" warning when
 /// configured. This is important for environment variables which share the
-/// `TUWUNEL_` prefix namespace but aren't config items;  match them here in
+/// `GAUSSMATRIX_` prefix namespace but aren't config items;  match them here in
 /// their split+lowercased format.
 static KNOWN_KEYS: &[&str; 2] = &["^config$", "^runtime_[a-z0-9_]+$"];
 
@@ -3846,10 +3846,13 @@ impl Config {
 	where
 		I: Iterator<Item = &'a Path>,
 	{
+		// GAUSSMATRIX_ is the primary prefix; CONDUIT_/CONDUWUIT_/TUWUNEL_ are
+		// retained for drop-in migration from the upstream lineage.
 		let envs = [
 			Env::var("CONDUIT_CONFIG"),
 			Env::var("CONDUWUIT_CONFIG"),
 			Env::var("TUWUNEL_CONFIG"),
+			Env::var("GAUSSMATRIX_CONFIG"),
 		];
 
 		let toml_files = envs
@@ -3879,7 +3882,8 @@ impl Config {
 			.fold(Figment::new(), Figment::merge)
 			.merge(Env::prefixed("CONDUIT_").global().split("__"))
 			.merge(Env::prefixed("CONDUWUIT_").global().split("__"))
-			.merge(Env::prefixed("TUWUNEL_").global().split("__"));
+			.merge(Env::prefixed("TUWUNEL_").global().split("__"))
+			.merge(Env::prefixed("GAUSSMATRIX_").global().split("__"));
 
 		Ok(config)
 	}
@@ -3920,7 +3924,7 @@ fn some_true_fn() -> Option<bool> { Some(true) }
 #[cfg(test)]
 fn default_server_name() -> OwnedServerName { ruma::owned_server_name!("localhost") }
 
-fn default_database_path() -> PathBuf { "/var/lib/tuwunel".to_owned().into() }
+fn default_database_path() -> PathBuf { "/var/lib/gaussmatrix".to_owned().into() }
 
 fn default_port() -> ListeningPort { ListeningPort { ports: Left(8008) } }
 

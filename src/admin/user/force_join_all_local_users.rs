@@ -1,6 +1,6 @@
 use futures::StreamExt;
 use ruma::{OwnedRoomOrAliasId, UserId};
-use tuwunel_core::{Err, Result, debug_warn};
+use gaussmatrix_core::{Err, Result, debug_warn};
 
 use super::BULK_JOIN_REASON;
 use crate::admin_command;

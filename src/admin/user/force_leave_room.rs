@@ -1,6 +1,6 @@
 use futures::FutureExt;
 use ruma::OwnedRoomOrAliasId;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::{admin_command, utils::parse_local_user_id};
 

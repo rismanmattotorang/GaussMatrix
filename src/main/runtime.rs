@@ -15,8 +15,8 @@ use std::{
 use tokio::runtime::Builder;
 pub use tokio::runtime::{Handle, Runtime as Tokio};
 #[cfg(all(not(target_env = "msvc"), feature = "jemalloc"))]
-use tuwunel_core::result::LogDebugErr;
-use tuwunel_core::{
+use gaussmatrix_core::result::LogDebugErr;
+use gaussmatrix_core::{
 	Result, debug, error, implement, is_true,
 	metrics::{Metrics, dump},
 	utils::sys::{
@@ -43,10 +43,10 @@ struct State {
 	thread_spawns: AtomicUsize,
 }
 
-const WORKER_THREAD_NAME: &str = "tuwunel:worker";
+const WORKER_THREAD_NAME: &str = "gaussmatrix:worker";
 const WORKER_THREAD_MIN: usize = 2;
 const BLOCKING_THREAD_KEEPALIVE: u64 = 36;
-const BLOCKING_THREAD_NAME: &str = "tuwunel:spawned";
+const BLOCKING_THREAD_NAME: &str = "gaussmatrix:spawned";
 const BLOCKING_THREAD_MAX: usize = 1024;
 const RUNTIME_SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(10);
 const DISABLE_MUZZY_THRESHOLD: usize = 8;
@@ -112,7 +112,7 @@ impl Drop for Runtime {
 #[implement(Runtime)]
 fn dump_runtime_metrics(&self) {
 	use tracing::Level;
-	use tuwunel_core::event;
+	use gaussmatrix_core::event;
 
 	// The final metrics output is promoted to INFO when tokio_unstable is active in
 	// a release/bench mode and DEBUG is likely optimized out
@@ -159,7 +159,7 @@ fn wait_shutdown(&mut self) {
 
 	// Join any jemalloc threads so they don't appear in use at exit.
 	#[cfg(all(not(target_env = "msvc"), feature = "jemalloc"))]
-	tuwunel_core::alloc::je::background_thread_enable(false)
+	gaussmatrix_core::alloc::je::background_thread_enable(false)
 		.log_debug_err()
 		.ok();
 }
@@ -298,11 +298,11 @@ fn set_worker_affinity(&self) {
 #[implement(State)]
 fn set_worker_mallctl(&self, _id: usize) {
 	let muzzy_auto_disable =
-		tuwunel_core::utils::available_parallelism() >= DISABLE_MUZZY_THRESHOLD;
+		gaussmatrix_core::utils::available_parallelism() >= DISABLE_MUZZY_THRESHOLD;
 
 	if matches!(self.gc_muzzy, Some(false) | None if muzzy_auto_disable) {
 		#[cfg(all(not(target_env = "msvc"), feature = "jemalloc"))]
-		tuwunel_core::alloc::je::this_thread::set_muzzy_decay(-1)
+		gaussmatrix_core::alloc::je::this_thread::set_muzzy_decay(-1)
 			.log_debug_err()
 			.ok();
 	}
@@ -323,7 +323,7 @@ fn thread_stop(&self) {
 	if cfg!(any(tokio_unstable, not(feature = "release_max_log_level")))
 		&& let Ok(resource_usage) = sys::thread_usage()
 	{
-		tuwunel_core::debug!(?resource_usage, "Thread resource usage.");
+		gaussmatrix_core::debug!(?resource_usage, "Thread resource usage.");
 	}
 }
 
@@ -359,7 +359,7 @@ fn thread_park(&self) {
 
 fn gc_on_park() {
 	#[cfg(all(not(target_env = "msvc"), feature = "jemalloc"))]
-	tuwunel_core::alloc::je::this_thread::decay()
+	gaussmatrix_core::alloc::je::this_thread::decay()
 		.log_debug_err()
 		.ok();
 }

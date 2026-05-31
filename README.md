@@ -90,14 +90,15 @@ cp gaussmatrix-example.toml gaussmatrix.toml
 $EDITOR gaussmatrix.toml
 
 # Run
-./target/release/tuwunel -c gaussmatrix.toml
+./target/release/gaussmatrix -c gaussmatrix.toml
 ```
 
-> ℹ️ The compiled binary and internal crate names retain the `tuwunel` identifier
-> for now. A full crate/binary rename to the `gm-*` namespace is **Phase 0** of the
-> [roadmap](#development-roadmap); on-disk and protocol compatibility with the
-> Tuwunel/Conduit family is preserved so a Tuwunel data directory migrates by
-> binary swap.
+> ℹ️ The binary is `gaussmatrix`, the workspace crates are `gaussmatrix_*`
+> (transitional names; the target eleven-crate `gm-*` decomposition lands in
+> Phases 1–4), and the primary config env prefix is `GAUSSMATRIX_`. On-disk and
+> protocol compatibility with the Tuwunel/Conduit family is preserved — a Tuwunel
+> data directory migrates by binary swap, and the `TUWUNEL_`, `CONDUWUIT_`, and
+> `CONDUIT_` config env prefixes are still honoured as migration fallbacks.
 
 See the [documentation](./docs/introduction.md) for deployment guides (Docker,
 Podman, Kubernetes, Debian, Arch, NixOS, Red Hat, FreeBSD), reverse-proxy setup,
@@ -112,13 +113,15 @@ specification ([`GaussMatrix-SPECS.pdf`](./GaussMatrix-SPECS.pdf), §VII). Each
 phase is independently shippable; the linear, documented dependency between phases
 preserves auditability.
 
-### Phase 0 — Foundation & rebrand *(current)*
+### Phase 0 — Foundation & rebrand *(complete)*
 - [x] Adopt the Tuwunel codebase as the GaussMatrix Phase-1 baseline.
 - [x] Rebrand public identity & metadata (README, workspace/package metadata,
       mdBook config, generated configuration) to GaussMatrix / Gaussian Technologies.
 - [x] Establish attribution to Tuwunel and upstream lineage ([`NOTICE`](./NOTICE)).
-- [ ] Complete crate/binary rename from `tuwunel*` → `gm-*` / `gaussmatrix`,
-      including the `TUWUNEL_` environment-variable prefix and packaging units.
+- [x] Rename crates (`tuwunel_* → gaussmatrix_*`), the binary (`tuwunel → gaussmatrix`),
+      the config env prefix (`TUWUNEL_ → GAUSSMATRIX_`, old prefixes retained as
+      migration fallbacks), and all packaging units (systemd, Deb/RPM/Arch, Podman
+      quadlets, install paths).
 - [ ] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
 
 ### Phase 1 — Server core *(drop-in homeserver)*

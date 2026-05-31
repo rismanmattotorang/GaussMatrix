@@ -18,7 +18,7 @@ mod user_memberships;
 
 use clap::Subcommand;
 use ruma::{OwnedRoomId, OwnedServerName, OwnedUserId};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

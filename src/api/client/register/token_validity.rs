@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::account::check_registration_token_validity;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::Ruma;
 

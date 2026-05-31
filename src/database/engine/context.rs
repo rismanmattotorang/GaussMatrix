@@ -6,7 +6,7 @@ use std::{
 };
 
 use rocksdb::{Cache, Env, LruCacheOptions};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, Server, debug,
 	utils::{math::usize_from_f64, result::LogErr},
 };

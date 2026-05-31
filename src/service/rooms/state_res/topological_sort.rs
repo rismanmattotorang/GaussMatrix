@@ -31,7 +31,7 @@ use futures::{Stream, TryFutureExt, TryStreamExt, stream::try_unfold};
 use ruma::{
 	MilliSecondsSinceUnixEpoch, OwnedEventId, events::room::power_levels::UserPowerLevel,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, is_not_equal_to, smallvec::SmallVec, utils::stream::IterStream, validated,
 };
 

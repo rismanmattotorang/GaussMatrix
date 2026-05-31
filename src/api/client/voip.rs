@@ -5,7 +5,7 @@ use base64::{Engine as _, engine::general_purpose};
 use hmac::{Hmac, Mac};
 use ruma::{SecondsSinceUnixEpoch, UserId, api::client::voip::get_turn_server_info};
 use sha1::Sha1;
-use tuwunel_core::{Err, Result, utils};
+use gaussmatrix_core::{Err, Result, utils};
 
 use crate::Ruma;
 

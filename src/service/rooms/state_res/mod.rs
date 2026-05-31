@@ -66,7 +66,7 @@ mod resolve;
 mod test_utils;
 pub mod topological_sort;
 
-use tuwunel_core::matrix::TypeStateKey;
+use gaussmatrix_core::matrix::TypeStateKey;
 
 use self::{event_auth::check_state_dependent_auth_rules, fetch_state::FetchStateExt};
 pub use self::{

@@ -2,7 +2,7 @@
 
 MatrixRTC is the modern Matrix calling framework used by Element Call and
 other recent clients. The media itself is carried by a Selective Forwarding
-Unit (SFU); Tuwunel does not embed an SFU, so an external one is required.
+Unit (SFU); GaussMatrix does not embed an SFU, so an external one is required.
 [Livekit](https://github.com/livekit/livekit) is the SFU implementation
 supported here, paired with the
 [lk-jwt-service](https://github.com/element-hq/lk-jwt-service) which issues
@@ -15,7 +15,7 @@ is not supported or recommended.
 
 > [!NOTE]
 > In the following documentation, `yourdomain.com` is whatever you have set
-> as `server_name` in your `tuwunel.toml`. This needs to be replaced with the
+> as `server_name` in your `gaussmatrix.toml`. This needs to be replaced with the
 > actual domain. It is assumed that you will be hosting MatrixRTC at
 > `matrix-rtc.yourdomain.com`. If you wish to host this service at a
 > different subdomain, this needs to be replaced as well.
@@ -61,7 +61,7 @@ services:
       - LIVEKIT_URL=wss://matrix-rtc.yourdomain.com
       - LIVEKIT_KEY=MRTCKEY # Random 20 character string
       - LIVEKIT_SECRET=MRTCSECRET # Random 64 character string
-      - LIVEKIT_FULL_ACCESS_HOMESERVERS=yourdomain.com # Your server_name from tuwunel.toml
+      - LIVEKIT_FULL_ACCESS_HOMESERVERS=yourdomain.com # Your server_name from gaussmatrix.toml
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -111,12 +111,12 @@ keys:
 
 ## 3. Configure .well-known
 
-### 3.1. .well-known served by Tuwunel
+### 3.1. .well-known served by GaussMatrix
 
-*Follow this step if your `.well-known` configuration is served by Tuwunel.
+*Follow this step if your `.well-known` configuration is served by GaussMatrix.
 Otherwise follow Step 3.2.*
 
-1. Open your `tuwunel.toml` file, e.g. `nano /etc/tuwunel/tuwunel.toml`.
+1. Open your `gaussmatrix.toml` file, e.g. `nano /etc/gaussmatrix/gaussmatrix.toml`.
 2. Find the line reading `#livekit_url = ""` and replace it with:
 
 ```toml
@@ -355,7 +355,7 @@ Docker, follow 6.2.
 1. Start `matrix-rtc-jwt`. `MRTCKEY` and `MRTCSECRET` should be replaced
    with the values generated in Step 2. `matrix-rtc.yourdomain.com` should
    be replaced with your MatrixRTC subdomain. `yourdomain.com` should be
-   replaced with what you have set as `server_name` in `tuwunel.toml`.
+   replaced with what you have set as `server_name` in `gaussmatrix.toml`.
 
 ```
 docker run -d \
@@ -400,7 +400,7 @@ max-port=65535
 If you have Coturn configured, you can use it as a TURN server for Livekit
 to improve call reliability. As Coturn allows multiple instances of
 `static-auth-secret`, it is suggested that the secret used for Livekit is
-different to that used for Tuwunel.
+different to that used for GaussMatrix.
 
 1. Create a secret for Coturn — a random 64-character alphanumeric string is
    suggested.

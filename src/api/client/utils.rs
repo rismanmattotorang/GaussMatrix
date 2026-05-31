@@ -1,6 +1,6 @@
 use ruma::{RoomId, UserId};
-use tuwunel_core::{Err, Result, warn};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, warn};
+use gaussmatrix_service::Services;
 
 pub(crate) async fn invite_check(
 	services: &Services,

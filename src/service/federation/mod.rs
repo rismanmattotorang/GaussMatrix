@@ -4,7 +4,7 @@ pub mod scheme;
 
 use std::sync::Arc;
 
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::services::OnceServices;
 

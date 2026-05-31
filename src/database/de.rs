@@ -2,7 +2,7 @@ use serde::{
 	Deserialize, de,
 	de::{DeserializeSeed, Visitor},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, arrayvec::ArrayVec, checked, debug::DebugInspect, err, unhandled,
 	utils::string,
 };
@@ -450,9 +450,9 @@ impl<'a, 'de: 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
 		const TYPE: &str = "serde_json::value::de::<impl serde_core::de::Deserialize<'_> for \
 		                    serde_json::value::Value>::deserialize::ValueVisitor";
 		debug_assert!(
-			matches!(tuwunel_core::debug::type_name::<V>(), TYPE | TYPE_PRE_1_91),
+			matches!(gaussmatrix_core::debug::type_name::<V>(), TYPE | TYPE_PRE_1_91),
 			"deserialize_any: type not expected {0}",
-			tuwunel_core::debug::type_name::<V>()
+			gaussmatrix_core::debug::type_name::<V>()
 		);
 
 		match self.record_peek_byte() {

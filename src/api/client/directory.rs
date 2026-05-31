@@ -21,7 +21,7 @@ use ruma::{
 	events::StateEventType,
 	uint,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, info,
 	matrix::Event,
 	utils::{
@@ -30,7 +30,7 @@ use tuwunel_core::{
 		stream::{IterStream, ReadyExt, WidebandExt},
 	},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{ClientIp, Ruma};
 

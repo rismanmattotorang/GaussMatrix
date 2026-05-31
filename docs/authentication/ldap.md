@@ -1,7 +1,7 @@
 # LDAP Authentication
 
-Tuwunel can authenticate password logins against an LDAP directory. When a
-user logs in with `m.login.password`, Tuwunel locates them in the directory,
+GaussMatrix can authenticate password logins against an LDAP directory. When a
+user logs in with `m.login.password`, GaussMatrix locates them in the directory,
 verifies the password by binding as that user, and creates a Matrix account on
 first successful login if one does not yet exist.
 
@@ -32,12 +32,12 @@ returns two or more matches the login is rejected.
 
 ## Bind modes
 
-Tuwunel supports three bind strategies, selected by what you put in `bind_dn`
+GaussMatrix supports three bind strategies, selected by what you put in `bind_dn`
 and `bind_password_file`.
 
 ### Search-then-bind (recommended)
 
-A service account binds to the directory, searches for the user, then Tuwunel
+A service account binds to the directory, searches for the user, then GaussMatrix
 re-binds as the user with the supplied password to verify it. This mode is
 required if you want admin synchronization (see below).
 
@@ -47,23 +47,23 @@ enable = true
 uri = "ldaps://ldap.example.org:636"
 base_dn = "ou=users,dc=example,dc=org"
 bind_dn = "cn=ldap-reader,dc=example,dc=org"
-bind_password_file = "/etc/tuwunel/.ldap_bind_password"
+bind_password_file = "/etc/gaussmatrix/.ldap_bind_password"
 filter = "(&(objectClass=person)(memberOf=cn=matrix,ou=groups,dc=example,dc=org))"
 ```
 
 The bind password is read from `bind_password_file` rather than placed inline
-in the config. The file must be readable by the Tuwunel process and must not
+in the config. The file must be readable by the GaussMatrix process and must not
 be empty.
 
 ### Anonymous search-then-bind
 
 If your directory permits anonymous searches, omit both `bind_dn` and
-`bind_password_file`. Tuwunel skips the initial bind and queries the
+`bind_password_file`. GaussMatrix skips the initial bind and queries the
 directory unauthenticated, then re-binds as the user to verify the password.
 
 ### Direct bind
 
-If `bind_dn` contains the literal substring `{username}`, Tuwunel skips the
+If `bind_dn` contains the literal substring `{username}`, GaussMatrix skips the
 search entirely and binds directly with that DN, substituting the user's
 localpart for `{username}` and using the supplied login password as the bind
 password:
@@ -77,7 +77,7 @@ bind_dn = "cn={username},ou=users,dc=example,dc=org"
 
 This is the simplest mode but has two limitations: it cannot apply a search
 filter (so anyone in the bind DN's subtree can log in), and **admin
-synchronization does not work** because Tuwunel never gets a chance to query
+synchronization does not work** because GaussMatrix never gets a chance to query
 the directory under a service account.
 
 ## Configuration reference
@@ -95,7 +95,7 @@ the directory under a service account.
 | `admin_base_dn` | `""` | Subtree for the admin search. Falls back to `base_dn` when empty. |
 | `admin_filter` | `""` | Filter that selects administrative users. Empty disables admin synchronization entirely. Supports `{username}` substitution. |
 
-The localpart match is case-insensitive — Tuwunel sends a lowercased version
+The localpart match is case-insensitive — GaussMatrix sends a lowercased version
 of the localpart through `{username}` substitution and accepts an entry if
 either the original or lowercased form appears in `uid_attribute` or
 `name_attribute`.
@@ -103,20 +103,20 @@ either the original or lowercased form appears in `uid_attribute` or
 ## Admin synchronization
 
 Setting `admin_filter` to a non-empty value turns the LDAP directory into the
-source of truth for who is a Tuwunel admin. On every successful LDAP login,
-Tuwunel runs a second search rooted at `admin_base_dn` (or `base_dn` if
+source of truth for who is a GaussMatrix admin. On every successful LDAP login,
+GaussMatrix runs a second search rooted at `admin_base_dn` (or `base_dn` if
 empty) using `admin_filter`. Membership in the result set is compared against
-the user's current admin status in Tuwunel:
+the user's current admin status in GaussMatrix:
 
-- In LDAP admin set, not a Tuwunel admin → granted admin.
-- Not in LDAP admin set, currently a Tuwunel admin → admin revoked.
+- In LDAP admin set, not a GaussMatrix admin → granted admin.
+- Not in LDAP admin set, currently a GaussMatrix admin → admin revoked.
 - Otherwise → no change.
 
 Two examples:
 
 ```toml
 # Admins are users with a custom objectClass.
-admin_filter = "(objectClass=tuwunelAdmin)"
+admin_filter = "(objectClass=gaussmatrixAdmin)"
 
 # Admins are members of an LDAP group, looked up under a different subtree.
 admin_base_dn = "ou=admins,dc=example,dc=org"
@@ -130,7 +130,7 @@ combination.
 
 ## Account lifecycle
 
-The first time a user successfully authenticates against LDAP, Tuwunel
+The first time a user successfully authenticates against LDAP, GaussMatrix
 auto-creates a local Matrix account for them (the same way Synapse,
 Nextcloud, and Jellyfin behave). The account is registered with origin
 `"ldap"` and a placeholder password value — the local password field is
@@ -160,7 +160,7 @@ Both commands are gated by the `ldap` build feature.
 
 ## Disabling password login for non-LDAP users
 
-Tuwunel's LDAP integration always falls back to local password verification
+GaussMatrix's LDAP integration always falls back to local password verification
 when the LDAP search returns no matches. To enforce LDAP-only login for
 everyone (apart from accounts that authenticate via SSO), pair LDAP with a
 restrictive `filter` that matches every legitimate user, and remove or

@@ -7,17 +7,17 @@ unit — that every other guide builds on.
 
 ## Choosing a reverse proxy
 
-Tuwunel listens on plain HTTP and requires a reverse proxy to terminate TLS.
+GaussMatrix listens on plain HTTP and requires a reverse proxy to terminate TLS.
 All guides assume HTTPS is already handled externally.
 
 **[Caddy](deploying/reverse-proxy-caddy.md)** is the recommended choice. It
-handles TLS automatically via Let's Encrypt, and the full Tuwunel configuration
+handles TLS automatically via Let's Encrypt, and the full GaussMatrix configuration
 fits in two lines. It also proxies port 8448 (Matrix federation) in the same
 block with no extra work.
 
 **[Nginx](deploying/reverse-proxy-nginx.md)** is a solid choice if you are
 already running it. The configuration is more verbose but well-documented. Set
-`client_max_body_size` to match or exceed Tuwunel's `max_request_size` (default
+`client_max_body_size` to match or exceed GaussMatrix's `max_request_size` (default
 20 MiB), and never use `$request_uri` in the proxy pass — it causes subtle
 breakage.
 
@@ -35,8 +35,8 @@ extra workaround flag.
 
 ## Root-domain delegation
 
-By default, Tuwunel's server name is the domain that appears in Matrix user IDs
-(`@alice:example.com`), which must exactly match the host Tuwunel presents when
+By default, GaussMatrix's server name is the domain that appears in Matrix user IDs
+(`@alice:example.com`), which must exactly match the host GaussMatrix presents when
 federating. If you want to host Matrix under a subdomain (`matrix.example.com`)
 while users have addresses on the root domain (`example.com`), configure
 **[root-domain delegation](deploying/root-domain-delegation.md)**. This serves
@@ -54,7 +54,7 @@ performance.
 
 **RocksDB is the only supported database.** SQLite support has been removed. If
 you are migrating from Conduit, you will need a migration tool before deploying
-Tuwunel.
+GaussMatrix.
 
 **Port 8448 matters for federation.** Clients connect on port 443, but other
 Matrix homeservers connect on port 8448. Both must be reachable for a fully

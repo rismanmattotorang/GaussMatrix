@@ -12,12 +12,12 @@ use ruma::{
 		federation::{authentication::ServerSignatures, openid::get_openid_userinfo},
 	},
 };
-use tuwunel_core::{Err, Error, Result, utils::result::LogDebugErr};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Error, Result, utils::result::LogDebugErr};
+use gaussmatrix_service::Services;
 
 use super::{Auth, Request, Token, appservice::auth_appservice, server::auth_server};
 
-/// Tag identifying an [`AuthScheme`] for tuwunel's purposes.
+/// Tag identifying an [`AuthScheme`] for gaussmatrix's purposes.
 ///
 /// Ruma's `AuthScheme` is a trait, so endpoint-specific bypasses cannot be
 /// expressed as enum match arms anymore. This tag is the value-side handle

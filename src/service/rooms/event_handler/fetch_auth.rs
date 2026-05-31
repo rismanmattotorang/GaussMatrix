@@ -9,7 +9,7 @@ use ruma::{
 	CanonicalJsonObject, CanonicalJsonValue, EventId, OwnedEventId, RoomId, RoomVersionId,
 	ServerName, api::federation::event::get_event,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	debug, debug_error, debug_warn, expected, implement,
 	matrix::{PduEvent, event::gen_event_id_canonical_json, pdu::MAX_AUTH_EVENTS},
 	trace,

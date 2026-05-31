@@ -3,7 +3,7 @@ use ruma::{
 	RoomId, api::client::sync::sync_events::v5::request::ListFilters, directory::RoomTypeFilter,
 	events::room::member::MembershipState,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	is_equal_to, is_true,
 	utils::{
 		BoolExt, FutureBoolExt, IterStream, ReadyExt,

@@ -37,13 +37,13 @@ use serde_json::{
 	json,
 	value::{RawValue, to_raw_value},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug_info, debug_warn, err, info,
 	matrix::{StateKey, pdu::PduBuilder, room_version},
 	utils::{BoolExt, IterStream, ReadyExt, option::OptionExt},
 	warn,
 };
-use tuwunel_service::{Services, appservice::RegistrationInfo, rooms::state::RoomMutexGuard};
+use gaussmatrix_service::{Services, appservice::RegistrationInfo, rooms::state::RoomMutexGuard};
 
 use crate::{Ruma, client::utils::invite_check};
 
@@ -782,7 +782,7 @@ fn default_power_levels_content(
 	power_levels_content["events"]["m.poll.response"] = json!(0);
 
 	// public_chat: pin invite and call-setup events at PL 50. Synapse pins
-	// invite and m.call.invite here; the MSC3401 entries are tuwunel-only.
+	// invite and m.call.invite here; the MSC3401 entries are gaussmatrix-only.
 	if *preset == RoomPreset::PublicChat {
 		power_levels_content["invite"] = json!(50);
 		power_levels_content["events"]["m.call.invite"] = json!(50);

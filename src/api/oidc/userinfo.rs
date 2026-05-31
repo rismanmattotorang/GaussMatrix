@@ -13,8 +13,8 @@ use futures::future::join;
 use http::{HeaderValue, Response, StatusCode, header};
 use serde::Deserialize;
 use serde_json::json;
-use tuwunel_core::{Err, Result, err, utils::TryFutureExtExt};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, err, utils::TryFutureExtExt};
+use gaussmatrix_service::Services;
 
 use super::oauth_error;
 
@@ -65,7 +65,7 @@ async fn userinfo_inner(services: &Services, request: Request) -> Result<Respons
 			.ok()
 			.and_then(|f| f.access_token)
 			.ok_or_else(|| {
-				tuwunel_core::err!(Request(MissingToken("No access token provided")))
+				gaussmatrix_core::err!(Request(MissingToken("No access token provided")))
 			})?
 	} else {
 		return Err!(Request(MissingToken("No access token provided")));

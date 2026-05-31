@@ -2,7 +2,7 @@ use std::cmp;
 
 use futures::{FutureExt, StreamExt, TryStreamExt};
 use ruma::{MilliSecondsSinceUnixEpoch, uint};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	utils::{ReadyExt, stream::IterStream},
 };

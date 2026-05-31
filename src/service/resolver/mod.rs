@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use ruma::OwnedServerName;
-use tuwunel_core::{Result, smallstr::SmallString, utils::MutexMap};
+use gaussmatrix_core::{Result, smallstr::SmallString, utils::MutexMap};
 
 pub use self::dns::Validating;
 use self::{cache::Cache, dns::Resolver, fed::FedDest};

@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use ruma::OwnedServerName;
-use tuwunel_core::{Result, utils::time};
-use tuwunel_service::resolver::cache::CachedDest;
+use gaussmatrix_core::{Result, utils::time};
+use gaussmatrix_service::resolver::cache::CachedDest;
 
 use crate::admin_command;
 

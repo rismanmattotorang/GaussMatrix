@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::{api::client::typing::create_typing_event, presence::PresenceState};
-use tuwunel_core::{Err, Result, utils, utils::math::Tried};
+use gaussmatrix_core::{Err, Result, utils, utils::math::Tried};
 
 use crate::{ClientIp, Ruma};
 

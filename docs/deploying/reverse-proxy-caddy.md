@@ -12,7 +12,7 @@ Install Caddy via your preferred method. Refer to the
 
 ## Configuration
 
-After installing Caddy, create `/etc/caddy/conf.d/tuwunel_caddyfile` and enter this (substitute
+After installing Caddy, create `/etc/caddy/conf.d/gaussmatrix_caddyfile` and enter this (substitute
 `your.server.name` with your actual server name):
 
 ```caddyfile
@@ -20,7 +20,7 @@ your.server.name, your.server.name:8448 {
     # TCP reverse_proxy
     reverse_proxy localhost:8008
     # UNIX socket (alternative - comment out the line above and uncomment this)
-    #reverse_proxy unix//run/tuwunel/tuwunel.sock
+    #reverse_proxy unix//run/gaussmatrix/gaussmatrix.sock
 }
 ```
 
@@ -29,20 +29,20 @@ your.server.name, your.server.name:8448 {
 - Handles both port 443 (HTTPS) and port 8448 (Matrix federation) automatically
 - Automatically provisions and renews TLS certificates via Let's Encrypt
 - Sets all necessary reverse proxy headers correctly
-- Routes all traffic to Tuwunel listening on `localhost:8008`
+- Routes all traffic to GaussMatrix listening on `localhost:8008`
 
 ### Client IP source
 
-By default, Tuwunel treats Caddy as the connecting peer, so registration
+By default, GaussMatrix treats Caddy as the connecting peer, so registration
 logs, rate limiting, and security tooling all attribute requests to Caddy's
 address rather than the real client. If Caddy is the only way clients can
-reach Tuwunel, set `ip_source = "rightmost_x_forwarded_for"` in
-`tuwunel.toml` (or `TUWUNEL_IP_SOURCE=rightmost_x_forwarded_for` in Docker).
-This makes Tuwunel trust the `X-Forwarded-For` header that Caddy's
+reach GaussMatrix, set `ip_source = "rightmost_x_forwarded_for"` in
+`gaussmatrix.toml` (or `GAUSSMATRIX_IP_SOURCE=rightmost_x_forwarded_for` in Docker).
+This makes GaussMatrix trust the `X-Forwarded-For` header that Caddy's
 `reverse_proxy` directive already sets. If you use the Unix-socket
 `reverse_proxy` target, leave `ip_source` unset instead.
 
-The setting only takes effect at startup, so restart Tuwunel after changing
+The setting only takes effect at startup, so restart GaussMatrix after changing
 it.
 
 That's it! Just start and enable the service and you're set.
@@ -56,17 +56,17 @@ sudo systemctl enable --now caddy
 After starting Caddy, verify it's working by checking:
 
 ```bash
-curl https://your.server.name/_tuwunel/server_version
-curl https://your.server.name:8448/_tuwunel/server_version
+curl https://your.server.name/_gaussmatrix/server_version
+curl https://your.server.name:8448/_gaussmatrix/server_version
 ```
 ## Caddy and .well-known
 
 Caddy can serve `.well-known/matrix/client` and `.well-known/matrix/server`
-instead of `tuwunel`. This is useful when delegating a root domain such as
+instead of `gaussmatrix`. This is useful when delegating a root domain such as
 `example.com` to a subdomain like `matrix.example.com`, where Caddy on the root
-domain has no Tuwunel upstream of its own.
+domain has no GaussMatrix upstream of its own.
 
-In this configuration Caddy bypasses Tuwunel's CORS layer, so the
+In this configuration Caddy bypasses GaussMatrix's CORS layer, so the
 [CORS headers recommended by the Matrix specification](https://spec.matrix.org/v1.17/client-server-api/#well-known-uris)
 must be added explicitly.
 

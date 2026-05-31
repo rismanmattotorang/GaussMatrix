@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use ruma::{DeviceId, TransactionId, UserId};
-use tuwunel_core::{Result, implement};
-use tuwunel_database::{Handle, Map};
+use gaussmatrix_core::{Result, implement};
+use gaussmatrix_database::{Handle, Map};
 
 pub struct Service {
 	db: Data,

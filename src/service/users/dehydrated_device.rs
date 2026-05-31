@@ -6,8 +6,8 @@ use ruma::{
 	serde::Raw,
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Err, Result, implement, trace};
-use tuwunel_database::{Deserialized, Json};
+use gaussmatrix_core::{Err, Result, implement, trace};
+use gaussmatrix_database::{Deserialized, Json};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct DehydratedDevice {

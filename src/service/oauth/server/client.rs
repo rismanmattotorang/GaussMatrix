@@ -1,10 +1,10 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD as b64};
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, implement,
 	utils::{hash::sha256, time::now_secs},
 };
-use tuwunel_database::{Cbor, Deserialized};
+use gaussmatrix_database::{Cbor, Deserialized};
 
 // Bounds the per-row footprint so an unauthenticated DCR endpoint cannot
 // evict every other client from the FIFO cache with one huge record.

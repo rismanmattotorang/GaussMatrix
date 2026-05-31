@@ -1,14 +1,14 @@
-# Maintaining your Tuwunel setup
+# Maintaining your GaussMatrix setup
 
 ## Moderation
 
-Tuwunel has moderation through admin room commands. "binary commands" (medium
+GaussMatrix has moderation through admin room commands. "binary commands" (medium
 priority) and an admin API (low priority) is planned. Some moderation-related
 config options are available in the example config such as "global ACLs" and
 blocking media requests to certain servers. See the example config for the
 moderation config options under the "Moderation / Privacy / Security" section.
 
-Tuwunel has moderation admin commands for:
+GaussMatrix has moderation admin commands for:
 
 - managing room aliases (`!admin rooms alias`)
 - managing room directory (`!admin rooms directory`)
@@ -36,7 +36,7 @@ each object being newline delimited. An example of doing this is:
 ## Database (RocksDB)
 
 Generally there is very little you need to do. [Compaction][rocksdb-compaction]
-is ran automatically based on various defined thresholds tuned for Tuwunel to
+is ran automatically based on various defined thresholds tuned for GaussMatrix to
 be high performance with the least I/O amplifcation or overhead. Manually
 running compaction is not recommended, or compaction via a timer, due to
 creating unnecessary I/O amplification. RocksDB is built with io_uring support
@@ -51,7 +51,7 @@ Some RocksDB settings can be adjusted such as the compression method chosen. See
 the RocksDB section in the [example config](configuration/examples.md).
 
 btrfs users have reported that database compression does not need to be disabled
-on Tuwunel as the filesystem already does not attempt to compress. This can be
+on GaussMatrix as the filesystem already does not attempt to compress. This can be
 validated by using `filefrag -v` on a `.SST` file in your database, and ensure
 the `physical_offset` matches (no filesystem compression). It is very important
 to ensure no additional filesystem compression takes place as this can render
@@ -67,9 +67,9 @@ performance. See <https://btrfs.readthedocs.io/en/latest/Compression.html#compat
 ### ZFS
 
 ZFS has several quirks that interact badly with RocksDB defaults. Apply both
-the Tuwunel config changes and the dataset properties below.
+the GaussMatrix config changes and the dataset properties below.
 
-In `tuwunel.toml`:
+In `gaussmatrix.toml`:
 
 - `rocksdb_direct_io = false`. OpenZFS prior to 2.3 silently ignored
   `O_DIRECT` and fell back to buffered. OpenZFS 2.3+ honors `O_DIRECT` only
@@ -86,8 +86,8 @@ On the dataset hosting `database_path`:
 | Property | Value | Reason |
 |---|---|---|
 | `recordsize` | `128K` (or `64K`) | Match RocksDB's working set. `16K` causes severe write amplification on compaction. |
-| `primarycache` | `metadata` | Tuwunel's block cache already serves data; ARC caching of data duplicates RAM. |
-| `compression` | `off` | RocksDB SSTs are already zstd-compressed by Tuwunel. |
+| `primarycache` | `metadata` | GaussMatrix's block cache already serves data; ARC caching of data duplicates RAM. |
+| `compression` | `off` | RocksDB SSTs are already zstd-compressed by GaussMatrix. |
 | `atime` | `off` | Avoid an FS write per read. |
 | `logbias` | `throughput` | Route ZIL through the normal txg path, which suits append-only WAL traffic. |
 
@@ -99,7 +99,7 @@ over weeks; pre-existing files keep the old size in the meantime.
 
 For sync write latency, in order of preference: a separate SLOG vdev, then
 `logbias=throughput`, then `sync=disabled` (only if you accept that a host
-crash may discard the WAL tail; Tuwunel recovers cleanly from this via
+crash may discard the WAL tail; GaussMatrix recovers cleanly from this via
 `rocksdb_recovery_mode=1`, the default).
 
 ### Files in database
@@ -110,7 +110,7 @@ they're server logs or database logs, however they are critical RocksDB files
 related to WAL tracking.
 
 The only safe files that can be deleted are the `LOG` files (all caps). These
-are the real RocksDB telemetry/log files, however Tuwunel has already
+are the real RocksDB telemetry/log files, however GaussMatrix has already
 configured to only store up to 3 RocksDB `LOG` files due to generally being
 useless for average users unless troubleshooting something low-level. If you
 would like to store nearly none at all, see the `rocksdb_max_log_files`
@@ -132,7 +132,7 @@ together.
 
 To restore a backup from an online RocksDB backup:
 
-- shutdown Tuwunel
+- shutdown GaussMatrix
 - create a new directory for merging together the data
 - in the online backup created, copy all `.sst` files in
 `$DATABASE_BACKUP_PATH/shared_checksum` to your new directory
@@ -143,11 +143,11 @@ To restore a backup from an online RocksDB backup:
 if you have multiple) to your new directory
 - set your `database_path` config option to your new directory, or replace your
 old one with the new one you crafted
-- start up Tuwunel again and it should open as normal
+- start up GaussMatrix again and it should open as normal
 
 ### Offline backups
 
-If you'd like to do an offline backup, shutdown Tuwunel and copy your
+If you'd like to do an offline backup, shutdown GaussMatrix and copy your
 `database_path` directory elsewhere. This can be restored with no modifications
 needed.
 
@@ -156,7 +156,7 @@ directory.
 
 ## Media
 
-Media still needs various work, however Tuwunel implements media deletion via:
+Media still needs various work, however GaussMatrix implements media deletion via:
 
 - MXC URI or Event ID (unencrypted and attempts to find the MXC URI in the
 event)
@@ -164,17 +164,17 @@ event)
 - Delete remote media in the past `N` seconds/minutes via filesystem metadata on
 the file created time (`btime`) or file modified time (`mtime`)
 
-See the `!admin media` command for further information. All media in Tuwunel
+See the `!admin media` command for further information. All media in GaussMatrix
 is stored at `$DATABASE_DIR/media`. This will be configurable soon.
 
 If you are finding yourself needing extensive granular control over media, we
 recommend looking into [Matrix Media
-Repo](https://github.com/t2bot/matrix-media-repo). Tuwunel intends to
+Repo](https://github.com/t2bot/matrix-media-repo). GaussMatrix intends to
 implement various utilities for media, but MMR is dedicated to extensive media
 management.
 
 Built-in S3 support is also planned, but for now using a "S3 filesystem" on
-`media/` works. Tuwunel also sends a `Cache-Control` header of 1 year and
+`media/` works. GaussMatrix also sends a `Cache-Control` header of 1 year and
 immutable for all media requests (download and thumbnail) to reduce unnecessary
 media requests from browsers, reduce bandwidth usage, and reduce load.
 

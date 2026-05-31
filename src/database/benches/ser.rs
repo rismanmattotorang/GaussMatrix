@@ -9,8 +9,8 @@ criterion_main!(benches);
 
 fn ser_str(b: &mut Criterion) {
 	b.bench_function("ser_str", |c| {
-		use tuwunel_core::ruma::{RoomId, UserId};
-		use tuwunel_database::serialize_to_vec;
+		use gaussmatrix_core::ruma::{RoomId, UserId};
+		use gaussmatrix_database::serialize_to_vec;
 
 		let user_id: &UserId = "@user:example.com".try_into().unwrap();
 		let room_id: &RoomId = "!room:example.com".try_into().unwrap();

@@ -7,7 +7,7 @@ use axum::{Router, extract::connect_info::IntoMakeServiceWithConnectInfo};
 use axum_server::Handle;
 use axum_server_dual_protocol::{ServerExt, axum_server::tls_rustls::RustlsConfig};
 use futures::{FutureExt, future::BoxFuture};
-use tuwunel_core::{Result, debug, err, info, itertools::Itertools};
+use gaussmatrix_core::{Result, debug, err, info, itertools::Itertools};
 
 pub(super) async fn serve<'a>(
 	app: &Router,
@@ -20,7 +20,7 @@ pub(super) async fn serve<'a>(
 ) -> Result<Vec<BoxFuture<'a, Result<(), std::io::Error>>>> {
 	info!(
 		"Note: It is strongly recommended that you use a reverse proxy instead of running \
-		 tuwunel directly with TLS."
+		 gaussmatrix directly with TLS."
 	);
 
 	debug!(

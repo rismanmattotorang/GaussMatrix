@@ -6,7 +6,7 @@ use ruma::{
 	events::typing::{SyncTypingEvent, TypingEventContent},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug_error,
 	utils::{IterStream, ReadyExt},
 };

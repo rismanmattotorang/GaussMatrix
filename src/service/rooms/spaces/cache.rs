@@ -8,8 +8,8 @@ use ruma::{
 	},
 };
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Result, at, debug, implement, utils::rand::time_from_now_secs};
-use tuwunel_database::{Deserialized, Json};
+use gaussmatrix_core::{Result, at, debug, implement, utils::rand::time_from_now_secs};
+use gaussmatrix_database::{Deserialized, Json};
 
 use super::is_summary_serializable;
 

@@ -1,5 +1,5 @@
 use ruma::OwnedEventId;
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 
 use crate::admin_command;
 

@@ -12,14 +12,14 @@ use ruma::{
 		media::{create_content, create_content_async, create_mxc_uri},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err,
 	utils::{
 		self, content_disposition::make_content_disposition, math::ruma_from_usize,
 		time::now_millis,
 	},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	media::{CACHE_CONTROL_IMMUTABLE, CORP_CROSS_ORIGIN, Dim, MXC_LENGTH, Media},
 };

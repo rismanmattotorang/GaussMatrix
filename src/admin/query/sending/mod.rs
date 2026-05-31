@@ -5,8 +5,8 @@ mod queued_requests;
 
 use clap::Subcommand;
 use ruma::{OwnedServerName, OwnedUserId};
-use tuwunel_core::{Err, Result};
-use tuwunel_service::sending::Destination;
+use gaussmatrix_core::{Err, Result};
+use gaussmatrix_service::sending::Destination;
 
 use crate::admin_command_dispatch;
 

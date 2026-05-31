@@ -9,7 +9,7 @@ use futures::{
 	stream::{FuturesUnordered, unfold},
 };
 use ruma::OwnedEventId;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement, is_equal_to,
 	itertools::Itertools,
 	matrix::{Event, pdu::AuthEvents},

@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use ruma::{OwnedUserId, UserId};
 use serde_json::Value;
-use tuwunel_core::{debug, implement, trace};
+use gaussmatrix_core::{debug, implement, trace};
 
 use super::{Sessions, UserInfo};
 

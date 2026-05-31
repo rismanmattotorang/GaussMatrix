@@ -14,7 +14,7 @@ use async_channel::{QueueStrategy, Receiver, RecvError, Sender};
 use futures::{TryFutureExt, channel::oneshot};
 use oneshot::Sender as ResultSender;
 use rocksdb::Direction;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, Server, debug, err, error, implement,
 	result::DebugInspect,
 	smallvec::SmallVec,
@@ -70,7 +70,7 @@ const QUEUE_LIMIT: (usize, usize) = (1, 1024);
 const BATCH_INLINE: usize = 1;
 
 const WORKER_STACK_SIZE: usize = 1_048_576;
-const WORKER_NAME: &str = "tuwunel:db";
+const WORKER_NAME: &str = "gaussmatrix:db";
 
 #[implement(Pool)]
 pub(crate) fn new(server: &Arc<Server>) -> Result<Arc<Self>> {

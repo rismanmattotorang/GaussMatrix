@@ -13,7 +13,7 @@ use ruma::{
 	profile::{ProfileFieldName, ProfileFieldValue},
 };
 use serde_json::Value as JsonValue;
-use tuwunel_core::{Err, Result, err, utils::future::TryExtExt};
+use gaussmatrix_core::{Err, Result, err, utils::future::TryExtExt};
 
 use crate::Ruma;
 

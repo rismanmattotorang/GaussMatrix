@@ -1,7 +1,7 @@
 use futures::StreamExt;
 use ruma::{OwnedRoomId, OwnedUserId, RoomId, UserId};
-use tuwunel_core::{Err, Result, err};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::Services;
 
 pub(crate) async fn get_room_info(
 	services: &Services,

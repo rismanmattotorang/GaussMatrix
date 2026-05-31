@@ -1,5 +1,5 @@
 use ruma::api::client::account::request_3pid_management_token_via_msisdn;
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::Ruma;
 

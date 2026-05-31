@@ -11,8 +11,8 @@ use std::{
 };
 
 use tokio::task::JoinSet;
-use tuwunel_core::{Err, Result, debug_info, info};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, debug_info, info};
+use gaussmatrix_service::Services;
 
 use super::layers;
 use crate::handle::ServerHandle;
@@ -81,9 +81,9 @@ pub(super) async fn serve(services: Arc<Services>, handle: ServerHandle) -> Resu
 		}
 
 		#[cfg(not(feature = "direct_tls"))]
-		return tuwunel_core::Err!(Config(
+		return gaussmatrix_core::Err!(Config(
 			"tls",
-			"tuwunel was not built with direct TLS support (\"direct_tls\")"
+			"gaussmatrix was not built with direct TLS support (\"direct_tls\")"
 		));
 	} else {
 		let plain_futures =
@@ -168,7 +168,7 @@ fn make_log_addrs(
 fn systemd_listeners() -> Result<(Vec<TcpListener>, Vec<UnixListener>)> {
 	use std::os::fd::FromRawFd;
 
-	use tuwunel_core::utils::sys::{SocketFamily, get_socket_family};
+	use gaussmatrix_core::utils::sys::{SocketFamily, get_socket_family};
 
 	let mut tcp = vec![];
 	let mut unix = vec![];

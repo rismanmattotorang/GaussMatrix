@@ -2,7 +2,7 @@ use std::{borrow::Borrow, collections::HashMap, sync::Arc};
 
 use futures::{FutureExt, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use ruma::{OwnedEventId, RoomId, RoomVersionId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err, implement,
 	matrix::room_version,
 	trace,

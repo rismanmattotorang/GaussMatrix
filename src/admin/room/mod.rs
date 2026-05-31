@@ -9,7 +9,7 @@ mod prune_empty;
 
 use clap::Subcommand;
 use ruma::OwnedRoomId;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use self::{
 	alias::RoomAliasCommand, directory::RoomDirectoryCommand, info::RoomInfoCommand,

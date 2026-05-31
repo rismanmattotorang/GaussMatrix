@@ -1,4 +1,4 @@
-use tuwunel_core::{Err, Result, utils::sys::current_exe_deleted};
+use gaussmatrix_core::{Err, Result, utils::sys::current_exe_deleted};
 
 use crate::admin_command;
 

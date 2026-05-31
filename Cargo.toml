@@ -36,7 +36,7 @@ rust-version = "1.94.0"
 version = "1.7.0"
 
 [workspace.metadata.crane]
-name = "tuwunel"
+name = "gaussmatrix"
 
 #
 # Dependencies
@@ -653,38 +653,38 @@ rev = "200e958941d522a70c5877e3d846f55b5586c68d"
 # Our crates
 #
 
-[workspace.dependencies.tuwunel-router]
-package = "tuwunel_router"
+[workspace.dependencies.gaussmatrix-router]
+package = "gaussmatrix_router"
 path = "src/router"
 default-features = false
 
-[workspace.dependencies.tuwunel-admin]
-package = "tuwunel_admin"
+[workspace.dependencies.gaussmatrix-admin]
+package = "gaussmatrix_admin"
 path = "src/admin"
 default-features = false
 
-[workspace.dependencies.tuwunel-api]
-package = "tuwunel_api"
+[workspace.dependencies.gaussmatrix-api]
+package = "gaussmatrix_api"
 path = "src/api"
 default-features = false
 
-[workspace.dependencies.tuwunel-service]
-package = "tuwunel_service"
+[workspace.dependencies.gaussmatrix-service]
+package = "gaussmatrix_service"
 path = "src/service"
 default-features = false
 
-[workspace.dependencies.tuwunel-database]
-package = "tuwunel_database"
+[workspace.dependencies.gaussmatrix-database]
+package = "gaussmatrix_database"
 path = "src/database"
 default-features = false
 
-[workspace.dependencies.tuwunel-core]
-package = "tuwunel_core"
+[workspace.dependencies.gaussmatrix-core]
+package = "gaussmatrix_core"
 path = "src/core"
 default-features = false
 
-[workspace.dependencies.tuwunel-macros]
-package = "tuwunel_macros"
+[workspace.dependencies.gaussmatrix-macros]
+package = "gaussmatrix_macros"
 path = "src/macros"
 default-features = false
 
@@ -733,7 +733,7 @@ codegen-units = 32
 #	'-Clink-arg=-Wl,--no-gc-sections',
 #]
 
-[profile.release-native.package.tuwunel_macros]
+[profile.release-native.package.gaussmatrix_macros]
 inherits = "release-native.build-override"
 #rustflags = [
 #	'-Crelocation-model=pic',
@@ -763,7 +763,7 @@ strip = "none"
 [profile.dev]
 debug = 0
 #rustflags = [
-#	'--cfg', 'tuwunel_mods',
+#	'--cfg', 'gaussmatrix_mods',
 #	'-Ztime-passes',
 #	'-Zmir-opt-level=0',
 #	'-Zvalidate-mir=false',
@@ -780,10 +780,10 @@ debug = 0
 #	'-Clink-arg=-Wl,-z,lazy',
 #]
 
-[profile.dev.package.tuwunel_core]
+[profile.dev.package.gaussmatrix_core]
 incremental = false
 #rustflags = [
-#	'--cfg', 'tuwunel_mods',
+#	'--cfg', 'gaussmatrix_mods',
 #	'-Ztime-passes',
 #	'-Zmir-opt-level=0',
 #	'-Ztls-model=initial-exec',
@@ -800,9 +800,9 @@ incremental = false
 #	'-Clink-arg=-Wl,-z,nodelete',
 #]
 
-[profile.dev.package.tuwunel]
+[profile.dev.package.gaussmatrix]
 #rustflags = [
-#	'--cfg', 'tuwunel_mods',
+#	'--cfg', 'gaussmatrix_mods',
 #	'-Ztime-passes',
 #	'-Zmir-opt-level=0',
 #	'-Zvalidate-mir=false',
@@ -823,7 +823,7 @@ strip = "symbols"
 opt-level = 'z'
 incremental = false
 #rustflags = [
-#	'--cfg', 'tuwunel_mods',
+#	'--cfg', 'gaussmatrix_mods',
 #	'-Ztls-model=global-dynamic',
 #	'-Cprefer-dynamic=true',
 #	'-Zstaticlib-prefer-dynamic=true',
@@ -1047,5 +1047,5 @@ suspicious = { level = "warn", priority = -1 }
 ## some sadness
 let_underscore_future = { level = "allow", priority = 1 }
 
-# rust doesnt understand tuwunel's custom log macros
+# rust doesnt understand gaussmatrix's custom log macros
 literal_string_with_formatting_args = { level = "allow", priority = 1 }

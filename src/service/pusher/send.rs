@@ -13,7 +13,7 @@ use ruma::{
 	push::{Action, PushFormat, Ruleset, Tweak},
 	uint,
 };
-use tuwunel_core::{Err, Result, err, implement, matrix::Event};
+use gaussmatrix_core::{Err, Result, err, implement, matrix::Event};
 
 #[implement(super::Service)]
 #[tracing::instrument(level = "debug", skip_all)]

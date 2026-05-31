@@ -5,11 +5,11 @@ use axum::{
 	response::{IntoResponse, Redirect},
 };
 use serde::Deserialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, utils,
 	utils::{BoolExt, result::FlatOk},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	Services,
 	oauth::server::{AUTH_REQUEST_LIFETIME, AuthRequest},
 };
@@ -83,7 +83,7 @@ pub(crate) async fn authorize_route(
 	let base = oidc.issuer_url()?;
 	let base = base.trim_end_matches('/');
 
-	let complete_url = Url::parse(&format!("{base}/_tuwunel/oidc/_complete"))
+	let complete_url = Url::parse(&format!("{base}/_gaussmatrix/oidc/_complete"))
 		.map_err(|_| err!(error!("Failed to build complete URL")))
 		.map(|mut url| {
 			url.query_pairs_mut()

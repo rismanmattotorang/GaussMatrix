@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use derive_more::Debug;
 use futures::TryStreamExt;
 pub use object_store::{CopyMode, GetResult, GetResultPayload, PutPayload, PutResult};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at,
 	config::{StorageProvider, StorageProviderLocal},
 	err, implement,

@@ -10,7 +10,7 @@ use ruma::{
 	api::client::device::Device, events::AnyToDeviceEvent, serde::Raw,
 };
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, implement, trace,
 	utils::{
 		self, BoolExt, ReadyExt,
@@ -21,7 +21,7 @@ use tuwunel_core::{
 		},
 	},
 };
-use tuwunel_database::{Cbor, Deserialized, Ignore, Interfix, Json, Map};
+use gaussmatrix_database::{Cbor, Deserialized, Ignore, Interfix, Json, Map};
 
 /// generated device ID length
 const DEVICE_ID_LENGTH: usize = 10;

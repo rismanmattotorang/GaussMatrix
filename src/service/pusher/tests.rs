@@ -1,7 +1,7 @@
 #![cfg(test)]
 
 use ruma::{EventId, RoomId, UserId};
-use tuwunel_database::{Interfix, SEP, serialize_to_vec};
+use gaussmatrix_database::{Interfix, SEP, serialize_to_vec};
 
 const ROOM: &str = "!room:example.com";
 const USER: &str = "@user:example.com";

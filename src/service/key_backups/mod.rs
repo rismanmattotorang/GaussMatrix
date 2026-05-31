@@ -6,11 +6,11 @@ use ruma::{
 	api::client::backup::{BackupAlgorithm, KeyBackupData, RoomKeyBackup},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, implement,
 	utils::stream::{ReadyExt, TryIgnore},
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Json, Map};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Json, Map};
 
 pub struct Service {
 	db: Data,

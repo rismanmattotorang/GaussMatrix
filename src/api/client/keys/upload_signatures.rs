@@ -2,7 +2,7 @@ use axum::extract::State;
 use futures::StreamExt;
 use ruma::{UserId, api::client::keys::upload_signatures};
 use serde_json::value::RawValue;
-use tuwunel_core::{Result, debug, debug_warn, utils::IterStream};
+use gaussmatrix_core::{Result, debug, debug_warn, utils::IterStream};
 
 use crate::Ruma;
 

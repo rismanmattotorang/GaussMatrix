@@ -7,8 +7,8 @@ mod token;
 use std::sync::Arc;
 
 use serde_json::Value as JsonValue;
-use tuwunel_core::{Result, debug_info, debug_warn, err, implement, warn};
-use tuwunel_database::Map;
+use gaussmatrix_core::{Result, debug_info, debug_warn, err, implement, warn};
+use gaussmatrix_database::Map;
 
 pub use self::{
 	auth::{AUTH_REQUEST_LIFETIME, AuthCodeSession, AuthRequest},

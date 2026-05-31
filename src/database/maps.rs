@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use rocksdb::DBCompressionType as CompressionType;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{
 	Engine, Map,

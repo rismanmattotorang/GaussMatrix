@@ -1,7 +1,7 @@
 use std::{convert::AsRef, fmt::Debug, io::Write};
 
 use serde::Serialize;
-use tuwunel_core::{arrayvec::ArrayVec, implement};
+use gaussmatrix_core::{arrayvec::ArrayVec, implement};
 
 use crate::{keyval::KeyBuf, ser};
 

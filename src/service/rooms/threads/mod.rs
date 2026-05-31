@@ -12,7 +12,7 @@ use ruma::{
 };
 use serde::Deserialize;
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Event, Result, err,
 	matrix::pdu::{PduCount, PduEvent, PduId, RawPduId},
 	trace,
@@ -21,7 +21,7 @@ use tuwunel_core::{
 		stream::{TryIgnore, WidebandExt},
 	},
 };
-use tuwunel_database::{Deserialized, Interfix, Map};
+use gaussmatrix_database::{Deserialized, Interfix, Map};
 
 /// Maximum relation hops walked when resolving thread membership, per
 /// the Matrix v1.4 spec recommendation (also MSC3771/MSC3773).

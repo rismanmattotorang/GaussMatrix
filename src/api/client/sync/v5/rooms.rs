@@ -18,7 +18,7 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, err, error, is_equal_to,
 	itertools::Itertools,
 	matrix::{
@@ -31,7 +31,7 @@ use tuwunel_core::{
 		stream::BroadbandExt,
 	},
 };
-use tuwunel_service::{Services, sync::Room};
+use gaussmatrix_service::{Services, sync::Room};
 
 use self::{bump_stamp::room_bump_stamp, heroes::calculate_heroes};
 use super::{super::load_timeline, Connection, ListIds, SyncInfo, Window, WindowRoom};

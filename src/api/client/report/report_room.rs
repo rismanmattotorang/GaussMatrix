@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::room::report_room;
-use tuwunel_core::{Err, Result, info};
+use gaussmatrix_core::{Err, Result, info};
 
 use super::REASON_MAX_LEN;
 use crate::{ClientIp, Ruma};

@@ -8,8 +8,8 @@ use ruma::{
 	},
 	push::{PredefinedContentRuleId, PredefinedOverrideRuleId, Ruleset},
 };
-use tuwunel_core::{Result, err};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Result, err};
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

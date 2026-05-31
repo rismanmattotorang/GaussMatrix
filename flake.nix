@@ -21,7 +21,7 @@
     nix-filter.url = "github:numtide/nix-filter?ref=main";
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixpkgs-unstable";
     rocksdb = {
-      url = "github:matrix-construct/rocksdb?ref=tuwunel-changes";
+      url = "github:matrix-construct/rocksdb?ref=gaussmatrix-changes";
       flake = false;
     };
     liburing = {
@@ -238,8 +238,8 @@
               # be expected on non-debug builds.
               "jemalloc_prof"
               "jemalloc_stats"
-              # tuwunel_mods is a development-only hot reload feature
-              "tuwunel_mods"
+              # gaussmatrix_mods is a development-only hot reload feature
+              "gaussmatrix_mods"
             ];
           };
           default-debug = scopeHost.main.override {
@@ -250,7 +250,7 @@
               # dont include experimental features
               "experimental"
               # this is non-functional on nix for some reason
-              "tuwunel_mods"
+              "gaussmatrix_mods"
             ];
           };
           # just a test profile used for things like CI and complement
@@ -261,7 +261,7 @@
               # dont include experimental features
               "experimental"
               # this is non-functional on nix for some reason
-              "tuwunel_mods"
+              "gaussmatrix_mods"
             ];
           };
           all-features = scopeHost.main.override {
@@ -274,7 +274,7 @@
               "jemalloc_prof"
               "jemalloc_stats"
               # this is non-functional on nix for some reason
-              "tuwunel_mods"
+              "gaussmatrix_mods"
             ];
           };
           all-features-debug = scopeHost.main.override {
@@ -286,7 +286,7 @@
               # dont include experimental features
               "experimental"
               # this is non-functional on nix for some reason
-              "tuwunel_mods"
+              "gaussmatrix_mods"
             ];
           };
 
@@ -301,8 +301,8 @@
                 # be expected on non-debug builds.
                 "jemalloc_prof"
                 "jemalloc_stats"
-                # tuwunel_mods is a development-only hot reload feature
-                "tuwunel_mods"
+                # gaussmatrix_mods is a development-only hot reload feature
+                "gaussmatrix_mods"
               ];
             };
           };
@@ -315,8 +315,8 @@
               disable_features = [
                 # dont include experimental features
                 "experimental"
-                # tuwunel_mods is a development-only hot reload feature
-                "tuwunel_mods"
+                # gaussmatrix_mods is a development-only hot reload feature
+                "gaussmatrix_mods"
               ];
             };
           };
@@ -375,8 +375,8 @@
                       disable_features = [
                         # dont include experimental features
                         "experimental"
-                        # tuwunel_mods is a development-only hot reload feature
-                        "tuwunel_mods"
+                        # gaussmatrix_mods is a development-only hot reload feature
+                        "gaussmatrix_mods"
                       ];
                     };
                   }
@@ -393,8 +393,8 @@
                         # be expected on non-debug builds.
                         "jemalloc_prof"
                         "jemalloc_stats"
-                        # tuwunel_mods is a development-only hot reload feature
-                        "tuwunel_mods"
+                        # gaussmatrix_mods is a development-only hot reload feature
+                        "gaussmatrix_mods"
                       ];
                     };
                   }
@@ -412,8 +412,8 @@
                         # be expected on non-debug builds.
                         "jemalloc_prof"
                         "jemalloc_stats"
-                        # tuwunel_mods is a development-only hot reload feature
-                        "tuwunel_mods"
+                        # gaussmatrix_mods is a development-only hot reload feature
+                        "gaussmatrix_mods"
                       ];
                       x86_64_haswell_target_optimised = (
                         if (crossSystem == "x86_64-linux-gnu" || crossSystem == "x86_64-linux-musl") then true else false
@@ -432,8 +432,8 @@
                       disable_features = [
                         # dont include experimental features
                         "experimental"
-                        # tuwunel_mods is a development-only hot reload feature
-                        "tuwunel_mods"
+                        # gaussmatrix_mods is a development-only hot reload feature
+                        "gaussmatrix_mods"
                       ];
                     };
                   }
@@ -482,8 +482,8 @@
                           # be expected on non-debug builds.
                           "jemalloc_prof"
                           "jemalloc_stats"
-                          # tuwunel_mods is a development-only hot reload feature
-                          "tuwunel_mods"
+                          # gaussmatrix_mods is a development-only hot reload feature
+                          "gaussmatrix_mods"
                         ];
                       };
                     };
@@ -503,8 +503,8 @@
                           # be expected on non-debug builds.
                           "jemalloc_prof"
                           "jemalloc_stats"
-                          # tuwunel_mods is a development-only hot reload feature
-                          "tuwunel_mods"
+                          # gaussmatrix_mods is a development-only hot reload feature
+                          "gaussmatrix_mods"
                         ];
                         x86_64_haswell_target_optimised = (
                           if (crossSystem == "x86_64-linux-gnu" || crossSystem == "x86_64-linux-musl") then true else false
@@ -525,8 +525,8 @@
                         disable_features = [
                           # dont include experimental features
                           "experimental"
-                          # tuwunel_mods is a development-only hot reload feature
-                          "tuwunel_mods"
+                          # gaussmatrix_mods is a development-only hot reload feature
+                          "gaussmatrix_mods"
                         ];
                       };
                     };
@@ -562,8 +562,8 @@
                   # be expected on non-debug builds.
                   "jemalloc_prof"
                   "jemalloc_stats"
-                  # tuwunel_mods is a development-only hot reload feature
-                  "tuwunel_mods"
+                  # gaussmatrix_mods is a development-only hot reload feature
+                  "gaussmatrix_mods"
                 ];
               };
             }

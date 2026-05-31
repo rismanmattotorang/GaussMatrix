@@ -4,7 +4,7 @@ mod signing_keys_for;
 
 use clap::Subcommand;
 use ruma::OwnedServerName;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

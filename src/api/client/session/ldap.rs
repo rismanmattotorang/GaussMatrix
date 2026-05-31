@@ -1,7 +1,7 @@
 use futures::FutureExt;
 use ruma::{OwnedUserId, UserId};
-use tuwunel_core::{Err, Result, debug};
-use tuwunel_service::{Services, users::Register};
+use gaussmatrix_core::{Err, Result, debug};
+use gaussmatrix_service::{Services, users::Register};
 
 use super::password_login;
 
@@ -46,7 +46,7 @@ pub(super) async fn ldap_login(
 	// their users (synapse, Nextcloud, Jellyfin, ...).
 	//
 	// LDAP users are crated with a dummy password but non empty because an empty
-	// password is reserved for deactivated accounts. The tuwunel password field
+	// password is reserved for deactivated accounts. The gaussmatrix password field
 	// will never be read to login a LDAP user so it's not an issue.
 	if !services.users.exists(lowercased_user_id).await {
 		services
@@ -62,18 +62,18 @@ pub(super) async fn ldap_login(
 
 	// only perform admin add/remove check if admin_filter is set
 	if !services.config.ldap.admin_filter.is_empty() {
-		let is_tuwunel_admin = services
+		let is_gaussmatrix_admin = services
 			.admin
 			.user_is_admin(lowercased_user_id)
 			.await;
 
-		if is_ldap_admin && !is_tuwunel_admin {
+		if is_ldap_admin && !is_gaussmatrix_admin {
 			services
 				.admin
 				.make_user_admin(lowercased_user_id)
 				.boxed()
 				.await?;
-		} else if !is_ldap_admin && is_tuwunel_admin {
+		} else if !is_ldap_admin && is_gaussmatrix_admin {
 			services
 				.admin
 				.revoke_admin(lowercased_user_id)

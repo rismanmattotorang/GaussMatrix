@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use futures::{Stream, TryStreamExt};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	utils::stream::{ReadyExt, TryIgnore},
 };

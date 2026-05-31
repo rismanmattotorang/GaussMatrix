@@ -1,5 +1,5 @@
 use futures::StreamExt;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{PAGE_SIZE, admin_command, get_room_info};
 

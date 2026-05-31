@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use futures::Stream;
 use ruma::{RoomId, api::client::room::Visibility};
-use tuwunel_core::{Result, implement, utils::stream::TryIgnore};
-use tuwunel_database::Map;
+use gaussmatrix_core::{Result, implement, utils::stream::TryIgnore};
+use gaussmatrix_database::Map;
 
 pub struct Service {
 	db: Data,

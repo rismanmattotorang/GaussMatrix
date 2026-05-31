@@ -13,8 +13,8 @@ use std::net::IpAddr;
 use axum::extract::State;
 use futures::{FutureExt, StreamExt};
 use ruma::{RoomId, RoomOrAliasId, UserId, api::client::membership::joined_rooms};
-use tuwunel_core::{Err, Result, result::LogErr, warn};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, result::LogErr, warn};
+use gaussmatrix_service::Services;
 
 pub(crate) use self::{
 	ban::ban_user_route,

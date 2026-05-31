@@ -19,7 +19,7 @@ use ruma::{
 	serde::Raw,
 };
 use serde_json::{json, value::to_raw_value};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug_warn, implement,
 	utils::{
 		BoolExt, IterStream,
@@ -28,7 +28,7 @@ use tuwunel_core::{
 		stream::{BroadbandExt, ReadyExt},
 	},
 };
-use tuwunel_service::{Services, users::parse_master_key};
+use gaussmatrix_service::{Services, users::parse_master_key};
 
 use super::FailureMap;
 use crate::Ruma;

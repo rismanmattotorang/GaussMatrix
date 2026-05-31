@@ -2,14 +2,14 @@ use std::{sync::Arc, time::SystemTime};
 
 use futures::Stream;
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result,
 	utils::{
 		self,
 		stream::{ReadyExt, TryIgnore},
 	},
 };
-use tuwunel_database::{Database, Deserialized, Json, Map};
+use gaussmatrix_database::{Database, Deserialized, Json, Map};
 
 pub(super) struct Data {
 	registrationtoken_info: Arc<Map>,

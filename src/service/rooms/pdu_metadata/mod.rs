@@ -6,7 +6,7 @@ use ruma::{
 	api::Direction,
 	events::{reaction::ReactionEventContent, relation::RelationType},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	PduId, Result,
 	arrayvec::ArrayVec,
 	implement, is_equal_to,
@@ -18,7 +18,7 @@ use tuwunel_core::{
 		u64_from_u8,
 	},
 };
-use tuwunel_database::{Interfix, Map};
+use gaussmatrix_database::{Interfix, Map};
 
 use crate::rooms::short::ShortRoomId;
 

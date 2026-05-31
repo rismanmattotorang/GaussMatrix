@@ -10,7 +10,7 @@ mod providers;
 mod show;
 mod sync;
 
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

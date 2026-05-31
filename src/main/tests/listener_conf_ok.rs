@@ -1,8 +1,8 @@
 #![cfg(test)]
 
 use insta::{assert_debug_snapshot, with_settings};
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::Result;
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::Result;
 
 #[test]
 fn listener_conf_ok() -> Result {
@@ -15,7 +15,7 @@ fn listener_conf_ok() -> Result {
 
 		let runtime = Runtime::new(Some(&args))?;
 		let server = Server::new(Some(&args), Some(&runtime))?;
-		let result = tuwunel::exec(&server, runtime);
+		let result = gaussmatrix::exec(&server, runtime);
 
 		assert_debug_snapshot!(result);
 		result

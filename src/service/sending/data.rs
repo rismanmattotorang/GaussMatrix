@@ -2,11 +2,11 @@ use std::{fmt::Debug, sync::Arc};
 
 use futures::{Stream, StreamExt};
 use ruma::{OwnedServerName, ServerName, UserId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, at, utils,
 	utils::{ReadyExt, stream::TryIgnore},
 };
-use tuwunel_database::{Database, Deserialized, Map};
+use gaussmatrix_database::{Database, Deserialized, Map};
 
 use super::{Destination, SendingEvent};
 

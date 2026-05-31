@@ -3,8 +3,8 @@ set -e
 
 #. /usr/share/debconf/confmodule
 
-TUWUNEL_CONFIG_PATH=/etc/tuwunel
-TUWUNEL_DATABASE_PATH=/var/lib/tuwunel
+GAUSSMATRIX_CONFIG_PATH=/etc/gaussmatrix
+GAUSSMATRIX_DATABASE_PATH=/var/lib/gaussmatrix
 CONDUIT_DATABASE_PATH_SYMLINK=/var/lib/matrix-conduit
 CONDUWUIT_DATABASE_PATH_SYMLINK=/var/lib/conduwuit
 
@@ -19,17 +19,17 @@ case $1 in
 
     #
 
-    if [ -d "$TUWUNEL_CONFIG_PATH" ]; then
-      if test -L "$TUWUNEL_CONFIG_PATH"; then
-        echo "Deleting tuwunel configuration files"
-        rm -v -r "$TUWUNEL_CONFIG_PATH"
+    if [ -d "$GAUSSMATRIX_CONFIG_PATH" ]; then
+      if test -L "$GAUSSMATRIX_CONFIG_PATH"; then
+        echo "Deleting gaussmatrix configuration files"
+        rm -v -r "$GAUSSMATRIX_CONFIG_PATH"
       fi
     fi
 
-    if [ -d "$TUWUNEL_DATABASE_PATH" ]; then
-      if test -L "$TUWUNEL_DATABASE_PATH"; then
-        echo "Deleting tuwunel database directory"
-        rm -r "$TUWUNEL_DATABASE_PATH"
+    if [ -d "$GAUSSMATRIX_DATABASE_PATH" ]; then
+      if test -L "$GAUSSMATRIX_DATABASE_PATH"; then
+        echo "Deleting gaussmatrix database directory"
+        rm -r "$GAUSSMATRIX_DATABASE_PATH"
       fi
     fi
 

@@ -8,7 +8,7 @@ use http::{
 	header::{CACHE_CONTROL, PRAGMA},
 };
 use serde::Deserialize;
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use super::oauth_error;
 
@@ -29,7 +29,7 @@ pub(crate) struct RevokeRequest {
 	_client_id: Option<String>,
 }
 
-/// `POST /_tuwunel/oidc/revoke`
+/// `POST /_gaussmatrix/oidc/revoke`
 ///
 /// MSC4254: OAuth 2.0 Token Revocation per RFC7009. Revokes both the access
 /// and refresh tokens associated with the supplied token.

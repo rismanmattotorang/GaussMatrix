@@ -3,7 +3,7 @@ mod changes_since;
 
 use clap::Subcommand;
 use ruma::{OwnedRoomId, OwnedUserId};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

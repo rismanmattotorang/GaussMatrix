@@ -1,7 +1,7 @@
-#![cfg(all(tuwunel_mods, feature = "tuwunel_mods"))]
+#![cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
 
 #[unsafe(no_link)]
-extern crate tuwunel_service;
+extern crate gaussmatrix_service;
 
 use std::{
 	future::Future,
@@ -9,13 +9,13 @@ use std::{
 	sync::{Arc, atomic::Ordering},
 };
 
-use tuwunel_core::{Error, Result, debug, error, mods};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Error, Result, debug, error, mods};
+use gaussmatrix_service::Services;
 
 use crate::Server;
 
 type StartFuncResult = Pin<Box<dyn Future<Output = Result<Arc<Services>>> + Send>>;
-type StartFuncProto = fn(&Arc<tuwunel_core::Server>) -> StartFuncResult;
+type StartFuncProto = fn(&Arc<gaussmatrix_core::Server>) -> StartFuncResult;
 
 type RunFuncResult = Pin<Box<dyn Future<Output = Result> + Send>>;
 type RunFuncProto = fn(&Arc<Services>) -> RunFuncResult;
@@ -23,19 +23,19 @@ type RunFuncProto = fn(&Arc<Services>) -> RunFuncResult;
 type StopFuncResult = Pin<Box<dyn Future<Output = Result> + Send>>;
 type StopFuncProto = fn(Arc<Services>) -> StopFuncResult;
 
-const RESTART_THRESH: &str = "tuwunel_service";
+const RESTART_THRESH: &str = "gaussmatrix_service";
 const MODULE_NAMES: &[&str] = &[
-	//"tuwunel_core",
-	"tuwunel_database",
-	"tuwunel_service",
-	"tuwunel_api",
-	"tuwunel_admin",
-	"tuwunel_router",
+	//"gaussmatrix_core",
+	"gaussmatrix_database",
+	"gaussmatrix_service",
+	"gaussmatrix_api",
+	"gaussmatrix_admin",
+	"gaussmatrix_router",
 ];
 
 #[cfg(panic_trap)]
-tuwunel_core::mod_init! {{
-	tuwunel_core::debug::set_panic_trap();
+gaussmatrix_core::mod_init! {{
+	gaussmatrix_core::debug::set_panic_trap();
 }}
 
 pub(crate) async fn run(server: &Arc<Server>, starts: bool) -> Result<(bool, bool), Error> {

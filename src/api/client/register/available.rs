@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::{UserId, api::client::account::get_username_availability};
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use super::is_matrix_appservice_irc;
 use crate::{ClientIp, Ruma};

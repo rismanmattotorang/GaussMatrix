@@ -11,11 +11,11 @@ use ruma::{
 		error::{ErrorKind, StandardErrorBody},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, error, extract, implement,
 	utils::{self, BoolExt, hash, string::EMPTY},
 };
-use tuwunel_database::{Deserialized, Json, Map};
+use gaussmatrix_database::{Deserialized, Json, Map};
 
 use crate::users::PASSWORD_SENTINEL;
 

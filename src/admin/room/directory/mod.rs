@@ -4,7 +4,7 @@ mod unpublish;
 
 use clap::Subcommand;
 use ruma::OwnedRoomId;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

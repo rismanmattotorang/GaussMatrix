@@ -16,7 +16,7 @@ mod sync;
 mod users;
 
 use clap::Subcommand;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use self::{
 	account_data::AccountDataCommand, appservice::AppserviceCommand, globals::GlobalsCommand,

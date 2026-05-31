@@ -5,8 +5,8 @@ use ruma::{
 	OwnedServerName, RoomAliasId, RoomId,
 	api::client::alias::{create_alias, delete_alias, get_alias},
 };
-use tuwunel_core::{Err, Result, debug, err};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, debug, err};
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

@@ -28,11 +28,11 @@ pub use matrix::{Event, EventTypeExt, Pdu, PduCount, PduEvent, PduId, RoomVersio
 pub use server::Server;
 pub use utils::{ctor, dtor, implement, result, result::Result};
 
-pub use crate as tuwunel_core;
+pub use crate as gaussmatrix_core;
 
 rustc_flags_capture! {}
 
-#[cfg(any(not(tuwunel_mods), not(feature = "tuwunel_mods")))]
+#[cfg(any(not(gaussmatrix_mods), not(feature = "gaussmatrix_mods")))]
 pub mod mods {
 	use log as _;
 

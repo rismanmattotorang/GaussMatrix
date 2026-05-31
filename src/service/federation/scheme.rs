@@ -1,12 +1,12 @@
 //! Adapters that build the `Input` for ruma's [`AuthScheme`] and
-//! [`PathBuilder`] traits from tuwunel's federation context.
+//! [`PathBuilder`] traits from gaussmatrix's federation context.
 //!
 //! Federation endpoints span several auth/path-builder combinations
 //! (`ServerSignatures` + `VersionHistory`, `ServerSignatures` + `SinglePath`,
 //! and a handful of `NoAuthentication`/`NoAccessToken` variants). The
 //! generic-associated-type `Input<'a>` of each ruma trait varies per impl, so
 //! a single bound on `OutgoingRequest` cannot supply the right value uniformly.
-//! [`FedAuth`] and [`FedPath`] each accept tuwunel's federation context and
+//! [`FedAuth`] and [`FedPath`] each accept gaussmatrix's federation context and
 //! return the appropriate `Input` for the concrete auth scheme or path builder
 //! at the call site.
 

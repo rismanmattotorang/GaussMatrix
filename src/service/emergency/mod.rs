@@ -7,7 +7,7 @@ use ruma::{
 	},
 	push::Ruleset,
 };
-use tuwunel_core::{Result, debug_warn, error, warn};
+use gaussmatrix_core::{Result, debug_warn, error, warn};
 
 pub struct Service {
 	services: Arc<crate::services::OnceServices>,

@@ -7,7 +7,7 @@ use ruma::{
 	},
 	room::RoomType,
 };
-use tuwunel_core::{Err, Result, debug, implement, trace};
+use gaussmatrix_core::{Err, Result, debug, implement, trace};
 
 use super::{
 	Accessibility,

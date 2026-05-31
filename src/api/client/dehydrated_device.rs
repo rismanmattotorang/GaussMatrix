@@ -5,7 +5,7 @@ use ruma::api::client::dehydrated_device::{
 	get_dehydrated_device::unstable as get_dehydrated_device, get_events::unstable as get_events,
 	put_dehydrated_device::unstable as put_dehydrated_device,
 };
-use tuwunel_core::{Err, Result, at, utils::result::IsErrOr};
+use gaussmatrix_core::{Err, Result, at, utils::result::IsErrOr};
 
 use crate::{ClientIp, Ruma};
 

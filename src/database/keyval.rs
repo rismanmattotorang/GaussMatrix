@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Result, smallvec::SmallVec};
+use gaussmatrix_core::{Result, smallvec::SmallVec};
 
 use crate::{de, ser};
 

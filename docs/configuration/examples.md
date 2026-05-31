@@ -15,7 +15,7 @@
 <summary>Debian systemd unit file</summary>
 
 ```
-{{#include ../../debian/tuwunel.service}}
+{{#include ../../debian/gaussmatrix.service}}
 ```
 
 </details>
@@ -26,7 +26,7 @@
 <summary>Arch Linux systemd unit file</summary>
 
 ```
-{{#include ../../arch/tuwunel.service}}
+{{#include ../../arch/gaussmatrix.service}}
 ```
 
 </details>

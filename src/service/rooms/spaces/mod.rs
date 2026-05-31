@@ -22,14 +22,14 @@ use ruma::{
 	room::{JoinRuleSummary, RestrictedSummary},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Event, Result, implement,
 	utils::{
 		future::{BoolExt, TryExtExt},
 		stream::{BroadbandExt, IterStream, ReadyExt, TryReadyExt},
 	},
 };
-use tuwunel_database::Map;
+use gaussmatrix_database::Map;
 
 use self::cache::Cached;
 pub use self::pagination_token::PaginationToken;

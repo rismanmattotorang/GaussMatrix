@@ -10,11 +10,11 @@ use std::{
 use futures::{FutureExt, Stream, StreamExt, TryFutureExt, TryStreamExt};
 use ruma::{OwnedUserId, UserId};
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, implement,
 	utils::stream::{IterStream, ReadyExt, TryExpect},
 };
-use tuwunel_database::{Cbor, Deserialized, Ignore, Map};
+use gaussmatrix_database::{Cbor, Deserialized, Ignore, Map};
 use url::Url;
 
 use super::{Provider, Providers, UserInfo, unique_id};

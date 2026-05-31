@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
 use rocksdb::Options;
-use tuwunel_core::{Err, Result, info, warn};
+use gaussmatrix_core::{Err, Result, info, warn};
 
 use super::Db;
 

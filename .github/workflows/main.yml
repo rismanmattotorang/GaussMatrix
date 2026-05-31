@@ -147,7 +147,7 @@ jobs:
       is_pull: ${{fromJSON(env.is_pull || 'false')}}
       is_fat: ${{fromJSON(env.is_fat || 'false')}}
       is_dev: ${{fromJSON(env.is_dev || 'true')}}
-      pages_url: 'https://matrix-construct.github.io/tuwunel'
+      pages_url: 'https://gaussmatrix.dev'
       release_url: ${{steps.release.outputs.upload_url}}
       docker_repo: ${{vars.DOCKER_REPO}}
       docker_acct: ${{vars.DOCKER_ACCT}}

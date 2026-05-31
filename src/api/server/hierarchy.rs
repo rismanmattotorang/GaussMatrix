@@ -4,11 +4,11 @@ use axum::extract::State;
 use futures::{FutureExt, StreamExt};
 use get_hierarchy::v1::{Request, Response};
 use ruma::api::federation::space::get_hierarchy;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result,
 	utils::stream::{BroadbandExt, IterStream},
 };
-use tuwunel_service::rooms::spaces::{Accessibility, Identifier, get_parent_children_via};
+use gaussmatrix_service::rooms::spaces::{Accessibility, Identifier, get_parent_children_via};
 
 use crate::Ruma;
 

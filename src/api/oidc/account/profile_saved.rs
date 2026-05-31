@@ -1,6 +1,6 @@
 use const_str::format as const_format;
 use ruma::UserId;
-use tuwunel_core::{Result, utils::html::escape as html_escape};
+use gaussmatrix_core::{Result, utils::html::escape as html_escape};
 
 use super::ACCOUNT_HEAD;
 
@@ -30,8 +30,8 @@ static PAGE_HTML: &str = const_format!(
 			Display name for <strong>{{uid}}</strong> updated to: <strong>{{dn}}</strong>.
 		</p>
 		<div class="nav">
-			<a href="/_tuwunel/oidc/account?action=org.matrix.profile">Edit profile</a>
-			<a href="/_tuwunel/oidc/account?action=org.matrix.sessions_list">Back to sessions</a>
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.profile">Edit profile</a>
+			<a href="/_gaussmatrix/oidc/account?action=org.matrix.sessions_list">Back to sessions</a>
 		</div>
 	</body>
 </html>

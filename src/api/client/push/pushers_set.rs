@@ -1,6 +1,6 @@
 use axum::extract::State;
 use ruma::api::client::push::set_pusher;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 

@@ -6,8 +6,8 @@ mod unban_room;
 use clap::Subcommand;
 use futures::{FutureExt, StreamExt};
 use ruma::{OwnedRoomOrAliasId, RoomId};
-use tuwunel_core::{Result, debug, utils::ReadyExt, warn};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Result, debug, utils::ReadyExt, warn};
+use gaussmatrix_service::Services;
 
 use crate::admin_command_dispatch;
 

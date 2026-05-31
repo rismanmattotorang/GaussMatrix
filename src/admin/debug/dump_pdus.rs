@@ -5,7 +5,7 @@ use tokio::{
 	fs::{self, OpenOptions},
 	io::AsyncWriteExt,
 };
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command;
 

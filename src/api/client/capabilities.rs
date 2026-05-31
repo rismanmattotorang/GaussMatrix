@@ -17,7 +17,7 @@ use ruma::{
 	},
 };
 use serde_json::json;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 

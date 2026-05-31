@@ -10,7 +10,7 @@ use ruma::{
 	},
 	serde::JsonObject,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, err,
 	matrix::{event::gen_event_id_canonical_json, pdu::PduEvent},
 	warn,

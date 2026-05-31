@@ -6,7 +6,7 @@ ARG RUSTUP_HOME
 ARG CARGO_HOME
 ARG audit_args=""
 
-WORKDIR /usr/src/tuwunel
+WORKDIR /usr/src/gaussmatrix
 RUN \
 --mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=shared \
 --mount=type=cache,dst=${CARGO_HOME}/registry,sharing=shared \

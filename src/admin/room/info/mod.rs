@@ -3,7 +3,7 @@ mod view_room_topic;
 
 use clap::Subcommand;
 use ruma::OwnedRoomId;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command_dispatch;
 

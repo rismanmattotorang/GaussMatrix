@@ -12,7 +12,7 @@ use ruma::{
 	},
 	serde::Raw,
 };
-use tuwunel_core::{Result, utils::timepoint_from_now};
+use gaussmatrix_core::{Result, utils::timepoint_from_now};
 
 /// # `GET /_matrix/key/v2/server`
 ///

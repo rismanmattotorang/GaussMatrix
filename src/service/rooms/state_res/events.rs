@@ -30,7 +30,7 @@ pub use self::{
 /// definition to match Synapse and Ruma.
 pub(super) fn is_power_event<Pdu>(event: &Pdu) -> bool
 where
-	Pdu: tuwunel_core::matrix::Event,
+	Pdu: gaussmatrix_core::matrix::Event,
 {
 	use ruma::events::{TimelineEventType, room::member::MembershipState};
 

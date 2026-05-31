@@ -2,7 +2,7 @@ use std::{convert::AsRef, sync::Arc};
 
 use futures::{Stream, StreamExt, TryStreamExt};
 use rocksdb::{DBPinnableSlice, ReadOptions};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	utils::{
 		IterStream,

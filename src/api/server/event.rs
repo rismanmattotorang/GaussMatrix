@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::{FutureExt, future::try_join};
 use ruma::{MilliSecondsSinceUnixEpoch, OwnedRoomId, api::federation::event::get_event};
-use tuwunel_core::{Result, err};
+use gaussmatrix_core::{Result, err};
 
 use super::AccessCheck;
 use crate::Ruma;

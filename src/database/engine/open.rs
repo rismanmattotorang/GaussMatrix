@@ -5,7 +5,7 @@ use std::{
 };
 
 use rocksdb::{ColumnFamilyDescriptor, Options};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, debug, debug_warn, implement, info, itertools::Itertools, trace, warn,
 };
 

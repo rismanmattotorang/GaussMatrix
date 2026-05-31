@@ -2,23 +2,23 @@
 
 use std::{env, sync::Arc};
 
-use tuwunel::{Args, Runtime, Server};
-use tuwunel_core::{Err, Result};
-use tuwunel_service::{Services, oauth::Session};
+use gaussmatrix::{Args, Runtime, Server};
+use gaussmatrix_core::{Err, Result};
+use gaussmatrix_service::{Services, oauth::Session};
 
 const TOML_KEY: &str = "test";
 
-const ENV_BRAND: &str = "TUWUNEL_TEST_OAUTH_BRAND";
-const ENV_CLIENT_ID: &str = "TUWUNEL_TEST_OAUTH_CLIENT_ID";
-const ENV_CLIENT_SECRET: &str = "TUWUNEL_TEST_OAUTH_CLIENT_SECRET";
-const ENV_ISSUER_URL: &str = "TUWUNEL_TEST_OAUTH_ISSUER_URL";
-const ENV_CALLBACK_URL: &str = "TUWUNEL_TEST_OAUTH_CALLBACK_URL";
-const ENV_TOKEN_URL: &str = "TUWUNEL_TEST_OAUTH_TOKEN_URL";
-const ENV_USERINFO_URL: &str = "TUWUNEL_TEST_OAUTH_USERINFO_URL";
-const ENV_AUTHORIZATION_URL: &str = "TUWUNEL_TEST_OAUTH_AUTHORIZATION_URL";
-const ENV_DISCOVERY: &str = "TUWUNEL_TEST_OAUTH_DISCOVERY";
-const ENV_CODE: &str = "TUWUNEL_TEST_OAUTH_CODE";
-const ENV_CODE_VERIFIER: &str = "TUWUNEL_TEST_OAUTH_CODE_VERIFIER";
+const ENV_BRAND: &str = "GAUSSMATRIX_TEST_OAUTH_BRAND";
+const ENV_CLIENT_ID: &str = "GAUSSMATRIX_TEST_OAUTH_CLIENT_ID";
+const ENV_CLIENT_SECRET: &str = "GAUSSMATRIX_TEST_OAUTH_CLIENT_SECRET";
+const ENV_ISSUER_URL: &str = "GAUSSMATRIX_TEST_OAUTH_ISSUER_URL";
+const ENV_CALLBACK_URL: &str = "GAUSSMATRIX_TEST_OAUTH_CALLBACK_URL";
+const ENV_TOKEN_URL: &str = "GAUSSMATRIX_TEST_OAUTH_TOKEN_URL";
+const ENV_USERINFO_URL: &str = "GAUSSMATRIX_TEST_OAUTH_USERINFO_URL";
+const ENV_AUTHORIZATION_URL: &str = "GAUSSMATRIX_TEST_OAUTH_AUTHORIZATION_URL";
+const ENV_DISCOVERY: &str = "GAUSSMATRIX_TEST_OAUTH_DISCOVERY";
+const ENV_CODE: &str = "GAUSSMATRIX_TEST_OAUTH_CODE";
+const ENV_CODE_VERIFIER: &str = "GAUSSMATRIX_TEST_OAUTH_CODE_VERIFIER";
 
 #[test]
 fn oauth_request_token() -> Result {
@@ -43,15 +43,15 @@ fn oauth_request_token() -> Result {
 	let server = Server::new(Some(&args), Some(&runtime))?;
 
 	let result: Result = runtime.block_on(async {
-		let services = tuwunel::async_start(&server).await?;
+		let services = gaussmatrix::async_start(&server).await?;
 
 		let outcome = exchange(&services, &client_id, &code).await;
 
 		server.server.shutdown()?;
 		drop(services);
 
-		tuwunel::async_run(&server).await?;
-		tuwunel::async_stop(&server).await?;
+		gaussmatrix::async_run(&server).await?;
+		gaussmatrix::async_stop(&server).await?;
 
 		outcome
 	});

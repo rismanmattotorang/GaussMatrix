@@ -1,6 +1,6 @@
 use futures::FutureExt;
 use ruma::{UserId, events::GlobalAccountDataEventType, push};
-use tuwunel_core::{Err, Result, error, implement, info, is_equal_to, warn};
+use gaussmatrix_core::{Err, Result, error, implement, info, is_equal_to, warn};
 
 #[derive(Debug, Default)]
 pub struct Register<'a> {

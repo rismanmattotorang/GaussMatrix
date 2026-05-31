@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::StreamExt;
 use ruma::{MilliSecondsSinceUnixEpoch, api::client::push::get_notifications, push::Action};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, err,
 	matrix::{Event, PduId},
 	utils::{

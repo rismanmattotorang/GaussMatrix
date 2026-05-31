@@ -1,7 +1,7 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD as b64};
 use jwt::{Algorithm, EncodingKey, Header};
 use serde::{Deserialize, Serialize};
-use tuwunel_core::{Result, err, implement, jwt, utils};
+use gaussmatrix_core::{Result, err, implement, jwt, utils};
 use utils::hash::sha256;
 
 #[derive(Debug, Deserialize, Serialize)]

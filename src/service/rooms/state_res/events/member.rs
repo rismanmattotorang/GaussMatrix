@@ -8,7 +8,7 @@ use ruma::{
 };
 use serde::Deserialize;
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::{Err, Error, Result, debug_error, err, matrix::Event};
+use gaussmatrix_core::{Err, Error, Result, debug_error, err, matrix::Event};
 
 /// A helper type for an [`Event`] of type `m.room.member`.
 ///

@@ -1,7 +1,7 @@
 use std::{ffi::OsString, path::PathBuf};
 
 use rocksdb::backup::{BackupEngine, BackupEngineOptions};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, error, implement, info, utils::time::rfc2822_from_seconds, warn,
 };
 

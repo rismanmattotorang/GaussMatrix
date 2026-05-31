@@ -5,7 +5,7 @@ use ruma::{
 	CanonicalJsonObject, EventId, OwnedEventId, RoomId, RoomVersionId, ServerName,
 	events::StateEventType, room_version_rules::RoomVersionRules,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug, debug_info, err, implement, is_equal_to,
 	matrix::{Event, EventTypeExt, PduEvent, StateKey, pdu::check_rules, room_version},
 	trace,

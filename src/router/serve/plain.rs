@@ -3,7 +3,7 @@ use std::net::{SocketAddr, TcpListener};
 use axum::Router;
 use axum_server::Handle;
 use futures::{FutureExt, future::BoxFuture};
-use tuwunel_core::{Result, itertools::Itertools};
+use gaussmatrix_core::{Result, itertools::Itertools};
 
 pub(super) fn serve<'a>(
 	router: &Router,

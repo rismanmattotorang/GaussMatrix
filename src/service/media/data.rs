@@ -2,7 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use futures::{StreamExt, pin_mut};
 use ruma::{Mxc, OwnedMxcUri, OwnedUserId, UserId, http_headers::ContentDisposition};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug, debug_info, err,
 	utils::{
 		ReadyExt, str_from_bytes,
@@ -10,7 +10,7 @@ use tuwunel_core::{
 		string_from_bytes,
 	},
 };
-use tuwunel_database::{Database, Deserialized, Ignore, Interfix, Map, serialize_key};
+use gaussmatrix_database::{Database, Deserialized, Ignore, Interfix, Map, serialize_key};
 
 use super::{preview::UrlPreviewData, thumbnail::Dim};
 

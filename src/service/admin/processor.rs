@@ -16,7 +16,7 @@ use ruma::{
 };
 use tracing::Level;
 use tracing_subscriber::{EnvFilter, filter::LevelFilter};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result, debug, error,
 	log::{
 		capture,
@@ -140,7 +140,7 @@ async fn process_command(
 
 fn handle_panic(error: &Error, input: &CommandInput) -> ProcessorResult {
 	let link =
-		"Please submit a [bug report](https://github.com/matrix-construct/tuwunel/issues/new). \
+		"Please submit a [bug report](https://github.com/rismanmattotorang/gaussmatrix/issues/new). \
 		 🥺";
 
 	let msg = format!("Panic occurred while processing command:\n```\n{error:#?}\n```\n{link}");

@@ -21,12 +21,12 @@ use std::{
 
 use async_trait::async_trait;
 use ruma::{EventId, OwnedEventId, OwnedRoomId};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	matrix::PduEvent,
 	utils::{MutexMap, bytes::pretty, continue_exponential_backoff},
 };
-use tuwunel_database::Map;
+use gaussmatrix_database::Map;
 
 pub struct Service {
 	pub mutex_federation: RoomMutexMap,

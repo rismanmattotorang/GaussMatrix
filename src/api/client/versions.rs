@@ -1,7 +1,7 @@
 use std::iter::once;
 
 use ruma::api::client::discovery::get_supported_versions;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::Ruma;
 
@@ -31,9 +31,9 @@ pub(crate) async fn get_supported_versions_route(
 
 		// MSC4383: client-side parity with /_matrix/federation/v1/version.
 		server: Some(get_supported_versions::Server {
-			name: Some(tuwunel_core::version::name().into()),
-			version: Some(tuwunel_core::version::version().into()),
-			compiler: tuwunel_core::info::rustc::version().map(Into::into),
+			name: Some(gaussmatrix_core::version::name().into()),
+			version: Some(gaussmatrix_core::version::version().into()),
+			compiler: gaussmatrix_core::info::rustc::version().map(Into::into),
 			..Default::default()
 		}),
 	})

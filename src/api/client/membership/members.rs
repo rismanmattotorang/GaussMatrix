@@ -13,7 +13,7 @@ use ruma::{
 		},
 	},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, is_equal_to, is_not_equal_to,
 	matrix::Event,
 	utils::{

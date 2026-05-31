@@ -1,5 +1,5 @@
 use futures::{FutureExt, StreamExt};
-use tuwunel_core::{Result, utils::FutureBoolExt};
+use gaussmatrix_core::{Result, utils::FutureBoolExt};
 
 use crate::admin_command;
 

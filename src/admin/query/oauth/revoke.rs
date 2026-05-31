@@ -1,4 +1,4 @@
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	either::{Left, Right},
 };

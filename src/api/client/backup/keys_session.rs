@@ -7,7 +7,7 @@ use ruma::{
 		add_backup_keys_for_session, delete_backup_keys_for_session, get_backup_keys_for_session,
 	},
 };
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use super::get_count_etag;
 use crate::Ruma;

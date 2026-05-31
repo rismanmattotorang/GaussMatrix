@@ -11,7 +11,7 @@ use ruma::{
 };
 use serde_json::value::RawValue as RawJsonValue;
 use tokio::time::{Instant, timeout_at};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	debug, debug_error, debug_warn, error, implement, info, result::FlatOk, trace, warn,
 };
 

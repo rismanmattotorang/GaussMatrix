@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.11-labs
 
 FROM input AS rocksdb-fetch
-ARG rocksdb_branch="tuwunel-changes"
+ARG rocksdb_branch="gaussmatrix-changes"
 ARG rust_rocksdb_branch="conduwuit-changes"
 ARG librocksdb_submodule="librocksdb-sys/rocksdb"
 

@@ -1,6 +1,6 @@
 use base64::prelude::*;
 use tokio::time::Instant;
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use super::encode;
 use crate::admin_command;

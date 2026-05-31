@@ -1,6 +1,6 @@
 # Containers
 
-Tuwunel ships as a small, statically linked OCI image that runs unprivileged
+GaussMatrix ships as a small, statically linked OCI image that runs unprivileged
 on any container runtime. Pick a deployment style based on how you already
 manage services on the host.
 
@@ -10,7 +10,7 @@ manage services on the host.
   or a bring-your-own reverse proxy).
 
 - [**Kubernetes**](kubernetes.md). Community-maintained Helm chart for
-  cluster deployments. Tuwunel itself does not scale horizontally, so the
+  cluster deployments. GaussMatrix itself does not scale horizontally, so the
   chart runs a single replica with persistent storage.
 
 - [**Podman with Quadlets**](podman-systemd.md). Rootless deployment managed
@@ -21,8 +21,8 @@ manage services on the host.
 
 | Registry        | Image                                             | Tags                          |
 | --------------- | ------------------------------------------------- | ----------------------------- |
-| GitHub Registry | [`ghcr.io/matrix-construct/tuwunel`][gh]          | `latest`, `preview`, `main`   |
-| Docker Hub      | [`docker.io/jevolk/tuwunel`][dh]                  | `latest`, `preview`, `main`   |
+| GitHub Registry | [`ghcr.io/rismanmattotorang/gaussmatrix`][gh]          | `latest`, `preview`, `main`   |
+| Docker Hub      | [`docker.io/rismanmattotorang/gaussmatrix`][dh]                  | `latest`, `preview`, `main`   |
 
 Three rolling tags trade update frequency for confidence.
 
@@ -34,5 +34,5 @@ Three rolling tags trade update frequency for confidence.
 
 **For automated updates we strongly advise tracking `:latest`.**
 
-[gh]: https://github.com/matrix-construct/tuwunel/pkgs/container/tuwunel
-[dh]: https://hub.docker.com/r/jevolk/tuwunel
+[gh]: https://github.com/rismanmattotorang/gaussmatrix/pkgs/container/gaussmatrix
+[dh]: https://hub.docker.com/r/rismanmattotorang/gaussmatrix

@@ -21,7 +21,7 @@ pub struct TruncatedStr<'a> {
 /// See [`TruncatedSlice`]. Useful for `#[instrument]`:
 ///
 /// ```
-/// use tuwunel_core::utils::debug::slice_truncated;
+/// use gaussmatrix_core::utils::debug::slice_truncated;
 ///
 /// #[tracing::instrument(fields(foos = slice_truncated(foos, 42)))]
 /// fn bar(foos: &[&str]) {}
@@ -36,7 +36,7 @@ pub fn slice_truncated<T: fmt::Debug>(
 /// See [`TruncatedStr`]. Useful for `#[instrument]`:
 ///
 /// ```
-/// use tuwunel_core::utils::debug::str_truncated;
+/// use gaussmatrix_core::utils::debug::str_truncated;
 ///
 /// #[tracing::instrument(fields(foos = str_truncated(foos, 42)))]
 /// fn bar(foos: &str) {}

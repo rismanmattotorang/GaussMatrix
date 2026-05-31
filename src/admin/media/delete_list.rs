@@ -1,5 +1,5 @@
 use ruma::Mxc;
-use tuwunel_core::{Err, Result, info, trace, utils::math::Expected, warn};
+use gaussmatrix_core::{Err, Result, info, trace, utils::math::Expected, warn};
 
 use crate::admin_command;
 

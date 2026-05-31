@@ -1,5 +1,5 @@
 #!/usr/bin/env -S python3 -S
-"""Aggregate Tuwunel runtime-metrics dumps from a Complement run."""
+"""Aggregate GaussMatrix runtime-metrics dumps from a Complement run."""
 
 import argparse, json, re, subprocess, sys, tarfile
 from collections import defaultdict
@@ -99,8 +99,8 @@ def parse_usage(payload):
 # Tarball ingestion
 #
 # Layout: runtime_metrics/by_test/<TestName>/<container_id>/
-#             tuwunel.runtime_metrics.<pid>.json
-#             tuwunel.runtime_usage.<pid>.json
+#             gaussmatrix.runtime_metrics.<pid>.json
+#             gaussmatrix.runtime_usage.<pid>.json
 
 def open_tar(path):
 	# stdlib tarfile lacks zstd until 3.14; pipe through the system tool.
@@ -142,7 +142,7 @@ def load_tar(path):
 			test, cid, fname = parsed
 			dump = read_dump(tar, m)
 			if dump is None: continue
-			version = version or dump.get("meta", {}).get("tuwunel_version")
+			version = version or dump.get("meta", {}).get("gaussmatrix_version")
 			row = rows[(test, cid)]
 			row["test"], row["cid"] = test, cid
 			merge_dump(row, fname, dump)
@@ -284,7 +284,7 @@ def fmt_delta(curr, prev, direction, floor):
 
 def header_line(curr, version):
 	bits = []
-	if version: bits.append(f"tuwunel {version}")
+	if version: bits.append(f"gaussmatrix {version}")
 	if curr.get("workers_count"): bits.append(f"{curr['workers_count']}-worker tokio runtime")
 	bits.append(f"{curr.get('testees', 0)} testees across {curr.get('tests', 0)} tests")
 	return ", ".join(bits) + "."

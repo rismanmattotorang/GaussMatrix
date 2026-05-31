@@ -15,7 +15,7 @@ use ruma::{
 };
 use serde::de::DeserializeOwned;
 use serde_json::{Error, from_value as from_json_value};
-use tuwunel_core::{Result, err, is_equal_to, matrix::Event, ref_at};
+use gaussmatrix_core::{Result, err, is_equal_to, matrix::Event, ref_at};
 
 /// The default value of the creator's power level.
 const DEFAULT_CREATOR_POWER_LEVEL: i32 = 100;

@@ -10,7 +10,7 @@ use hickory_resolver::{
 };
 use ipaddress::IPAddress;
 use ruma::ServerName;
-use tuwunel_core::{Err, Result, debug, debug_info, debug_warn, err, error, trace};
+use gaussmatrix_core::{Err, Result, debug, debug_info, debug_warn, err, error, trace};
 
 use super::{
 	DestString, FedDest,

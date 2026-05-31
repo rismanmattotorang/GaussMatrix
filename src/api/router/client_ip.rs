@@ -1,4 +1,4 @@
-//! Tuwunel's client-IP extractor.
+//! GaussMatrix's client-IP extractor.
 //!
 //! Two modes:
 //!
@@ -24,9 +24,9 @@ use std::{
 use axum::extract::{ConnectInfo, FromRequestParts};
 use http::{Extensions, HeaderMap, StatusCode, request::Parts};
 use ipnet::IpNet;
-use tuwunel_core::config::IpSource;
+use gaussmatrix_core::config::IpSource;
 
-/// Tuwunel client-IP extractor. See module docs.
+/// GaussMatrix client-IP extractor. See module docs.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct ClientIp(pub(crate) IpAddr);
 
@@ -203,7 +203,7 @@ mod tests {
 		http::{Request, StatusCode, request::Parts},
 	};
 	use ipnet::IpNet;
-	use tuwunel_core::config::IpSource;
+	use gaussmatrix_core::config::IpSource;
 
 	use super::{ClientIp, ConfiguredIpSource, TrustedPeerSubnets};
 

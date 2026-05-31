@@ -1,6 +1,6 @@
 # JSON web token for enterprise
 
-Tuwunel can accept signed JSON Web Tokens as proof of identity, both as a
+GaussMatrix can accept signed JSON Web Tokens as proof of identity, both as a
 login flow (`POST /_matrix/client/v3/login` with `type = org.matrix.login.jwt`)
 and as a User-Interactive Authentication step for sensitive operations.
 
@@ -8,7 +8,7 @@ This is an **enterprise feature** intended for managed deployments where
 identity is owned by an external system. Two typical uses:
 
 - **Externalized user management.** A hosting provider or corporate
-  identity service mints short-lived JWTs for its users; Tuwunel becomes
+  identity service mints short-lived JWTs for its users; GaussMatrix becomes
   a stateless consumer of those tokens and creates Matrix accounts on
   first login.
 
@@ -27,7 +27,7 @@ enable = true
 key = "yJKn0!E2g$5Hs!rUv9NQwL@ZmpQ3xVT"
 ```
 
-With these defaults, Tuwunel will accept any HS256-signed token whose
+With these defaults, GaussMatrix will accept any HS256-signed token whose
 `sub` claim is the localpart of an MXID on this server.
 
 `POST /_matrix/client/v3/login` then accepts:
@@ -42,7 +42,7 @@ With these defaults, Tuwunel will accept any HS256-signed token whose
 `GET /_matrix/client/v3/login` advertises the flow as long as
 `enable = true`.
 
-The `sub` (subject) claim is the **localpart** of the user's MXID. Tuwunel
+The `sub` (subject) claim is the **localpart** of the user's MXID. GaussMatrix
 combines it with this server's `server_name` to form the full MXID. The
 subject is lowercased before lookup.
 
@@ -76,7 +76,7 @@ files.
 Synapse's JWT support uses a configuration of similar shape. To migrate
 a Synapse `experimental_features.jwt_config` block:
 
-| Synapse | Tuwunel |
+| Synapse | GaussMatrix |
 |---|---|
 | `enabled` | `enable` |
 | `secret` | `key` (also accepted as `secret` for direct migration) |
@@ -85,7 +85,7 @@ a Synapse `experimental_features.jwt_config` block:
 | `issuer` | `issuer` (now a list; wrap a single value as `["..."]`) |
 
 Synapse defaults to optional `exp`/`nbf` and accepts the localpart in
-the `sub` claim. Tuwunel matches both behaviors out of the box, so a
+the `sub` claim. GaussMatrix matches both behaviors out of the box, so a
 straight key+algorithm port should authenticate the same set of tokens.
 
 
@@ -93,7 +93,7 @@ straight key+algorithm port should authenticate the same set of tokens.
 
 The first time a token authenticates as a user that does not yet exist:
 
-- If `register_user = true`, Tuwunel creates the account with origin
+- If `register_user = true`, GaussMatrix creates the account with origin
   `"jwt"` and a placeholder password marker. The local password field is
   never read for a JWT-authenticated user — they can only re-authenticate
   by presenting another valid JWT.
@@ -136,7 +136,7 @@ A typical operator workflow for a forced password reset:
    }
    ```
 
-3. Tuwunel validates the signature, confirms the user exists, and
+3. GaussMatrix validates the signature, confirms the user exists, and
    completes the password change without ever consulting the user's
    existing credentials.
 
@@ -158,7 +158,7 @@ signing algorithm. The two must agree.
 | `EDDSA` | `EdDSA` | PEM-encoded Ed25519 public key. |
 
 For asymmetric formats (`ECDSA`, `EDDSA`) the `key` is the **public** key —
-Tuwunel only verifies, it never signs. The corresponding private key
+GaussMatrix only verifies, it never signs. The corresponding private key
 stays with the issuer.
 
 ```toml

@@ -8,8 +8,8 @@ use ruma::{
 		login::v3::{Request, Token},
 	},
 };
-use tuwunel_core::{Err, Result, utils::random_string};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, utils::random_string};
+use gaussmatrix_service::Services;
 
 use super::TOKEN_LENGTH;
 use crate::{ClientIp, Ruma, router::auth_uiaa};

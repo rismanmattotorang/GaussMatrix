@@ -1,6 +1,6 @@
 use ruma::events::room::message::RoomMessageEventContent;
 use tokio::task::yield_now;
-use tuwunel_core::{Err, Result, debug, debug_info, error, implement, info};
+use gaussmatrix_core::{Err, Result, debug, debug_info, error, implement, info};
 
 pub(super) const SIGNAL: &str = "SIGUSR2";
 

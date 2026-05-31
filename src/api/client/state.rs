@@ -19,12 +19,12 @@ use ruma::{
 	serde::Raw,
 };
 use serde_json::json;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, is_false,
 	matrix::{Event, pdu::PduBuilder},
 	utils::{BoolExt, stream::TryBroadbandExt},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{Ruma, RumaResponse, client::with_membership};
 
@@ -259,7 +259,7 @@ fn validate_server_acl(
 		return Err!(Request(BadJson(debug_warn!(
 			?room_id,
 			"Sending an ACL event with an empty allow key will permanently brick the room for \
-			 non-tuwunel's as this equates to no servers being allowed to participate in this \
+			 non-gaussmatrix's as this equates to no servers being allowed to participate in this \
 			 room."
 		))));
 	}
@@ -268,7 +268,7 @@ fn validate_server_acl(
 		return Err!(Request(BadJson(debug_warn!(
 			?room_id,
 			"Sending an ACL event with a deny and allow key value of \"*\" will permanently \
-			 brick the room for non-tuwunel's as this equates to no servers being allowed to \
+			 brick the room for non-gaussmatrix's as this equates to no servers being allowed to \
 			 participate in this room."
 		))));
 	}

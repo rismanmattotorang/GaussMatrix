@@ -5,7 +5,7 @@ use ruma::{
 	profile::ProfileFieldValue,
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, implement,
 	matrix::PduBuilder,
 	utils::{
@@ -13,7 +13,7 @@ use tuwunel_core::{
 		stream::{IterStream, TryIgnore},
 	},
 };
-use tuwunel_database::{Deserialized, Ignore, Interfix, Json};
+use gaussmatrix_database::{Deserialized, Ignore, Interfix, Json};
 
 /// Per-update policy for fanning a global profile change out to each of
 /// the user's joined rooms as a fresh `m.room.member` event. Mirrors the

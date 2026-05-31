@@ -9,7 +9,7 @@ use hickory_resolver::{
 };
 use ipaddress::IPAddress;
 use reqwest::dns::{Addrs, Name, Resolve, Resolving};
-use tuwunel_core::{Result, Server, err, trace};
+use gaussmatrix_core::{Result, Server, err, trace};
 
 use super::cache::{Cache, CachedOverride};
 use crate::client::ipaddress_from_std;

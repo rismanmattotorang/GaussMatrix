@@ -6,8 +6,8 @@ use ruma::{
 		uiaa,
 	},
 };
-use tuwunel_core::{Err, Result, debug_error, err, utils::hash};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, debug_error, err, utils::hash};
+use gaussmatrix_service::Services;
 
 use super::ldap_login;
 use crate::Ruma;

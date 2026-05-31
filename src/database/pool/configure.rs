@@ -1,6 +1,6 @@
 use std::{path::PathBuf, sync::Arc};
 
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Config, Server, at, debug,
 	debug::INFO_SPAN_LEVEL,
 	debug_info, debug_warn, expected, info, is_equal_to,

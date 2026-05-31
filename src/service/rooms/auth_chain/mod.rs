@@ -15,7 +15,7 @@ use ruma::{
 	room_version_rules::RoomVersionRules,
 };
 use serde::Deserialize;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, debug, debug_error, err, implement,
 	itertools::Itertools,
 	matrix::room_version,
@@ -28,7 +28,7 @@ use tuwunel_core::{
 	},
 	validated, warn,
 };
-use tuwunel_database::Map;
+use gaussmatrix_database::Map;
 
 use crate::rooms::short::ShortEventId;
 

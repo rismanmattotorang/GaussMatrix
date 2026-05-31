@@ -1,6 +1,6 @@
 # Build Matrix
 
-Tuwunel's CI tests a large combinatorial space of build configurations. The
+GaussMatrix's CI tests a large combinatorial space of build configurations. The
 matrix has six independent dimensions. Not all combinations are valid or useful,
 so the bake configuration and workflow files apply exclusions to keep the total
 job count tractable.
@@ -42,7 +42,7 @@ development and diagnostics:
 
 `blurhashing`, `bzip2_compression`, `console`, `direct_tls`, `jemalloc_prof`,
 `jemalloc_stats`, `ldap`, `lz4_compression`, `perf_measurements`,
-`sentry_telemetry`, `tokio_console`, `tuwunel_mods`
+`sentry_telemetry`, `tokio_console`, `gaussmatrix_mods`
 
 #### `all`
 

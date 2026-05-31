@@ -2,8 +2,8 @@ use std::collections::BTreeMap;
 
 use serde_json::{Map as JsonObject, Value as JsonValue};
 use tokio::sync::RwLock;
-pub use tuwunel_core::config::IdentityProvider as Provider;
-use tuwunel_core::{Err, Result, debug, debug::INFO_SPAN_LEVEL, err, implement};
+pub use gaussmatrix_core::config::IdentityProvider as Provider;
+use gaussmatrix_core::{Err, Result, debug, debug::INFO_SPAN_LEVEL, err, implement};
 use url::Url;
 
 use crate::SelfServices;

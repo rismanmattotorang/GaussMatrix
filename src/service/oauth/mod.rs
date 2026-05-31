@@ -15,7 +15,7 @@ use reqwest::{
 use ruma::UserId;
 use serde::Serialize;
 use serde_json::Value as JsonValue;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, err, implement,
 	utils::{hash::sha256, result::LogErr, stream::ReadyExt},
 	warn,

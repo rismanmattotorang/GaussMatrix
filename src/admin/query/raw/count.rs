@@ -1,6 +1,6 @@
 use futures::StreamExt;
 use tokio::time::Instant;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	utils::{
 		stream::{IterStream, ReadyExt},

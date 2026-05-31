@@ -16,14 +16,14 @@ use ruma::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::value::to_raw_value;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, at, debug, implement,
 	matrix::{Event, pdu::into_outgoing_federation, room_version},
 	trace,
 	utils::time::now_secs,
 	warn,
 };
-use tuwunel_database::{Cbor, Deserialized};
+use gaussmatrix_database::{Cbor, Deserialized};
 
 /// MSC4284 unstable state event type. The merged spec stabilised this to
 /// `m.room.policy`, but the reference policy server (and Element's default
@@ -296,7 +296,7 @@ async fn fetch_policy_signature(
 		.map_or(FetchOutcome::Refused, FetchOutcome::Signed)
 }
 
-fn parse_rate_limit(error: &tuwunel_core::Error) -> Option<u64> {
+fn parse_rate_limit(error: &gaussmatrix_core::Error) -> Option<u64> {
 	let ErrorKind::LimitExceeded(data) = error.kind() else {
 		return None;
 	};

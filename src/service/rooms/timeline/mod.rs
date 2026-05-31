@@ -21,8 +21,8 @@ use ruma::{
 	UserId, api::Direction, events::room::encrypted::Relation,
 };
 use serde::Deserialize;
-pub use tuwunel_core::matrix::pdu::{PduId, RawPduId};
-use tuwunel_core::{
+pub use gaussmatrix_core::matrix::pdu::{PduId, RawPduId};
+use gaussmatrix_core::{
 	Err, Result, at, err, implement,
 	matrix::{
 		ShortEventId,
@@ -35,7 +35,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{Database, Deserialized, Json, Map};
+use gaussmatrix_database::{Database, Deserialized, Json, Map};
 
 pub use self::pdus::PdusIterItem;
 use crate::rooms::short::{ShortRoomId, ShortStateHash};

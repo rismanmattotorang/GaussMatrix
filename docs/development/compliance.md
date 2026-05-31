@@ -6,7 +6,7 @@ _Todo_
 
 ## [MSC Implementation Status](compliance/msc.md)
 
-The [status table](compliance/msc.md) lists every memo Tuwunel knows about,
+The [status table](compliance/msc.md) lists every memo GaussMatrix knows about,
 
 ## [Complement Testing](compliance/complement.md)
 

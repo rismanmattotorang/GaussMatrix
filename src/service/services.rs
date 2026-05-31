@@ -2,10 +2,10 @@ use std::{fmt, sync::Arc};
 
 use futures::{StreamExt, TryStreamExt};
 use tokio::sync::Mutex;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, Server, debug, debug_info, implement, info, trace, utils::stream::IterStream,
 };
-use tuwunel_database::Database;
+use gaussmatrix_database::Database;
 
 pub(crate) use crate::OnceServices;
 use crate::{

@@ -12,7 +12,7 @@ mod preview;
 
 use clap::Subcommand;
 use ruma::{OwnedEventId, OwnedMxcUri, OwnedServerName};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 use url::Url;
 
 use crate::admin_command_dispatch;

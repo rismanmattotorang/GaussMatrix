@@ -1,5 +1,5 @@
-use tuwunel_core::Result;
-use tuwunel_service::oauth::ProviderId;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::oauth::ProviderId;
 
 use crate::admin_command;
 

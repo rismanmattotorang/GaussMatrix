@@ -1,4 +1,4 @@
-use tuwunel_core::{Result, debug, debug_error, debug_info, debug_warn, implement, trace};
+use gaussmatrix_core::{Result, debug, debug_error, debug_info, debug_warn, implement, trace};
 
 use super::DestString;
 

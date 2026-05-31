@@ -5,8 +5,8 @@ use ruma::{
 		uiaa,
 	},
 };
-use tuwunel_core::{Err, Result, err, extract};
-use tuwunel_service::Services;
+use gaussmatrix_core::{Err, Result, err, extract};
+use gaussmatrix_service::Services;
 
 use crate::Ruma;
 

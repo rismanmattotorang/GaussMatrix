@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use clap::{CommandFactory, FromArgMatches, Parser};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::{
 	Context,
@@ -15,17 +15,17 @@ use crate::{
 	user::{self, UserCommand},
 };
 
-/// Concrete root installed into [`tuwunel_service::admin::Service::command`].
+/// Concrete root installed into [`gaussmatrix_service::admin::Service::command`].
 pub(crate) struct Root;
 
 #[async_trait]
-impl tuwunel_service::admin::Command for Root {
+impl gaussmatrix_service::admin::Command for Root {
 	fn clap(&self) -> clap::Command { <AdminCommand as CommandFactory>::command() }
 
 	async fn dispatch(
 		&self,
 		matches: clap::ArgMatches,
-		context: &tuwunel_service::admin::Context<'_>,
+		context: &gaussmatrix_service::admin::Context<'_>,
 	) -> Result {
 		let command = <AdminCommand as FromArgMatches>::from_arg_matches(&matches)?;
 		let context = Context::new(context);
@@ -35,7 +35,7 @@ impl tuwunel_service::admin::Command for Root {
 }
 
 #[derive(Debug, Parser)]
-#[command(name = "tuwunel", version = tuwunel_core::version())]
+#[command(name = "gaussmatrix", version = gaussmatrix_core::version())]
 pub(super) enum AdminCommand {
 	#[command(subcommand)]
 	/// - Commands for managing appservices

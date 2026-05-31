@@ -7,7 +7,7 @@ use ruma::api::{
 	auth_scheme::{AuthScheme, SendAccessToken},
 	path_builder::PathBuilder,
 };
-use tuwunel_core::{Err, Result, debug_error, err, implement, trace, utils, warn};
+use gaussmatrix_core::{Err, Result, debug_error, err, implement, trace, utils, warn};
 
 /// Sends a request to an appservice
 ///

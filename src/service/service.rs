@@ -1,8 +1,8 @@
 use std::{any::Any, fmt::Write, sync::Arc};
 
 use async_trait::async_trait;
-use tuwunel_core::{Result, Server, utils::string::SplitInfallible};
-use tuwunel_database::Database;
+use gaussmatrix_core::{Result, Server, utils::string::SplitInfallible};
+use gaussmatrix_database::Database;
 
 use crate::services::OnceServices;
 

@@ -4,7 +4,7 @@ use futures::FutureExt;
 use ruma::{
 	CanonicalJsonObject, EventId, MilliSecondsSinceUnixEpoch, RoomId, RoomVersionId, ServerName,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug,
 	debug::INFO_SPAN_LEVEL,
 	debug_warn, implement,

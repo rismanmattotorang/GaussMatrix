@@ -4,7 +4,7 @@ use ruma::{
 	serde::Raw,
 };
 use serde::Deserialize;
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use super::is_empty_content;
 use crate::Ruma;

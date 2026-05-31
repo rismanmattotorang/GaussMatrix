@@ -2,7 +2,7 @@ use std::cmp;
 
 use futures::{FutureExt, StreamExt};
 use ruma::{MxcUri, OwnedUserId, RoomId, UserId, events::room::member::MembershipState};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Result, debug, debug_info, debug_warn, err, info,
 	itertools::Itertools,
 	matrix::PduCount,
@@ -14,7 +14,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{Deserialized, SEP};
+use gaussmatrix_database::{Deserialized, SEP};
 
 use crate::{Services, media};
 
@@ -225,7 +225,7 @@ async fn migrate(services: &Services) -> Result {
 	assert_eq!(
 		target_version,
 		discovered_version().await,
-		"Failed asserting local database version {} is equal to known latest tuwunel database \
+		"Failed asserting local database version {} is equal to known latest gaussmatrix database \
 		 version {target_version}",
 		discovered_version().await,
 	);
@@ -466,7 +466,7 @@ async fn fix_referencedevents_missing_sep(services: &Services) -> Result {
 
 async fn fix_readreceiptid_readreceipt_duplicates(services: &Services) -> Result {
 	use ruma::identifiers_validation::ID_MAX_BYTES;
-	use tuwunel_core::arrayvec::ArrayString;
+	use gaussmatrix_core::arrayvec::ArrayString;
 
 	type ArrayId = ArrayString<ID_MAX_BYTES>;
 	type Key<'a> = (&'a RoomId, u64, &'a UserId);
@@ -517,7 +517,7 @@ async fn fix_readreceiptid_readreceipt_duplicates(services: &Services) -> Result
 }
 
 async fn fix_hashed_sentinel_passwords(services: &Services) -> Result {
-	use tuwunel_core::utils::hash::verify_password;
+	use gaussmatrix_core::utils::hash::verify_password;
 
 	const PASSWORD_SENTINEL: &str = "*";
 

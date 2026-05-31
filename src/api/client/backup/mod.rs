@@ -8,8 +8,8 @@ use futures::{FutureExt, future::try_join};
 use ruma::{UInt, UserId, serde::Raw};
 use serde::Deserialize;
 use serde_json::value::RawValue as RawJsonValue;
-use tuwunel_core::Result;
-use tuwunel_service::Services;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::Services;
 
 pub(crate) use self::{
 	keys::{add_backup_keys_route, delete_backup_keys_route, get_backup_keys_route},

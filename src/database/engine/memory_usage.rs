@@ -1,7 +1,7 @@
 use std::{ffi::CStr, fmt::Write};
 
 use rocksdb::perf::get_memory_usage_stats;
-use tuwunel_core::{Result, implement};
+use gaussmatrix_core::{Result, implement};
 
 use super::{
 	Engine,

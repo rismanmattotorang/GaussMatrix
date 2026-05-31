@@ -1,6 +1,6 @@
 # OIDC Server (Next-Gen Auth)
 
-Tuwunel includes a built-in OIDC authorization server that implements
+GaussMatrix includes a built-in OIDC authorization server that implements
 next-generation Matrix authentication. Matrix clients that support next-gen
 auth interact with this server directly instead of using the legacy
 `m.login.password` or `m.login.sso` flows.
@@ -30,7 +30,7 @@ client = "https://matrix.example.com"
 ```
 
 The `well_known.client` URL becomes the OIDC issuer URL. If only one of the
-two prerequisites is met, Tuwunel logs a warning at startup and the OIDC
+two prerequisites is met, GaussMatrix logs a warning at startup and the OIDC
 server does not start.
 
 ## Endpoints
@@ -49,36 +49,36 @@ server does not start.
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/_tuwunel/oidc/authorize` | Authorization endpoint — starts the OAuth flow |
-| `GET` | `/_tuwunel/oidc/_complete` | Completes authorization after provider callback |
-| `POST` | `/_tuwunel/oidc/token` | Token endpoint — exchanges auth codes and refresh tokens |
-| `POST` | `/_tuwunel/oidc/revoke` | Token revocation (RFC 7009) |
-| `GET` | `/_tuwunel/oidc/jwks` | JSON Web Key Set — public keys for JWT verification |
-| `GET/POST` | `/_tuwunel/oidc/userinfo` | Userinfo endpoint — returns claims for a bearer token |
-| `POST` | `/_tuwunel/oidc/registration` | Dynamic client registration (RFC 7591) |
+| `GET` | `/_gaussmatrix/oidc/authorize` | Authorization endpoint — starts the OAuth flow |
+| `GET` | `/_gaussmatrix/oidc/_complete` | Completes authorization after provider callback |
+| `POST` | `/_gaussmatrix/oidc/token` | Token endpoint — exchanges auth codes and refresh tokens |
+| `POST` | `/_gaussmatrix/oidc/revoke` | Token revocation (RFC 7009) |
+| `GET` | `/_gaussmatrix/oidc/jwks` | JSON Web Key Set — public keys for JWT verification |
+| `GET/POST` | `/_gaussmatrix/oidc/userinfo` | Userinfo endpoint — returns claims for a bearer token |
+| `POST` | `/_gaussmatrix/oidc/registration` | Dynamic client registration (RFC 7591) |
 
 ### Account management UI
 
 | Endpoint | Description |
 |---|---|
-| `GET /_tuwunel/oidc/account` | Account management page (MSC4191) |
+| `GET /_gaussmatrix/oidc/account` | Account management page (MSC4191) |
 
 ## Dynamic Client Registration
 
-Matrix clients that support next-gen auth register themselves with Tuwunel
+Matrix clients that support next-gen auth register themselves with GaussMatrix
 before initiating the authorization flow, using RFC 7591 dynamic client
 registration:
 
 ```
-POST /_tuwunel/oidc/registration
+POST /_gaussmatrix/oidc/registration
 ```
 
 No pre-configuration of clients is required — any Matrix client that supports
-dynamic registration can authenticate against Tuwunel's OIDC server.
+dynamic registration can authenticate against GaussMatrix's OIDC server.
 
 ## Account Management UI
 
-Tuwunel serves a built-in account management page at `/_tuwunel/oidc/account`
+GaussMatrix serves a built-in account management page at `/_gaussmatrix/oidc/account`
 for users authenticated via OIDC. From this page users can:
 
 - View all active OIDC sessions
@@ -92,7 +92,7 @@ The URL for this page is advertised in the authorization server metadata under
 ## Cross-Signing Protection (MSC4312)
 
 Devices that authenticated via the OIDC server are tracked as "OIDC devices."
-When such a device attempts to reset cross-signing keys, Tuwunel requires
+When such a device attempts to reset cross-signing keys, GaussMatrix requires
 re-authentication via the original identity provider through the SSO UIAA
 flow. This prevents a compromised client from resetting cross-signing without
 the user actively re-authorizing through their identity provider.
@@ -102,15 +102,15 @@ query commands for OAuth sessions.
 
 ## Signing Keys
 
-Tuwunel generates and persists an ECDSA signing key on first startup, stored
+GaussMatrix generates and persists an ECDSA signing key on first startup, stored
 in the `oidc_signingkey` database table. The corresponding public key is
-served at `/_tuwunel/oidc/jwks`. This key signs ID tokens (JWTs) issued by
+served at `/_gaussmatrix/oidc/jwks`. This key signs ID tokens (JWTs) issued by
 the token endpoint.
 
 ## Startup Warnings
 
 If an `[[global.identity_provider]]` is configured but `well_known.client` is
-missing, Tuwunel logs:
+missing, GaussMatrix logs:
 
 ```
 OIDC server (Next-gen auth) requires `well_known.client` to be configured to serve your `identity_provider`.

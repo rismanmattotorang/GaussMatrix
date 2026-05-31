@@ -1,7 +1,7 @@
 use ruma::{OwnedRoomId, OwnedUserId};
 use tokio::time::Instant;
-use tuwunel_core::Result;
-use tuwunel_database::Deserialized;
+use gaussmatrix_core::Result;
+use gaussmatrix_database::Deserialized;
 
 use crate::admin_command;
 

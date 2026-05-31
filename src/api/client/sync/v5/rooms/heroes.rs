@@ -5,8 +5,8 @@ use ruma::{
 	MxcUri, OwnedMxcUri, RoomId, UserId,
 	api::client::sync::sync_events::v5::{DisplayName, response, response::Heroes},
 };
-use tuwunel_core::utils::{BoolExt, ReadyExt, TryFutureExtExt, stream::BroadbandExt};
-use tuwunel_service::Services;
+use gaussmatrix_core::utils::{BoolExt, ReadyExt, TryFutureExtExt, stream::BroadbandExt};
+use gaussmatrix_service::Services;
 
 const MAX_HEROES: usize = 5;
 

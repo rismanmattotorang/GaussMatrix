@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use ruma::{Mxc, OwnedMxcUri, OwnedServerName};
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 
 use crate::admin_command;
 

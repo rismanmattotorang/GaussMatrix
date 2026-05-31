@@ -5,7 +5,7 @@ use futures::{
 	future::Either::{Left, Right},
 };
 use ruma::{MilliSecondsSinceUnixEpoch, RoomId, UInt, UserId, api::Direction};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, at, err, implement,
 	matrix::pdu::{PduCount, PduEvent},
 	trace,
@@ -15,7 +15,7 @@ use tuwunel_core::{
 	},
 	warn,
 };
-use tuwunel_database::{KeyVal, keyval::Val};
+use gaussmatrix_database::{KeyVal, keyval::Val};
 
 use super::{PduId, RawPduId};
 

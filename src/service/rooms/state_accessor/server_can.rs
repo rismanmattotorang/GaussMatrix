@@ -6,7 +6,7 @@ use ruma::{
 		room::history_visibility::{HistoryVisibility, RoomHistoryVisibilityEventContent},
 	},
 };
-use tuwunel_core::{implement, utils::stream::ReadyExt};
+use gaussmatrix_core::{implement, utils::stream::ReadyExt};
 
 /// Whether a server is allowed to see an event through federation, based on
 /// the room's history_visibility at that event's state.

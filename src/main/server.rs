@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc};
 
 use tokio::sync::Mutex;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Error, Result,
 	config::Config,
 	implement, info,
@@ -14,18 +14,18 @@ use crate::{Args, Runtime, args, logging::TracingFlameGuard, runtime::Handle};
 /// Server runtime state; complete
 pub struct Server {
 	/// Server runtime state; public portion
-	pub server: Arc<tuwunel_core::Server>,
+	pub server: Arc<gaussmatrix_core::Server>,
 
-	pub services: Mutex<Option<Arc<tuwunel_service::Services>>>,
+	pub services: Mutex<Option<Arc<gaussmatrix_service::Services>>>,
 
 	_tracing_flame_guard: TracingFlameGuard,
 
 	#[cfg(feature = "sentry_telemetry")]
 	_sentry_guard: Option<::sentry::ClientInitGuard>,
 
-	#[cfg(all(tuwunel_mods, feature = "tuwunel_mods"))]
+	#[cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
 	// Module instances; TODO: move to mods::loaded mgmt vector
-	pub(crate) mods: tokio::sync::RwLock<Vec<tuwunel_core::mods::Module>>,
+	pub(crate) mods: tokio::sync::RwLock<Vec<gaussmatrix_core::mods::Module>>,
 }
 
 #[implement(Server)]
@@ -72,11 +72,11 @@ pub fn new(args: Option<&Args>, runtime: Option<&Runtime>) -> Result<Arc<Self>, 
 		database_path = ?config.database_path,
 		log_levels = %config.log,
 		"{}",
-		tuwunel_core::version(),
+		gaussmatrix_core::version(),
 	);
 
 	Ok(Arc::new(Self {
-		server: Arc::new(tuwunel_core::Server::new(config, handle, logger, metrics)),
+		server: Arc::new(gaussmatrix_core::Server::new(config, handle, logger, metrics)),
 
 		services: None.into(),
 
@@ -85,7 +85,7 @@ pub fn new(args: Option<&Args>, runtime: Option<&Runtime>) -> Result<Arc<Self>, 
 		#[cfg(feature = "sentry_telemetry")]
 		_sentry_guard: sentry_guard,
 
-		#[cfg(all(tuwunel_mods, feature = "tuwunel_mods"))]
+		#[cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
 		mods: tokio::sync::RwLock::new(Vec::new()),
 	}))
 }

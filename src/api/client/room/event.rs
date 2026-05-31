@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::{TryFutureExt, future::join3, pin_mut};
 use ruma::api::client::room::get_room_event;
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Event, Pdu, Result, err,
 	result::IsErrOr,
 	utils::{BoolExt, FutureBoolExt, TryFutureExtExt, future::OptionFutureExt},

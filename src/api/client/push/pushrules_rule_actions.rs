@@ -4,7 +4,7 @@ use ruma::{
 	events::{GlobalAccountDataEventType, push_rules::PushRulesEvent},
 	push::{PredefinedContentRuleId, PredefinedOverrideRuleId},
 };
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use crate::Ruma;
 

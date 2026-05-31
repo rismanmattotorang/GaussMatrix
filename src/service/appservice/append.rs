@@ -1,6 +1,6 @@
 use futures::{FutureExt, StreamExt, TryFutureExt};
 use ruma::{UserId, events::TimelineEventType};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, error, implement,
 	matrix::{
 		event::Event,

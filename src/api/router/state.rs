@@ -1,6 +1,6 @@
 use std::{ops::Deref, sync::Arc};
 
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 #[derive(Clone, Copy, Debug)]
 pub struct State {

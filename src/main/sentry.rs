@@ -14,7 +14,7 @@ use sentry::{
 		protocol::v7::{Context, Event},
 	},
 };
-use tuwunel_core::{config::Config, debug, trace};
+use gaussmatrix_core::{config::Config, debug, trace};
 
 static SEND_PANIC: OnceLock<bool> = OnceLock::new();
 static SEND_ERROR: OnceLock<bool> = OnceLock::new();
@@ -49,7 +49,7 @@ fn options(config: &Config) -> ClientOptions {
 		traces_sample_rate: config.sentry_traces_sample_rate,
 		debug: cfg!(debug_assertions),
 		release: sentry::release_name!(),
-		user_agent: tuwunel_core::version::user_agent().into(),
+		user_agent: gaussmatrix_core::version::user_agent().into(),
 		attach_stacktrace: config.sentry_attach_stacktrace,
 		before_send: Some(Arc::new(before_send)),
 		before_breadcrumb: Some(Arc::new(before_breadcrumb)),

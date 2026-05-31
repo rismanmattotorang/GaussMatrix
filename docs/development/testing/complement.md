@@ -13,12 +13,12 @@ for each test (or small group of tests). This requires the test runner itself
 to have access to the Docker socket — which creates a docker-in-docker
 situation when running inside a container.
 
-Tuwunel's CI handles this by splitting the work into two images and a
+GaussMatrix's CI handles this by splitting the work into two images and a
 shell script:
 
 ```
 complement-tester   ← contains the Complement binary (the Go test runner)
-complement-testee   ← contains the Tuwunel binary (the system under test)
+complement-testee   ← contains the GaussMatrix binary (the system under test)
 ```
 
 `docker/complement.sh` runs `complement-tester` as a container with:
@@ -124,7 +124,7 @@ complement-testee--test--nightly--x86_64-unknown-linux-gnu--all--debian--testing
 > recommended. It is preserved here for any contributor who wants to reconstitute
 > it.
 
-Tuwunel's `flake.nix` provides a `complement` package that builds a Complement
+GaussMatrix's `flake.nix` provides a `complement` package that builds a Complement
 OCI image using Nix. With [Nix and direnv installed](https://direnv.net/docs/hook.html)
 (run `direnv allow` after setup):
 

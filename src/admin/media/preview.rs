@@ -1,4 +1,4 @@
-use tuwunel_core::Result;
+use gaussmatrix_core::Result;
 use url::Url;
 
 use crate::admin_command;

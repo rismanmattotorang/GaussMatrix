@@ -17,7 +17,7 @@ use ruma::{
 	},
 	events::{TimelineEventType, relation::RelationType},
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, at, err,
 	matrix::{
 		event::{Event, RelationTypeEqual},
@@ -29,7 +29,7 @@ use tuwunel_core::{
 		stream::{ReadyExt, WidebandExt},
 	},
 };
-use tuwunel_service::Services;
+use gaussmatrix_service::Services;
 
 use crate::{Ruma, client::is_ignored_pdu};
 

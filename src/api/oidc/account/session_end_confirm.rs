@@ -1,6 +1,6 @@
 use const_str::format as const_format;
 use ruma::UserId;
-use tuwunel_core::{Result, utils::html::escape as html_escape};
+use gaussmatrix_core::{Result, utils::html::escape as html_escape};
 
 use super::{ACCOUNT_HEAD, url_encode};
 
@@ -45,14 +45,14 @@ static PAGE_HTML: &str = const_format!(
 			Sign out session <code>{{did}}</code>?
 			This will immediately invalidate its access token.
 		</p>
-		<form method="POST" action="/_tuwunel/oidc/account_callback">
+		<form method="POST" action="/_gaussmatrix/oidc/account_callback">
 			<input type="hidden" name="action" value="org.matrix.session_end">
 			<input type="hidden" name="device_id" value="{{did}}">
 			<input type="hidden" name="loginToken" value="{{tok}}">
 			<button type="submit" class="danger">Sign out</button>
 			<a
 				class="cancel"
-				href="/_tuwunel/oidc/account_callback?action=org.matrix.session_view&device_id={{did_enc}}&loginToken={{tok_enc}}"
+				href="/_gaussmatrix/oidc/account_callback?action=org.matrix.session_view&device_id={{did_enc}}&loginToken={{tok_enc}}"
 			>
 				Cancel
 			</a>

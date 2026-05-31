@@ -15,7 +15,7 @@ use async_trait::async_trait;
 use futures::{FutureExt, Stream, StreamExt};
 use ruma::{RoomId, ServerName, UserId};
 use tokio::{task, task::JoinSet};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, Server, debug, debug_warn, err, error,
 	smallvec::SmallVec,
 	utils::{

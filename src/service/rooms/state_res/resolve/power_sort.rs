@@ -10,7 +10,7 @@ use ruma::{
 	events::{TimelineEventType, room::power_levels::UserPowerLevel},
 	room_version_rules::RoomVersionRules,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result, err,
 	matrix::Event,
 	utils::stream::{BroadbandExt, IterStream, TryBroadbandExt},

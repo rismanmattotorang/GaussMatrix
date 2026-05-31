@@ -1,5 +1,5 @@
-use tuwunel_core::{Err, Result, utils};
-use tuwunel_service::users::Register;
+use gaussmatrix_core::{Err, Result, utils};
+use gaussmatrix_service::users::Register;
 
 use super::AUTO_GEN_PASSWORD_LENGTH;
 use crate::{admin_command, utils::parse_local_user_id};

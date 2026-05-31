@@ -1,5 +1,5 @@
-use tuwunel_core::{Result, utils};
-use tuwunel_service::registration_tokens::TokenExpires;
+use gaussmatrix_core::{Result, utils};
+use gaussmatrix_service::registration_tokens::TokenExpires;
 
 use crate::admin_command;
 

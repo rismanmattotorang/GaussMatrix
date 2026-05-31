@@ -3,7 +3,7 @@ use rocksdb::{
 	DBCompressionType as CompressionType, DataBlockIndexType, FifoCompactOptions,
 	LruCacheOptions, Options, UniversalCompactOptions, UniversalCompactionStopStyle,
 };
-use tuwunel_core::{Config, Result, err, utils::math::Expected};
+use gaussmatrix_core::{Config, Result, err, utils::math::Expected};
 
 use super::{
 	context::{ColCache, ColCaches, SHARED_POOL},

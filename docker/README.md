@@ -1,8 +1,8 @@
 # Docker Builder
 
 > [!NOTE]
-> This directory is for building docker images. For [deploying](https://github.com/matrix-construct/tuwunel/tree/main/docs/deploying)
-> [docker](https://github.com/matrix-construct/tuwunel/blob/main/docs/deploying/docker.md) visit
+> This directory is for building docker images. For [deploying](https://github.com/rismanmattotorang/gaussmatrix/tree/main/docs/deploying)
+> [docker](https://github.com/rismanmattotorang/gaussmatrix/blob/main/docs/deploying/docker.md) visit
 > the appropriate documentation instead.
 
 All Docker images for the project are built here. All images are
@@ -84,12 +84,12 @@ to run a smoketest: `./bake.sh tests-smoke`.
 
 4. Build something more complicated. Set environment variables or just edit the default vectors
 near the top of in the `bake.sh` with multiple elements (they are JSON arrays). You can take
-cues from the primary user of this system, the [GitHub CI](https://github.com/matrix-construct/tuwunel/blob/main/.github/workflows/main.yml#L32)
+cues from the primary user of this system, the [GitHub CI](https://github.com/rismanmattotorang/gaussmatrix/blob/main/.github/workflows/main.yml#L32)
 
 5. Defeat the final boss by building and running complement to completion. This will involve
 building the targets for `complement-tester` and `complement-testee` using `bake.sh` and then
 invoking `complement.sh`. You can take cues again from another user of this in the
-[GitHub CI](https://github.com/matrix-construct/tuwunel/blob/7e8c4c8883ca17de91c3323d329541342366ee0c/.github/workflows/test.yml#L140).
+[GitHub CI](https://github.com/rismanmattotorang/gaussmatrix/blob/7e8c4c8883ca17de91c3323d329541342366ee0c/.github/workflows/test.yml#L140).
 
 ## Notes
 

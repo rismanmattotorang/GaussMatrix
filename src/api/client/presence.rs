@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use axum::extract::State;
 use ruma::api::client::presence::{get_presence, set_presence};
-use tuwunel_core::{Err, Result};
+use gaussmatrix_core::{Err, Result};
 
 use crate::Ruma;
 

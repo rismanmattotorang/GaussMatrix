@@ -6,14 +6,14 @@ use ruma::{
 	},
 };
 use serde_json::{json, value::to_raw_value};
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Err, Error, Result, err, is_equal_to, utils,
 	utils::{
 		OptionExt,
 		future::{OptionFutureExt, TryExtExt},
 	},
 };
-use tuwunel_service::{Services, uiaa::SESSION_ID_LENGTH};
+use gaussmatrix_service::{Services, uiaa::SESSION_ID_LENGTH};
 
 use crate::{Ruma, client::jwt};
 

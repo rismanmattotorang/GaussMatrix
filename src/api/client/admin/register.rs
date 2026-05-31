@@ -4,8 +4,8 @@ use axum::extract::State;
 use hmac::{Hmac, Mac};
 use ruma::{OwnedUserId, UserId, api::client::admin::register};
 use sha1::Sha1;
-use tuwunel_core::{Err, Result, err};
-use tuwunel_service::users::{Register, device::generate_refresh_token};
+use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::users::{Register, device::generate_refresh_token};
 
 use crate::{ClientIp, Ruma};
 

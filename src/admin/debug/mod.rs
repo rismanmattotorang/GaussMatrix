@@ -36,8 +36,8 @@ mod verify_pdu;
 
 use clap::Subcommand;
 use ruma::{OwnedEventId, OwnedRoomId, OwnedRoomOrAliasId, OwnedServerName};
-use tuwunel_core::Result;
-use tuwunel_service::rooms::short::ShortRoomId;
+use gaussmatrix_core::Result;
+use gaussmatrix_service::rooms::short::ShortRoomId;
 
 use self::tester::TesterCommand;
 use crate::admin_command_dispatch;
@@ -65,13 +65,13 @@ pub(super) enum DebugCommand {
 	/// the command.
 	ParsePdu,
 
-	/// - Retrieve and print a PDU by EventID from the tuwunel database
+	/// - Retrieve and print a PDU by EventID from the gaussmatrix database
 	GetPdu {
 		/// An event ID (a $ followed by the base64 reference hash)
 		event_id: OwnedEventId,
 	},
 
-	/// - Retrieve and print a PDU by PduId from the tuwunel database
+	/// - Retrieve and print a PDU by PduId from the gaussmatrix database
 	GetShortPdu {
 		/// Shortroomid integer
 		shortroomid: ShortRoomId,
@@ -209,7 +209,7 @@ pub(super) enum DebugCommand {
 		server_name: OwnedServerName,
 	},
 
-	/// - Runs a server name through tuwunel's true destination resolution
+	/// - Runs a server name through gaussmatrix's true destination resolution
 	///   process
 	///
 	/// Useful for debugging well-known issues

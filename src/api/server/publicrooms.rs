@@ -3,7 +3,7 @@ use ruma::{
 	api::federation::directory::{get_public_rooms, get_public_rooms_filtered},
 	directory::Filter,
 };
-use tuwunel_core::{Err, Result, err};
+use gaussmatrix_core::{Err, Result, err};
 
 use crate::{ClientIp, Ruma};
 

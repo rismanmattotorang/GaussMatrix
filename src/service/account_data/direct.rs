@@ -2,7 +2,7 @@ use ruma::{
 	RoomId, UserId,
 	events::{GlobalAccountDataEventType, direct::DirectEventContent},
 };
-use tuwunel_core::{at, implement, is_equal_to};
+use gaussmatrix_core::{at, implement, is_equal_to};
 
 #[implement(super::Service)]
 pub async fn is_direct(&self, user_id: &UserId, room_id: &RoomId) -> bool {

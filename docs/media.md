@@ -1,6 +1,6 @@
 # Multimedia and storage provision
 
-Tuwunel handles media uploads, remote media fetching, thumbnail generation,
+GaussMatrix handles media uploads, remote media fetching, thumbnail generation,
 URL previews, and blurhash generation. This chapter covers configuration for
 all of these features, as well as the storage backends that back them.
 
@@ -34,7 +34,7 @@ use them.
 ## Blocking remote media
 
 `prevent_media_downloads_from` is a list of regex patterns matched against
-server names. Tuwunel refuses to download media originating from any matching
+server names. GaussMatrix refuses to download media originating from any matching
 server.
 
 ```toml
@@ -70,7 +70,7 @@ All allowlist checks are evaluated before the denylist check.
 
 ## Blurhash
 
-Tuwunel can generate [blurhashes](https://blurha.sh/) for uploaded images,
+GaussMatrix can generate [blurhashes](https://blurha.sh/) for uploaded images,
 which clients use to show a blurred placeholder before the full image loads.
 This requires the `blurhashing` compile-time feature.
 

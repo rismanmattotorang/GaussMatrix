@@ -90,7 +90,7 @@ where
 
 /// Find the common prefix from a collection of strings and return a slice
 /// ```
-/// use tuwunel_core::utils::string::common_prefix;
+/// use gaussmatrix_core::utils::string::common_prefix;
 /// let input = ["conduwuit", "conduit", "construct"];
 /// common_prefix(&input) == "con";
 /// ```

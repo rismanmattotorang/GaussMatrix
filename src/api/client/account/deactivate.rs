@@ -1,7 +1,7 @@
 use axum::extract::State;
 use futures::FutureExt;
 use ruma::api::client::account::{ThirdPartyIdRemovalStatus, deactivate};
-use tuwunel_core::{Result, info};
+use gaussmatrix_core::{Result, info};
 
 use crate::{ClientIp, Ruma, router::auth_uiaa};
 

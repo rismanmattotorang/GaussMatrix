@@ -5,11 +5,11 @@ use ruma::{
 	events::{AnySyncEphemeralRoomEvent, receipt::SyncReceiptEvent},
 	serde::Raw,
 };
-use tuwunel_core::{
+use gaussmatrix_core::{
 	Result,
 	utils::{BoolExt, IterStream, stream::BroadbandExt},
 };
-use tuwunel_service::{
+use gaussmatrix_service::{
 	rooms::read_receipt::{PrivateReadEvents, pack_receipts},
 	sync::Room,
 };
