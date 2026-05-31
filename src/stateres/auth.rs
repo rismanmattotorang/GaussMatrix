@@ -15,14 +15,51 @@
 
 use crate::{
 	event::Event,
+	power::PowerLevels,
 	state_map::{EventId, EventStore, StateMap},
 };
 
+/// The state key of the room's power-levels event.
+const POWER_LEVELS_KEY: (&str, &str) = ("m.room.power_levels", "");
+
 /// The room-version authorisation rules: decide whether `event` is authorised
 /// against the partially-resolved `state`.
+///
+/// `store` is provided so a rule can read the content of state events (the
+/// resolved `state` maps slots to event ids, not content).
 pub trait AuthRules<E: Event> {
 	/// Whether `event` is authorised given the state resolved so far.
-	fn is_authorized(&self, event: &E, state: &StateMap) -> bool;
+	fn is_authorized(&self, event: &E, state: &StateMap, store: &EventStore<E>) -> bool;
+}
+
+/// Power-level authorisation: a sender may send an event only if their power
+/// level meets the level the room's `m.room.power_levels` state requires for
+/// that event type.
+///
+/// This is one component of the full room-version rule set. When no
+/// power-levels event is in the state yet (room bootstrap), it falls back to a
+/// default (all-zero) power-levels, which authorises; the create-event and
+/// membership rules that govern bootstrap and joins are separate components.
+pub struct PowerLevelRules;
+
+impl<E: Event> AuthRules<E> for PowerLevelRules {
+	fn is_authorized(&self, event: &E, state: &StateMap, store: &EventStore<E>) -> bool {
+		let levels = current_power_levels(state, store);
+		let required = levels.required_for(event.event_type(), true);
+
+		levels.for_user(event.sender()) >= required
+	}
+}
+
+/// The power levels in effect in `state`, or the default when no power-levels
+/// event is present.
+fn current_power_levels<E: Event>(state: &StateMap, store: &EventStore<E>) -> PowerLevels {
+	let key = (POWER_LEVELS_KEY.0.to_owned(), POWER_LEVELS_KEY.1.to_owned());
+	state
+		.get(&key)
+		.and_then(|id| store.get(id))
+		.and_then(|event| event.power_levels().cloned())
+		.unwrap_or_default()
 }
 
 /// Walk `events` in resolution order, folding each authorised event into `base`
@@ -51,7 +88,7 @@ where
 			continue;
 		};
 
-		if rules.is_authorized(event, &state) {
+		if rules.is_authorized(event, &state, store) {
 			let slot = (event.event_type().to_owned(), event.state_key().to_owned());
 			state.insert(slot, id.clone());
 		}

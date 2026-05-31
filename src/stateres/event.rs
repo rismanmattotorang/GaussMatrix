@@ -1,6 +1,6 @@
 //! The event projection the resolution ordering operates on.
 
-use crate::state_map::EventId;
+use crate::{power::PowerLevels, state_map::EventId};
 
 /// The minimal projection of a Matrix event that the resolution ordering needs.
 ///
@@ -30,4 +30,11 @@ pub trait Event {
 
 	/// The identifiers of this event's auth events.
 	fn auth_event_ids(&self) -> &[EventId];
+
+	/// The user id of this event's sender.
+	fn sender(&self) -> &str;
+
+	/// The parsed power-levels content, present only for `m.room.power_levels`
+	/// events.
+	fn power_levels(&self) -> Option<&PowerLevels>;
 }

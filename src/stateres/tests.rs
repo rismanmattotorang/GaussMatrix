@@ -1,21 +1,27 @@
 //! Unit tests for partitioning, the resolved-state cache, and resolution.
 
-use std::{cell::Cell, collections::BTreeSet};
-
-use crate::{
-	AuthRules, ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap,
-	auth_difference, conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition,
-	resolve, reverse_topological_power_sort,
+use std::{
+	cell::Cell,
+	collections::{BTreeMap, BTreeSet},
 };
 
-/// A test event carrying just the fields the ordering needs.
+use crate::{
+	AuthRules, ConflictedState, Event, EventId, EventStore, PowerLevelRules, PowerLevels,
+	ResolvedStateCache, StateKey, StateMap, auth_difference, conflicting_event_ids,
+	iterative_auth_checks, mainline_ordering, partition, resolve,
+	reverse_topological_power_sort,
+};
+
+/// A test event carrying just the fields the ordering and auth rules need.
 struct TestEvent {
 	id: EventId,
 	kind: String,
 	state_key: String,
+	sender: String,
 	power: i64,
 	ts: u64,
 	auth: Vec<EventId>,
+	power_levels: Option<PowerLevels>,
 }
 
 impl TestEvent {
@@ -28,21 +34,32 @@ impl TestEvent {
 			id: id.to_owned(),
 			kind: kind.to_owned(),
 			state_key: String::new(),
+			sender: String::new(),
 			power,
 			ts,
 			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
+			power_levels: None,
 		}
 	}
 
 	fn state_event(id: &str, kind: &str, state_key: &str, auth: &[&str]) -> Self {
-		Self {
-			id: id.to_owned(),
-			kind: kind.to_owned(),
-			state_key: state_key.to_owned(),
-			power: 0,
-			ts: 0,
-			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
-		}
+		let mut event = Self::typed(id, kind, 0, 0, auth);
+		event.state_key = state_key.to_owned();
+		event
+	}
+
+	/// An event of `kind` sent by `sender`.
+	fn by(id: &str, kind: &str, sender: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, kind, 0, 0, auth);
+		event.sender = sender.to_owned();
+		event
+	}
+
+	/// An `m.room.power_levels` event carrying `levels`.
+	fn powerlevels(id: &str, levels: PowerLevels, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.power_levels", 0, 0, auth);
+		event.power_levels = Some(levels);
+		event
 	}
 }
 
@@ -58,10 +75,14 @@ impl Event for TestEvent {
 	fn origin_server_ts(&self) -> u64 { self.ts }
 
 	fn auth_event_ids(&self) -> &[EventId] { &self.auth }
+
+	fn sender(&self) -> &str { &self.sender }
+
+	fn power_levels(&self) -> Option<&PowerLevels> { self.power_levels.as_ref() }
 }
 
 /// Build a by-id store from a set of events.
-fn store(events: Vec<TestEvent>) -> std::collections::BTreeMap<EventId, TestEvent> {
+fn store(events: Vec<TestEvent>) -> BTreeMap<EventId, TestEvent> {
 	events.into_iter().map(|e| (e.id.clone(), e)).collect()
 }
 
@@ -329,7 +350,14 @@ fn mainline_without_power_levels_orders_by_ts_then_id() {
 /// Authorise every event.
 struct AcceptAll;
 impl AuthRules<TestEvent> for AcceptAll {
-	fn is_authorized(&self, _event: &TestEvent, _state: &StateMap) -> bool { true }
+	fn is_authorized(
+		&self,
+		_event: &TestEvent,
+		_state: &StateMap,
+		_store: &EventStore<TestEvent>,
+	) -> bool {
+		true
+	}
 }
 
 #[test]
@@ -347,7 +375,12 @@ fn iterative_auth_checks_folds_authorized_events_into_state() {
 fn iterative_auth_checks_skips_rejected_events() {
 	struct RejectBad;
 	impl AuthRules<TestEvent> for RejectBad {
-		fn is_authorized(&self, event: &TestEvent, _state: &StateMap) -> bool {
+		fn is_authorized(
+			&self,
+			event: &TestEvent,
+			_state: &StateMap,
+			_store: &EventStore<TestEvent>,
+		) -> bool {
 			event.event_id() != "$bad"
 		}
 	}
@@ -366,7 +399,12 @@ fn iterative_auth_checks_sees_state_resolved_so_far() {
 	// "$child" is only authorised once a power-levels event is in the state.
 	struct NeedsPowerLevels;
 	impl AuthRules<TestEvent> for NeedsPowerLevels {
-		fn is_authorized(&self, event: &TestEvent, state: &StateMap) -> bool {
+		fn is_authorized(
+			&self,
+			event: &TestEvent,
+			state: &StateMap,
+			_store: &EventStore<TestEvent>,
+		) -> bool {
 			event.event_id() != "$child"
 				|| state.contains_key(&key("m.room.power_levels", ""))
 		}
@@ -394,4 +432,64 @@ fn iterative_auth_checks_preserves_base_state() {
 	let resolved = iterative_auth_checks(&ids(&["$new"]), base, &s, &AcceptAll);
 	assert_eq!(resolved.get(&key("m.room.topic", "")).map(String::as_str), Some("$existing"));
 	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$new"));
+}
+
+fn levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@admin".to_owned(), 100_i64)]),
+		users_default: 10,
+		events: BTreeMap::from([("m.room.name".to_owned(), 60_i64)]),
+		events_default: 0,
+		state_default: 50,
+	}
+}
+
+#[test]
+fn power_levels_lookups_fall_back_to_defaults() {
+	let pl = levels();
+	assert_eq!(pl.for_user("@admin"), 100);
+	assert_eq!(pl.for_user("@nobody"), 10);
+	assert_eq!(pl.required_for("m.room.name", true), 60); // explicit
+	assert_eq!(pl.required_for("m.room.topic", true), 50); // state_default
+	assert_eq!(pl.required_for("m.room.message", false), 0); // events_default
+}
+
+#[test]
+fn power_level_rules_authorize_by_sender_level() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		// @admin (100) may send a topic (needs state_default 50).
+		TestEvent::by("$ok", "m.room.topic", "@admin", &["$pl"]),
+		// @bob (default 10) may not (needs 50).
+		TestEvent::by("$no", "m.room.topic", "@bob", &["$pl"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let rules = PowerLevelRules;
+	assert!(rules.is_authorized(&s["$ok"], &state, &s));
+	assert!(!rules.is_authorized(&s["$no"], &state, &s));
+}
+
+#[test]
+fn power_level_rules_drive_iterative_auth_checks() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		TestEvent::by("$ok", "m.room.topic", "@admin", &["$pl"]),
+		TestEvent::by("$no", "m.room.guest_access", "@bob", &["$pl"]),
+	]);
+	let mut base = StateMap::new();
+	base.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let resolved = iterative_auth_checks(&ids(&["$ok", "$no"]), base, &s, &PowerLevelRules);
+	assert!(resolved.contains_key(&key("m.room.topic", "")), "@admin authorised");
+	assert!(!resolved.contains_key(&key("m.room.guest_access", "")), "@bob rejected");
+}
+
+#[test]
+fn power_level_rules_default_to_permissive_without_power_levels() {
+	// No power-levels event in state → default (all-zero) levels → authorised.
+	let s = store(vec![TestEvent::by("$e", "m.room.name", "@anyone", &[])]);
+	let rules = PowerLevelRules;
+	assert!(rules.is_authorized(&s["$e"], &StateMap::new(), &s));
 }
