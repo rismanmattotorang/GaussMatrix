@@ -24,6 +24,15 @@ pub struct PowerLevels {
 
 	/// The level required to send a state event without an explicit entry.
 	pub state_default: i64,
+
+	/// The level required to invite a user.
+	pub invite: i64,
+
+	/// The level required to kick a user.
+	pub kick: i64,
+
+	/// The level required to ban a user.
+	pub ban: i64,
 }
 
 impl PowerLevels {

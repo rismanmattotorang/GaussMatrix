@@ -37,4 +37,12 @@ pub trait Event {
 	/// The parsed power-levels content, present only for `m.room.power_levels`
 	/// events.
 	fn power_levels(&self) -> Option<&PowerLevels>;
+
+	/// The membership (`join`/`invite`/`leave`/`ban`/`knock`), present only for
+	/// `m.room.member` events.
+	fn membership(&self) -> Option<&str>;
+
+	/// The join rule (`public`/`invite`/…), present only for
+	/// `m.room.join_rules` events.
+	fn join_rule(&self) -> Option<&str>;
 }

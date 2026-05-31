@@ -25,6 +25,12 @@ const POWER_LEVELS_KEY: (&str, &str) = ("m.room.power_levels", "");
 /// The room's create event type.
 const CREATE_TYPE: &str = "m.room.create";
 
+/// The member event type.
+const MEMBER_TYPE: &str = "m.room.member";
+
+/// The join-rules state key.
+const JOIN_RULES_KEY: (&str, &str) = ("m.room.join_rules", "");
+
 /// The room-version authorisation rules: decide whether `event` is authorised
 /// against the partially-resolved `state`.
 ///
@@ -82,6 +88,88 @@ impl<E: Event> AuthRules<E> for AllOf<'_, E> {
 			.iter()
 			.all(|rule| rule.is_authorized(event, state, store))
 	}
+}
+
+/// Membership authorisation for `m.room.member` events: governs the
+/// join/invite/leave/ban transitions against the join rule, current
+/// memberships, and the inviting/kicking/banning power levels. Non-member
+/// events are passed through (this rule only governs membership).
+///
+/// Scope: this covers the steady-state transitions. The create-room bootstrap
+/// join (the room creator's first join), knock, restricted joins, and
+/// third-party invites are separate components and not yet handled.
+pub struct MembershipRules;
+
+impl<E: Event> AuthRules<E> for MembershipRules {
+	fn is_authorized(&self, event: &E, state: &StateMap, store: &EventStore<E>) -> bool {
+		if event.event_type() != MEMBER_TYPE {
+			return true;
+		}
+
+		let Some(membership) = event.membership() else {
+			return false;
+		};
+
+		let sender = event.sender();
+		let target = event.state_key();
+		let levels = current_power_levels(state, store);
+		let sender_level = levels.for_user(sender);
+		let sender_membership = membership_of(sender, state, store);
+		let target_membership = membership_of(target, state, store);
+
+		match membership {
+			| "join" => {
+				if sender != target || target_membership == "ban" {
+					return false;
+				}
+				match current_join_rule(state, store).as_str() {
+					| "public" => true,
+					| "invite" => matches!(target_membership.as_str(), "invite" | "join"),
+					| _ => false,
+				}
+			},
+			| "invite" =>
+				sender_membership == "join"
+					&& !matches!(target_membership.as_str(), "join" | "ban")
+					&& sender_level >= levels.invite,
+			| "leave" =>
+				if sender == target {
+					matches!(sender_membership.as_str(), "join" | "invite" | "knock")
+				} else {
+					sender_membership == "join"
+						&& sender_level >= levels.kick
+						&& sender_level > levels.for_user(target)
+				},
+			| "ban" =>
+				sender_membership == "join"
+					&& sender_level >= levels.ban
+					&& sender_level > levels.for_user(target),
+			| _ => false,
+		}
+	}
+}
+
+/// The membership of `user` in `state` (`leave` when no member event is
+/// present).
+fn membership_of<E: Event>(user: &str, state: &StateMap, store: &EventStore<E>) -> String {
+	state
+		.get(&(MEMBER_TYPE.to_owned(), user.to_owned()))
+		.and_then(|id| store.get(id))
+		.and_then(Event::membership)
+		.unwrap_or("leave")
+		.to_owned()
+}
+
+/// The room's join rule in `state` (`invite` when no join-rules event is
+/// present, matching the Matrix default).
+fn current_join_rule<E: Event>(state: &StateMap, store: &EventStore<E>) -> String {
+	let key = (JOIN_RULES_KEY.0.to_owned(), JOIN_RULES_KEY.1.to_owned());
+	state
+		.get(&key)
+		.and_then(|id| store.get(id))
+		.and_then(Event::join_rule)
+		.unwrap_or("invite")
+		.to_owned()
 }
 
 /// The power levels in effect in `state`, or the default when no power-levels

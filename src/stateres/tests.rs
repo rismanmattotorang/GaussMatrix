@@ -6,9 +6,9 @@ use std::{
 };
 
 use crate::{
-	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, PowerLevelRules,
-	PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference, conflicting_event_ids,
-	iterative_auth_checks, mainline_ordering, partition, resolve,
+	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, MembershipRules,
+	PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference,
+	conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition, resolve,
 	reverse_topological_power_sort,
 };
 
@@ -22,6 +22,8 @@ struct TestEvent {
 	ts: u64,
 	auth: Vec<EventId>,
 	power_levels: Option<PowerLevels>,
+	membership: Option<String>,
+	join_rule: Option<String>,
 }
 
 impl TestEvent {
@@ -39,7 +41,25 @@ impl TestEvent {
 			ts,
 			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
 			power_levels: None,
+			membership: None,
+			join_rule: None,
 		}
+	}
+
+	/// An `m.room.member` event setting `target`'s membership, sent by `sender`.
+	fn member(id: &str, sender: &str, target: &str, membership: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.member", 0, 0, auth);
+		event.sender = sender.to_owned();
+		event.state_key = target.to_owned();
+		event.membership = Some(membership.to_owned());
+		event
+	}
+
+	/// An `m.room.join_rules` event setting the room's join rule.
+	fn joinrules(id: &str, rule: &str, auth: &[&str]) -> Self {
+		let mut event = Self::typed(id, "m.room.join_rules", 0, 0, auth);
+		event.join_rule = Some(rule.to_owned());
+		event
 	}
 
 	fn state_event(id: &str, kind: &str, state_key: &str, auth: &[&str]) -> Self {
@@ -79,6 +99,10 @@ impl Event for TestEvent {
 	fn sender(&self) -> &str { &self.sender }
 
 	fn power_levels(&self) -> Option<&PowerLevels> { self.power_levels.as_ref() }
+
+	fn membership(&self) -> Option<&str> { self.membership.as_deref() }
+
+	fn join_rule(&self) -> Option<&str> { self.join_rule.as_deref() }
 }
 
 /// Build a by-id store from a set of events.
@@ -441,6 +465,24 @@ fn levels() -> PowerLevels {
 		events: BTreeMap::from([("m.room.name".to_owned(), 60_i64)]),
 		events_default: 0,
 		state_default: 50,
+		invite: 0,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+/// Power levels giving `@admin` 100 and `@mod` 60, with default `users_default`
+/// 0 and the standard invite/kick/ban gates.
+fn membership_levels() -> PowerLevels {
+	PowerLevels {
+		users: BTreeMap::from([("@admin".to_owned(), 100_i64), ("@mod".to_owned(), 60_i64)]),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default: 50,
+		invite: 50,
+		kick: 50,
+		ban: 50,
 	}
 }
 
@@ -544,4 +586,81 @@ fn all_of_requires_every_rule_to_pass() {
 	let mut without_create = StateMap::new();
 	without_create.insert(key("m.room.power_levels", ""), "$pl".to_owned());
 	assert!(!rules.is_authorized(&s["$admin_evt"], &without_create, &s));
+}
+
+#[test]
+fn membership_rules_pass_non_member_events() {
+	let s = store(vec![TestEvent::state_event("$name", "m.room.name", "", &[])]);
+	assert!(MembershipRules.is_authorized(&s["$name"], &StateMap::new(), &s));
+}
+
+#[test]
+fn membership_join_public_allowed_invite_requires_invitation() {
+	let s = store(vec![
+		TestEvent::joinrules("$public", "public", &[]),
+		TestEvent::joinrules("$invite", "invite", &[]),
+		TestEvent::member("$join", "@alice", "@alice", "join", &[]),
+		TestEvent::member("$inv", "@bob", "@alice", "invite", &[]),
+	]);
+
+	// Public room: anyone may join.
+	let mut public = StateMap::new();
+	public.insert(key("m.room.join_rules", ""), "$public".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$join"], &public, &s));
+
+	// Invite-only, alice not invited → rejected.
+	let mut invite_only = StateMap::new();
+	invite_only.insert(key("m.room.join_rules", ""), "$invite".to_owned());
+	assert!(!MembershipRules.is_authorized(&s["$join"], &invite_only, &s));
+
+	// Invite-only, alice invited → allowed.
+	let mut invited = invite_only.clone();
+	invited.insert(key("m.room.member", "@alice"), "$inv".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$join"], &invited, &s));
+}
+
+#[test]
+fn membership_invite_requires_joined_sender_with_power() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", membership_levels(), &[]),
+		TestEvent::member("$adminjoin", "@admin", "@admin", "join", &[]),
+		TestEvent::member("$bobjoin", "@bob", "@bob", "join", &[]),
+		TestEvent::member("$inv_ok", "@admin", "@carol", "invite", &[]),
+		TestEvent::member("$inv_low", "@bob", "@dave", "invite", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	state.insert(key("m.room.member", "@admin"), "$adminjoin".to_owned());
+	state.insert(key("m.room.member", "@bob"), "$bobjoin".to_owned());
+
+	// @admin (joined, power 100 >= invite 50) invites carol.
+	assert!(MembershipRules.is_authorized(&s["$inv_ok"], &state, &s));
+	// @bob (joined, power 0 < invite 50) cannot invite.
+	assert!(!MembershipRules.is_authorized(&s["$inv_low"], &state, &s));
+}
+
+#[test]
+fn membership_leave_self_and_kick_and_ban_by_power() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", membership_levels(), &[]),
+		TestEvent::member("$alicejoin", "@alice", "@alice", "join", &[]),
+		TestEvent::member("$modjoin", "@mod", "@mod", "join", &[]),
+		TestEvent::member("$aliceleave", "@alice", "@alice", "leave", &[]),
+		TestEvent::member("$kick", "@mod", "@alice", "leave", &[]),
+		TestEvent::member("$kick_fail", "@alice", "@mod", "leave", &[]),
+		TestEvent::member("$ban", "@mod", "@alice", "ban", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	state.insert(key("m.room.member", "@alice"), "$alicejoin".to_owned());
+	state.insert(key("m.room.member", "@mod"), "$modjoin".to_owned());
+
+	// Alice (joined) leaves herself.
+	assert!(MembershipRules.is_authorized(&s["$aliceleave"], &state, &s));
+	// Mod (power 60 >= kick 50, 60 > 0) kicks alice.
+	assert!(MembershipRules.is_authorized(&s["$kick"], &state, &s));
+	// Alice (power 0) cannot kick the mod.
+	assert!(!MembershipRules.is_authorized(&s["$kick_fail"], &state, &s));
+	// Mod (power 60 >= ban 50, 60 > 0) bans alice.
+	assert!(MembershipRules.is_authorized(&s["$ban"], &state, &s));
 }
