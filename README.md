@@ -147,13 +147,15 @@ preserves auditability.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.
-- [~] `gm-stateres` parallel state-resolution engine (room versions 1–12) with a
-      resolved-state cache. **Foundation landed** (`src/stateres`): the state-res-v2
-      conflict partitioning (unconflicted/conflicted split), the resolved-state cache
-      (memoised by the conflicting event-id set, bounded eviction), and the resolution
-      skeleton that ties them together with the auth-rule ordering as an injected step.
-      Pure/deterministic and unit-tested. Next: the RV1–12 authorisation ordering and
-      parallel signature verification.
+- [x] `gm-stateres` state-resolution engine (room versions 1–12) with a
+      resolved-state cache. **Landed** (`src/stateres`): the full state-res-v2 two-pass
+      `resolve` — conflict partitioning, auth-difference, reverse-topological power
+      ordering, mainline ordering, iterative auth checks, and the resolved-state cache —
+      plus the room-version authorisation rules (create; power-level send and mutation;
+      membership join/invite/leave/kick/ban incl. the create-room bootstrap join and
+      knock) composed via `AllOf`. Pure/deterministic, 42 unit tests incl. end-to-end
+      resolution. Remaining: restricted joins, third-party invites, and parallel
+      signature verification.
 
 ### Phase 2 — Horizontal scale
 - [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.
