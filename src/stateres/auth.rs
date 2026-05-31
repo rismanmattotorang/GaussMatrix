@@ -151,6 +151,12 @@ impl<E: Event> AuthRules<E> for MembershipRules {
 				sender_membership == "join"
 					&& sender_level >= levels.ban
 					&& sender_level > levels.for_user(target),
+			| "knock" =>
+				sender == target
+					&& matches!(
+						current_join_rule(state, store).as_str(),
+						"knock" | "knock_restricted"
+					) && !matches!(target_membership.as_str(), "join" | "ban"),
 			| _ => false,
 		}
 	}

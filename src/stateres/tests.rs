@@ -789,3 +789,37 @@ fn power_level_mutation_passes_non_power_levels_events() {
 	let s = store(vec![TestEvent::by("$name", "m.room.name", "@anyone", &[])]);
 	assert!(PowerLevelMutationRules.is_authorized(&s["$name"], &StateMap::new(), &s));
 }
+
+#[test]
+fn membership_knock_requires_a_knock_join_rule() {
+	let s = store(vec![
+		TestEvent::joinrules("$knock", "knock", &[]),
+		TestEvent::joinrules("$invite", "invite", &[]),
+		TestEvent::member("$k", "@alice", "@alice", "knock", &[]),
+	]);
+
+	// Knock room: alice may knock.
+	let mut knock_room = StateMap::new();
+	knock_room.insert(key("m.room.join_rules", ""), "$knock".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$k"], &knock_room, &s));
+
+	// Invite-only room: knocking is not allowed.
+	let mut invite_room = StateMap::new();
+	invite_room.insert(key("m.room.join_rules", ""), "$invite".to_owned());
+	assert!(!MembershipRules.is_authorized(&s["$k"], &invite_room, &s));
+}
+
+#[test]
+fn membership_knock_rejected_when_banned() {
+	let s = store(vec![
+		TestEvent::joinrules("$knock", "knock", &[]),
+		TestEvent::member("$ban", "@admin", "@alice", "ban", &[]),
+		TestEvent::member("$k", "@alice", "@alice", "knock", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.join_rules", ""), "$knock".to_owned());
+	state.insert(key("m.room.member", "@alice"), "$ban".to_owned());
+
+	// A banned user cannot knock.
+	assert!(!MembershipRules.is_authorized(&s["$k"], &state, &s));
+}
