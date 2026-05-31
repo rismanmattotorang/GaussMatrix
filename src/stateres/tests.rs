@@ -1,11 +1,44 @@
 //! Unit tests for partitioning, the resolved-state cache, and resolution.
 
-use std::cell::Cell;
+use std::{cell::Cell, collections::BTreeSet};
 
 use crate::{
-	ConflictedState, ResolvedStateCache, StateKey, StateMap, conflicting_event_ids, partition,
-	resolve,
+	ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap, auth_difference,
+	conflicting_event_ids, partition, resolve, reverse_topological_power_sort,
 };
+
+/// A test event carrying just the fields the ordering needs.
+struct TestEvent {
+	id: EventId,
+	power: i64,
+	ts: u64,
+	auth: Vec<EventId>,
+}
+
+impl TestEvent {
+	fn new(id: &str, power: i64, ts: u64, auth: &[&str]) -> Self {
+		Self {
+			id: id.to_owned(),
+			power,
+			ts,
+			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
+		}
+	}
+}
+
+impl Event for TestEvent {
+	fn event_id(&self) -> &str { &self.id }
+
+	fn power_level(&self) -> i64 { self.power }
+
+	fn origin_server_ts(&self) -> u64 { self.ts }
+
+	fn auth_event_ids(&self) -> &[EventId] { &self.auth }
+}
+
+fn id_set(ids: &[&str]) -> BTreeSet<EventId> {
+	ids.iter().map(|s| (*s).to_owned()).collect()
+}
 
 fn key(event_type: &str, state_key: &str) -> StateKey {
 	(event_type.to_owned(), state_key.to_owned())
@@ -82,8 +115,8 @@ fn cache_insert_and_get() {
 #[test]
 fn cache_evicts_least_recently_inserted_over_capacity() {
 	let mut cache = ResolvedStateCache::new(2);
-	let mk = |id: &str| -> std::collections::BTreeSet<String> {
-		let mut s = std::collections::BTreeSet::new();
+	let mk = |id: &str| -> BTreeSet<String> {
+		let mut s = BTreeSet::new();
 		s.insert(id.to_owned());
 		s
 	};
@@ -100,7 +133,7 @@ fn cache_evicts_least_recently_inserted_over_capacity() {
 #[test]
 fn cache_zero_capacity_disables_caching() {
 	let mut cache = ResolvedStateCache::new(0);
-	let mut k = std::collections::BTreeSet::new();
+	let mut k = BTreeSet::new();
 	k.insert("$x".to_owned());
 	cache.insert(k.clone(), StateMap::new());
 	assert!(cache.get(&k).is_none());
@@ -110,7 +143,7 @@ fn cache_zero_capacity_disables_caching() {
 #[test]
 fn cache_reinsert_refreshes_value_without_duplicate_slot() {
 	let mut cache = ResolvedStateCache::new(8);
-	let mut k = std::collections::BTreeSet::new();
+	let mut k = BTreeSet::new();
 	k.insert("$x".to_owned());
 	cache.insert(k.clone(), state(&[("a", "", "$old")]));
 	cache.insert(k.clone(), state(&[("a", "", "$new")]));
@@ -158,4 +191,65 @@ fn resolve_memoises_and_skips_reordering_on_cache_hit() {
 
 	assert_eq!(first, second);
 	assert_eq!(calls.get(), 1, "ordering must run once; the second resolve hits the cache");
+}
+
+#[test]
+fn auth_difference_is_union_minus_intersection() {
+	let forks = [id_set(&["$a", "$b", "$c"]), id_set(&["$b", "$c", "$d"])];
+	// $b and $c are shared; $a and $d differ.
+	assert_eq!(auth_difference(&forks), id_set(&["$a", "$d"]));
+}
+
+#[test]
+fn auth_difference_empty_when_all_agree() {
+	let forks = [id_set(&["$a", "$b"]), id_set(&["$a", "$b"])];
+	assert!(auth_difference(&forks).is_empty());
+	assert!(auth_difference(&[]).is_empty());
+}
+
+#[test]
+fn power_sort_orders_auth_events_before_dependents() {
+	// $c authed by $b, $b authed by $a → topological order must be $a, $b, $c.
+	let events = [
+		TestEvent::new("$c", 100, 1, &["$b"]),
+		TestEvent::new("$a", 100, 1, &[]),
+		TestEvent::new("$b", 100, 1, &["$a"]),
+	];
+	assert_eq!(reverse_topological_power_sort(&events), vec!["$a", "$b", "$c"]);
+}
+
+#[test]
+fn power_sort_breaks_ties_by_power_then_ts_then_id() {
+	// Three independent events (no auth deps among them).
+	let events = [
+		// lower power, should come last among these
+		TestEvent::new("$low", 10, 5, &[]),
+		// highest power, comes first
+		TestEvent::new("$high", 100, 9, &[]),
+		// mid power, two with equal power broken by ts then id
+		TestEvent::new("$mid_late", 50, 20, &[]),
+		TestEvent::new("$mid_early", 50, 10, &[]),
+	];
+	// highest power first; equal-power pair ordered by earlier ts; lowest last.
+	assert_eq!(
+		reverse_topological_power_sort(&events),
+		vec!["$high", "$mid_early", "$mid_late", "$low"]
+	);
+}
+
+#[test]
+fn power_sort_ignores_auth_events_outside_the_set() {
+	// $a's auth event $external is not in the set and must not block emission.
+	let events = [TestEvent::new("$a", 50, 1, &["$external"])];
+	assert_eq!(reverse_topological_power_sort(&events), vec!["$a"]);
+}
+
+#[test]
+fn power_sort_equal_keys_broken_by_event_id() {
+	let events = [
+		TestEvent::new("$b", 50, 10, &[]),
+		TestEvent::new("$a", 50, 10, &[]),
+	];
+	// Identical power and ts → smaller id first.
+	assert_eq!(reverse_topological_power_sort(&events), vec!["$a", "$b"]);
 }
