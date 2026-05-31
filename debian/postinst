@@ -1,0 +1,47 @@
+#!/bin/sh
+set -e
+
+# TODO: implement debconf support that is maintainable without duplicating the config
+#. /usr/share/debconf/confmodule
+
+GAUSSMATRIX_DATABASE_PATH=/var/lib/gaussmatrix
+GAUSSMATRIX_CONFIG_PATH=/etc/gaussmatrix
+
+case "$1" in
+  configure)
+    # Create the `gaussmatrix` user if it does not exist yet.
+    if ! getent passwd gaussmatrix > /dev/null ; then
+      echo 'Adding system user for the gaussmatrix Matrix homeserver' 1>&2
+      adduser --system --group --quiet \
+        --home "$GAUSSMATRIX_DATABASE_PATH" \
+        --disabled-login \
+        --shell "/usr/sbin/nologin" \
+        gaussmatrix
+    fi
+
+    # Create the database path if it does not exist yet and fix up ownership
+    # and permissions for the config.
+    mkdir -v -p "$GAUSSMATRIX_DATABASE_PATH"
+
+    # symlink the previous location for compatibility if it does not exist yet.
+    if ! test -L "/var/lib/matrix-conduit" ; then
+        ln -s -v "$GAUSSMATRIX_DATABASE_PATH" "/var/lib/matrix-conduit"
+    fi
+    if ! test -L "/var/lib/conduwuit" ; then
+        ln -s -v "$GAUSSMATRIX_DATABASE_PATH" "/var/lib/conduwuit"
+    fi
+
+    chown -v gaussmatrix:gaussmatrix -R "$GAUSSMATRIX_DATABASE_PATH"
+    chown -v gaussmatrix:gaussmatrix -R "$GAUSSMATRIX_CONFIG_PATH"
+
+    chmod -v 740 "$GAUSSMATRIX_DATABASE_PATH"
+
+    echo ''
+    echo 'Make sure you edit the example config at /etc/gaussmatrix/gaussmatrix.toml before starting!'
+    echo 'To start the server, run: systemctl start gaussmatrix.service'
+    echo ''
+
+    ;;
+esac
+
+#DEBHELPER#

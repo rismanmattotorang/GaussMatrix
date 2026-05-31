@@ -1,0 +1,55 @@
+# syntax = docker/dockerfile:1.11-labs
+
+FROM input AS build-rpm
+ARG rust_target
+ARG rust_toolchain
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG CARGO_TARGET
+ARG CARGO_TARGET_DIR
+ARG cargo_target_profile
+ARG cargo_profile
+ARG cargo_features
+ARG cargo_spec_features
+ARG pkg_dir
+ARG gen_rpm_args=""
+
+WORKDIR /usr/src/gaussmatrix
+RUN \
+--mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/registry,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/git,sharing=shared \
+<<EOF
+	set -eux
+	mkdir -p "${pkg_dir}"
+	rustup run ${rust_toolchain} \
+		cargo generate-rpm \
+			--package src/main \
+			--auto-req auto \
+			--target "${CARGO_TARGET}" \
+			--target-dir "${CARGO_TARGET_DIR}" \
+			--profile "${cargo_profile}" \
+			--payload-compress zstd \
+			--output "${pkg_dir}" \
+			${gen_rpm_args}
+
+	mv ${pkg_dir}/* "${pkg_dir}/gaussmatrix.rpm"
+EOF
+
+
+FROM scratch AS rpm
+ARG pkg_dir
+
+COPY --from=input ${pkg_dir}/gaussmatrix.rpm .
+
+
+FROM input AS rpm-install
+ARG pkg_dir
+
+WORKDIR ${pkg_dir}
+COPY --link --from=rpm . .
+RUN <<EOF
+	set -eux
+	rpm -i --test gaussmatrix.rpm
+	rpm -i gaussmatrix.rpm
+EOF

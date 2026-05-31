@@ -1,0 +1,21 @@
+# tuwenel.container
+
+[Unit]
+Description=GaussMatrix Matrix Homeserver
+
+[Container]
+ContainerName=gaussmatrix-homeserver
+Image=ghcr.io/rismanmattotorang/gaussmatrix:latest
+PublishPort=8008:8008
+Volume=gaussmatrix-db:/var/lib/gaussmatrix/
+
+#Example location in ~/gaussmatrix/config/
+Volume=%h/gaussmatrix/config/gaussmatrix.toml:/etc/gaussmatrix.toml
+EnvironmentFile=gaussmatrix.env
+
+[Service]
+# Uncomment when your system is properly configured, restart=always can mask start up errors. 
+#Restart=always
+
+[Install]
+WantedBy=default.target

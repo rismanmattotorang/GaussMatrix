@@ -1,0 +1,147 @@
+[package]
+name = "gaussmatrix_service"
+categories.workspace = true
+description.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+path = "mod.rs"
+bench = false
+crate-type = [
+	"rlib",
+#	"dylib",
+]
+
+[features]
+blurhashing = [
+	"dep:image",
+	"dep:blurhash",
+]
+brotli_compression = [
+	"gaussmatrix-core/brotli_compression",
+	"reqwest/brotli",
+]
+bzip2_compression = [
+    "gaussmatrix-database/bzip2_compression",
+]
+console = [
+	"dep:rustyline-async",
+	"dep:termimad",
+]
+element_hacks = []
+gzip_compression = [
+	"gaussmatrix-core/gzip_compression",
+	"reqwest/gzip",
+]
+io_uring = [
+	"gaussmatrix-database/io_uring",
+]
+jemalloc = [
+	"gaussmatrix-core/jemalloc",
+	"gaussmatrix-database/jemalloc",
+]
+jemalloc_conf = [
+	"gaussmatrix-core/jemalloc_conf",
+	"gaussmatrix-database/jemalloc_conf",
+]
+jemalloc_prof = [
+	"gaussmatrix-core/jemalloc_prof",
+	"gaussmatrix-database/jemalloc_prof",
+]
+jemalloc_stats = [
+	"gaussmatrix-core/jemalloc_stats",
+	"gaussmatrix-database/jemalloc_stats",
+]
+ldap = [
+	"dep:ldap3",
+]
+lz4_compression = [
+	"gaussmatrix-database/lz4_compression",
+]
+media_thumbnail = [
+	"dep:image",
+]
+release_max_log_level = [
+	"gaussmatrix-core/release_max_log_level",
+	"gaussmatrix-database/release_max_log_level",
+	"log/max_level_trace",
+	"log/release_max_level_info",
+	"tracing/max_level_trace",
+	"tracing/release_max_level_info",
+]
+url_preview = [
+	"dep:image",
+	"dep:webpage",
+]
+zstd_compression = [
+	"gaussmatrix-core/zstd_compression",
+	"gaussmatrix-database/zstd_compression",
+    "reqwest/zstd",
+]
+
+[dependencies]
+async-trait.workspace = true
+base64.workspace = true
+bytes.workspace = true
+clap.workspace = true
+const-str.workspace = true
+ctor.workspace = true
+dtor.workspace = true
+derive_more.workspace = true
+futures.workspace = true
+hickory-resolver.workspace = true
+http.workspace = true
+image.workspace = true
+image.optional = true
+ipaddress.workspace = true
+ldap3.workspace = true
+ldap3.optional = true
+log.workspace = true
+loole.workspace = true
+lru-cache.workspace = true
+object_store.workspace = true
+rand.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+ring.workspace = true
+ruma.workspace = true
+rustls.workspace = true
+rustyline-async.workspace = true
+rustyline-async.optional = true
+serde_html_form.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+serde_yaml.workspace = true
+sha2.workspace = true
+termimad.workspace = true
+termimad.optional = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+url.workspace = true
+webpage.workspace = true
+webpage.optional = true
+webpki-root-certs.workspace = true
+blurhash.workspace = true
+blurhash.optional = true
+gaussmatrix-core.workspace = true
+gaussmatrix-database.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+insta.workspace = true
+maplit.workspace = true
+similar.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true
+
+[[bench]]
+name = "state_res"
+harness = false

@@ -1,0 +1,62 @@
+# syntax = docker/dockerfile:1.11-labs
+
+FROM input AS build-deb
+ARG rust_target
+ARG rust_toolchain
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG CARGO_TARGET
+ARG CARGO_TARGET_DIR
+ARG cargo_target_profile
+ARG cargo_profile
+ARG cargo_features
+ARG cargo_spec_features
+ARG pkg_dir
+ARG deb_args=""
+
+WORKDIR /usr/src/gaussmatrix
+RUN \
+--mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/registry,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/git,sharing=shared \
+<<EOF
+    set -eux
+    mkdir -p "${pkg_dir}"
+    rustup run ${rust_toolchain} \
+        cargo deb \
+            --verbose \
+            --locked \
+            --no-build \
+            "${cargo_spec_features}" \
+            --features "${cargo_features}" \
+            --profile "${cargo_profile}" \
+            --target "${CARGO_TARGET}" \
+            --manifest-path Cargo.toml \
+            --multiarch same \
+            --compress-type gz \
+            --output "${pkg_dir}" \
+            ${deb_args}
+
+	mv ${pkg_dir}/* "${pkg_dir}/gaussmatrix.deb"
+	dpkg --info "${pkg_dir}/gaussmatrix.deb"
+	dpkg --contents "${pkg_dir}/gaussmatrix.deb"
+EOF
+
+
+FROM scratch AS deb
+ARG pkg_dir
+
+COPY --from=input ${pkg_dir}/gaussmatrix.deb .
+
+
+FROM input AS deb-install
+ARG pkg_dir
+
+WORKDIR ${pkg_dir}
+COPY --from=deb . .
+RUN <<EOF
+	set -eux
+	dpkg --info gaussmatrix.deb
+	dpkg --contents gaussmatrix.deb
+	dpkg --install gaussmatrix.deb
+EOF

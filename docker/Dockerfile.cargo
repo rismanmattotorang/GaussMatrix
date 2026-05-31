@@ -1,0 +1,137 @@
+# syntax = docker/dockerfile:1.11-labs
+
+# cook: dependency build via cargo-chef, against recipe.json only.
+#
+# Cache invalidation key: recipe.json content. Source-only changes do not
+# invalidate this stage.
+FROM input AS cook
+ARG sys_triple
+ARG rust_target
+ARG rust_toolchain
+ARG RUST_HOME
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG CARGO_TARGET
+ARG CARGO_TARGET_DIR
+ARG CARGO_TERM_VERBOSE=0
+ARG RUST_BACKTRACE
+ARG JEMALLOC_OVERRIDE
+ARG ROCKSDB_LIB_DIR
+ARG RUSTDOCFLAGS
+ARG CARGO_BUILD_RUSTFLAGS
+ARG CARGO_PROFILE_TEST_DEBUG
+ARG CARGO_PROFILE_TEST_INCREMENTAL
+ARG CARGO_PROFILE_BENCH_DEBUG
+ARG CARGO_PROFILE_BENCH_LTO
+ARG CARGO_PROFILE_RELEASE_LTO
+ARG CARGO_PROFILE_RELEASE_DEBUGINFO_DEBUG
+ARG CARGO_PROFILE_RELEASE_DEBUGINFO_LTO
+ARG cargo_profile
+ARG cargo_features
+ARG cargo_spec_features
+ARG cargo_cmd="chef cook --all-targets --no-build"
+ARG color_args="--color always"
+
+WORKDIR /
+COPY --link --from=rust ${RUST_HOME} ${RUST_HOME}
+COPY --link --from=recipe recipe.json /usr/src/gaussmatrix/recipe.json
+
+WORKDIR /usr/lib/${sys_triple}
+COPY --link --from=rocksdb . .
+
+WORKDIR /usr/src/gaussmatrix
+SHELL ["/bin/bash", "-c"]
+ENV PATH="${CARGO_HOME}/bin:$PATH"
+ENV CARGO_TERM_VERBOSE="${CARGO_TERM_VERBOSE}"
+ENV RUST_BACKTRACE="${RUST_BACKTRACE}"
+ENV JEMALLOC_OVERRIDE="${JEMALLOC_OVERRIDE}"
+ENV ROCKSDB_LIB_DIR="${ROCKSDB_LIB_DIR}"
+ENV RUSTDOCFLAGS="${RUSTDOCFLAGS}"
+ENV CARGO_PROFILE_TEST_DEBUG="${CARGO_PROFILE_TEST_DEBUG}"
+ENV CARGO_PROFILE_TEST_INCREMENTAL="${CARGO_PROFILE_TEST_INCREMENTAL}"
+ENV CARGO_PROFILE_BENCH_DEBUG="${CARGO_PROFILE_BENCH_DEBUG}"
+ENV CARGO_PROFILE_BENCH_LTO="${CARGO_PROFILE_BENCH_LTO}"
+ENV CARGO_PROFILE_RELEASE_LTO="${CARGO_PROFILE_RELEASE_LTO}"
+ENV CARGO_PROFILE_RELEASE_DEBUGINFO_DEBUG="${CARGO_PROFILE_RELEASE_DEBUGINFO_DEBUG}"
+ENV CARGO_PROFILE_RELEASE_DEBUGINFO_LTO="${CARGO_PROFILE_RELEASE_DEBUGINFO_LTO}"
+ENV CARGO_BUILD_RUSTFLAGS="${CARGO_BUILD_RUSTFLAGS}"
+ENV CARGO_TARGET_DIR="${CARGO_TARGET_DIR}"
+RUN \
+--mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=locked \
+--mount=type=cache,dst=${CARGO_HOME}/registry,sharing=locked \
+--mount=type=cache,dst=${CARGO_HOME}/git,sharing=locked \
+<<EOF
+    set -eux
+    ulimit -n 65535
+
+    rustup run "${rust_toolchain}" \
+        cargo ${cargo_cmd} \
+            --verbose \
+            --locked \
+            --workspace \
+            "${cargo_spec_features}" \
+            "--features=${cargo_features}" \
+            "--profile=${cargo_profile}" \
+            "--target=${CARGO_TARGET}" \
+            "--target-dir=${CARGO_TARGET_DIR}" \
+            --recipe-path=recipe.json \
+            ${color_args}
+EOF
+
+
+# cargo: workspace build, reusing cook's compiled dependencies.
+#
+# COPY --from=source merges into /usr/src/gaussmatrix: real Cargo.toml and
+# src/<member>/src/* overwrite the chef stubs; target/ from cook is
+# preserved (source has no target/ enforced by .dockerignore).
+FROM input AS cargo
+ARG rust_toolchain
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG CARGO_TARGET
+ARG CARGO_TARGET_DIR
+ARG cargo_profile
+ARG cargo_features
+ARG cargo_spec_features
+ARG cargo_cmd="build"
+ARG cargo_args=""
+ARG color_args="--color always"
+ARG VALGRINDFLAGS=""
+ARG VALGRIND_MAX_WORKERS=128
+
+WORKDIR /
+COPY --link --from=source /usr/src/gaussmatrix /usr/src/gaussmatrix
+
+WORKDIR /usr/src/gaussmatrix
+SHELL ["/bin/bash", "-c"]
+ENV VALGRINDFLAGS="${VALGRINDFLAGS}"
+ENV GAUSSMATRIX_DB_POOL_MAX_WORKERS="${VALGRIND_MAX_WORKERS}"
+RUN \
+--mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=locked \
+--mount=type=cache,dst=${CARGO_HOME}/registry,sharing=locked \
+--mount=type=cache,dst=${CARGO_HOME}/git,sharing=locked \
+<<EOF
+    set -eux
+    ulimit -n 65535
+
+    example_sha=$(sha1sum gaussmatrix-example.toml)
+
+    rustup run "${rust_toolchain}" \
+        cargo ${cargo_cmd} \
+            --verbose \
+            --locked \
+            --workspace \
+            "${cargo_spec_features}" \
+            "--features=${cargo_features}" \
+            "--profile=${cargo_profile}" \
+            "--target=${CARGO_TARGET}" \
+            "--target-dir=${CARGO_TARGET_DIR}" \
+            "--manifest-path=Cargo.toml" \
+            ${color_args} \
+            ${cargo_args}
+
+    if ! echo "$example_sha" | sha1sum --check --status; then
+        echo "gaussmatrix-example.toml drift: run cargo check yourself and commit the result." >&2
+        exit 1
+    fi
+EOF

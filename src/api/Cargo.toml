@@ -1,0 +1,106 @@
+[package]
+name = "gaussmatrix_api"
+categories.workspace = true
+description.workspace = true
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+path = "mod.rs"
+bench = false
+crate-type = [
+	"rlib",
+#	"dylib",
+]
+
+[features]
+brotli_compression = [
+	"gaussmatrix-core/brotli_compression",
+	"gaussmatrix-service/brotli_compression",
+	"reqwest/brotli",
+]
+bzip2_compression = [
+	"gaussmatrix-service/bzip2_compression",
+]
+element_hacks = [
+	"gaussmatrix-service/element_hacks",
+]
+gzip_compression = [
+	"gaussmatrix-core/gzip_compression",
+	"gaussmatrix-service/gzip_compression",
+	"reqwest/gzip",
+]
+io_uring = [
+	"gaussmatrix-service/io_uring",
+]
+jemalloc = [
+    "gaussmatrix-core/jemalloc",
+    "gaussmatrix-service/jemalloc",
+]
+jemalloc_conf = [
+	"gaussmatrix-core/jemalloc_conf",
+	"gaussmatrix-service/jemalloc_conf",
+]
+jemalloc_prof = [
+	"gaussmatrix-core/jemalloc_prof",
+	"gaussmatrix-service/jemalloc_prof",
+]
+jemalloc_stats = [
+	"gaussmatrix-core/jemalloc_stats",
+	"gaussmatrix-service/jemalloc_stats",
+]
+ldap = [
+	"gaussmatrix-service/ldap",
+]
+lz4_compression = [
+	"gaussmatrix-service/lz4_compression",
+]
+release_max_log_level = [
+	"gaussmatrix-core/release_max_log_level",
+	"gaussmatrix-service/release_max_log_level",
+	"log/max_level_trace",
+	"log/release_max_level_info",
+	"tracing/max_level_trace",
+	"tracing/release_max_level_info",
+]
+zstd_compression = [
+	"gaussmatrix-core/zstd_compression",
+	"gaussmatrix-service/zstd_compression",
+	"reqwest/zstd",
+]
+
+[dependencies]
+axum-extra.workspace = true
+axum.workspace = true
+base64.workspace = true
+bytes.workspace = true
+const-str.workspace = true
+ctor.workspace = true
+dtor.workspace = true
+futures.workspace = true
+hmac.workspace = true
+http.workspace = true
+http-body-util.workspace = true
+hyper.workspace = true
+ipnet.workspace = true
+itertools.workspace = true
+log.workspace = true
+rand.workspace = true
+reqwest.workspace = true
+ruma.workspace = true
+serde_html_form.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+sha1.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+gaussmatrix-core.workspace = true
+gaussmatrix-service.workspace = true
+url.workspace = true
+
+[lints]
+workspace = true

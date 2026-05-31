@@ -1,0 +1,184 @@
+# syntax = docker/dockerfile:1.11-labs
+
+# GaussMatrix server under test. Modeled after complement-testee
+# (docker/Dockerfile.complement). Inherits from `install` via
+# `--build-context input=target:install`. Bakes in a playwright.toml that
+# disables federation, opens registration, and removes rate limits so the
+# suite can sprint.
+FROM input AS playwright-testee
+EXPOSE 8008
+RUN mkdir -p /database
+COPY <<EOF /playwright/playwright.toml
+    [global]
+    address = "0.0.0.0"
+    port = 8008
+    server_name = "localhost"
+    database_path = "/database"
+    allow_registration = true
+    yes_i_am_very_very_sure_i_want_an_open_registration_server_prone_to_abuse = true
+    allow_guest_registration = false
+    allow_federation = false
+    allow_public_room_directory_without_auth = true
+    registration_shared_secret = "playwright-shared-secret"
+    new_user_displayname_suffix = ""
+    rc_messages_per_second = 10000
+    rc_message_burst_count = 10000
+    log = "warn,gaussmatrix=info"
+    log_colors = false
+    log_thread_ids = false
+    log_span_events = "NONE"
+    media_startup_check = false
+    startup_netburst = false
+    admin_room_notices = false
+    create_admin_room = false
+    trusted_servers = []
+    ip_range_denylist = []
+EOF
+ENV GAUSSMATRIX_CONFIG="/playwright/playwright.toml"
+ENTRYPOINT gaussmatrix -Oserver_name=\""$SERVER_NAME\""
+
+
+# Playwright runtime image with element-web pre-built. The official Microsoft
+# Playwright image already ships pinned Chromium / Firefox / WebKit and their
+# system deps. Pin its version via ARG.
+FROM mcr.microsoft.com/playwright:v1.59.1-noble AS playwright-base
+ARG element_web_ref="develop"
+
+# corepack's bundled signing keys in this image are stale relative to current
+# pnpm releases; install pnpm directly via npm to sidestep that mismatch.
+# `serve` is pre-installed so playwright.config.ts's webServer (which runs
+# `npx serve -p 8080 -L ./webapp` in CI mode) starts instantly instead of
+# spending most of its 30s startup window fetching the package.
+RUN npm install -g pnpm serve
+
+WORKDIR /usr/src
+ADD https://github.com/element-hq/element-web.git#${element_web_ref} element-web
+
+WORKDIR /usr/src/element-web
+RUN --mount=type=cache,target=/root/.local/share/pnpm,sharing=locked \
+    pnpm install --frozen-lockfile
+
+# GaussMatrix HomeserverContainer. Out-of-lined to docker/playwright.gaussmatrix.ts in
+# the workspace so it gets TS tooling and proper diffs; pulled in from the
+# source stage. Mirrors the shape of element-web's
+# apps/web/playwright/testcontainers/synapse.ts.
+COPY --link --from=source /usr/src/gaussmatrix/docker/playwright.gaussmatrix.ts \
+     /usr/src/element-web/apps/web/playwright/testcontainers/gaussmatrix.ts
+
+# Apply overlay patches to upstream element-web. Idempotent: grep-guards
+# protect re-runs from the buildkit cache.
+COPY <<'EOF' /playwright/patch.sh
+#!/bin/bash
+set -euxo pipefail
+cd /usr/src/element-web
+
+SERVICES=apps/web/playwright/services.ts
+CONFIG=apps/web/playwright.config.ts
+PLUGIN=apps/web/playwright/plugins/homeserver/index.ts
+
+# 1. services.ts: import + switch arm.
+if ! grep -q '"gaussmatrix"' "$SERVICES"; then
+    sed -i '/import { DendriteContainer, PineconeContainer } from "\.\/testcontainers\/dendrite";/a\
+import { GaussMatrixContainer } from "./testcontainers/gaussmatrix";' "$SERVICES"
+
+    sed -i '/case "pinecone":/i\
+                case "gaussmatrix":\
+                    container = new GaussMatrixContainer();\
+                    break;' "$SERVICES"
+fi
+
+# 2. plugins/homeserver/index.ts: extend HomeserverType union.
+if [ -f "$PLUGIN" ] && ! grep -q '"gaussmatrix"' "$PLUGIN"; then
+    sed -i 's/"synapse" | "dendrite" | "pinecone"/"synapse" | "dendrite" | "pinecone" | "gaussmatrix"/' "$PLUGIN"
+fi
+
+# 3. playwright.config.ts: register a GaussMatrix project entry after Pinecone.
+if ! grep -q 'homeserverType: "gaussmatrix"' "$CONFIG"; then
+    sed -i '/homeserverType: "pinecone"/,/ignoreSnapshots: true,/ {
+        /ignoreSnapshots: true,/a\
+        },\
+        {\
+            name: "GaussMatrix",\
+            use: {\
+                ...chromeProject,\
+                homeserverType: "gaussmatrix",\
+            },\
+            ignoreSnapshots: true,
+    }' "$CONFIG"
+fi
+
+# 4. Confirm overlays applied (grep, not playwright test --list, since the
+#    playwright-common package's lib/ is not built yet).
+grep -q 'GaussMatrixContainer' "$SERVICES"
+grep -q 'name: "GaussMatrix"' "$CONFIG"
+EOF
+RUN chmod +x /playwright/patch.sh && /playwright/patch.sh
+
+# Pre-build:
+#   - apps/web/webapp/ via `pnpm build` (nx build → webpack production).
+#     Served at :8080 by `npx serve` when the tester runs (CI mode of
+#     playwright.config.ts).
+#   - packages/playwright-common/lib/ via nx build:playwright on the
+#     playwright-common workspace. Required by element-web-test.ts at
+#     runtime.
+# Skip the eager `playwright test --list` validation: it fires the
+# webServer config (nx start → webpack-dev-server) which we do not want
+# at build time. Real validation happens when the tester runs.
+WORKDIR /usr/src/element-web/apps/web
+RUN --mount=type=cache,target=/root/.local/share/pnpm,sharing=locked \
+    --mount=type=cache,target=/usr/src/element-web/.nx,sharing=locked \
+    pnpm build && \
+    pnpm exec nx build:playwright @element-hq/element-web-playwright-common
+
+# `npx serve -L ./webapp` (the CI webServer command in playwright.config.ts)
+# health-checks `${baseURL}/config.json` before tests run. element-web's own
+# CI copies element.io/develop/config.json into the served root; mirror that.
+RUN cp element.io/develop/config.json webapp/config.json
+
+
+# Test runner. Inherits playwright-base via --build-context input=target:....
+FROM input AS playwright-tester
+ARG playwright_run=".*"
+ARG playwright_skip=""
+ARG playwright_shard="1/1"
+ARG playwright_count="1"
+ARG playwright_workers="1"
+
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV CI=true
+ENV playwright_run=$playwright_run
+ENV playwright_skip=$playwright_skip
+ENV playwright_shard=$playwright_shard
+ENV playwright_count=$playwright_count
+ENV playwright_workers=$playwright_workers
+
+# tester spawns testee as a sibling via the host docker daemon. Runtime
+# caller (bake.sh / `docker run`) supplies
+# `--volume /var/run/docker.sock:/var/run/docker.sock`.
+
+WORKDIR /usr/src/element-web/apps/web
+RUN mkdir -p /playwright/out
+
+COPY <<EOF /playwright/run.sh
+#!/bin/bash
+set -euxo pipefail
+cd /usr/src/element-web/apps/web
+# --max-failures=0 overrides element-web's playwright.config.ts CI default
+# of 10. With the early-abort active, the suite stopped at the 10th unique
+# failure and marked the rest skipped, which made the failing-spec set
+# non-deterministic across runs. The regression gate in
+# docker/playwright_summarise.sh needs a stable input set.
+PLAYWRIGHT_JSON_OUTPUT_NAME=/playwright/out/results.json \\
+npx playwright test \\
+    --project=GaussMatrix \\
+    --grep="\${playwright_run}" \\
+    --grep-invert="\${playwright_skip}" \\
+    --shard="\${playwright_shard}" \\
+    --repeat-each="\${playwright_count}" \\
+    --workers="\${playwright_workers}" \\
+    --max-failures=0 \\
+    --reporter="list,json" \\
+    2>&1 | tee /playwright/out/output.log
+EOF
+RUN chmod +x /playwright/run.sh
+ENTRYPOINT ["/playwright/run.sh"]

@@ -1,0 +1,18 @@
+# syntax = docker/dockerfile:1.11-labs
+
+FROM input AS fmt
+ARG rust_toolchain="nightly"
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG fmt_args=""
+
+WORKDIR /usr/src/gaussmatrix
+RUN <<EOF
+    set -eux
+    rustup run ${rust_toolchain} \
+        cargo fmt \
+            --all \
+            --check \
+            --manifest-path Cargo.toml \
+            ${fmt_args}
+EOF

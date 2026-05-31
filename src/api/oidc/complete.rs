@@ -1,0 +1,63 @@
+use std::iter::once;
+
+use axum::{
+	extract::State,
+	response::{IntoResponse, Redirect},
+};
+use serde::Deserialize;
+use gaussmatrix_core::{Result, err};
+use url::{Url, form_urlencoded};
+
+#[derive(Debug, Deserialize)]
+pub(crate) struct CompleteParams {
+	oidc_req_id: String,
+	#[serde(rename = "loginToken")]
+	login_token: String,
+}
+
+pub(crate) async fn complete_route(
+	State(services): State<crate::State>,
+	request: axum::extract::Request,
+) -> Result<impl IntoResponse> {
+	let query = request.uri().query().unwrap_or_default();
+	let params: CompleteParams = serde_html_form::from_str(query)?;
+
+	let oidc = services.oauth.get_server()?;
+
+	// Validate the auth request first (before consuming the login_token) so that
+	// a crafted request with an invalid oidc_req_id cannot burn a valid token.
+	let auth_req = oidc
+		.take_auth_request(&params.oidc_req_id)
+		.await?;
+
+	let user_id = services
+		.users
+		.find_from_login_token(&params.login_token)
+		.await
+		.map_err(|_| err!(Request(Forbidden("Invalid or expired login token"))))?;
+
+	let code = oidc.create_auth_code(&auth_req, user_id);
+	let redirect_url = Url::parse(&auth_req.redirect_uri)
+		.map_err(|_| err!(Request(InvalidParam("Invalid redirect_uri"))))
+		.map(|mut url| {
+			let pairs = once(("code", code.as_str()))
+				.chain(auth_req.state.as_deref().map(|s| ("state", s)));
+
+			match auth_req.response_mode.as_deref() {
+				| Some("fragment") => {
+					let body = form_urlencoded::Serializer::new(String::new())
+						.extend_pairs(pairs)
+						.finish();
+
+					url.set_fragment(Some(&body));
+				},
+				| _ => {
+					url.query_pairs_mut().extend_pairs(pairs);
+				},
+			}
+
+			url
+		})?;
+
+	Ok(Redirect::temporary(redirect_url.as_str()))
+}

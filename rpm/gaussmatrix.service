@@ -1,0 +1,67 @@
+[Unit]
+Description=GaussMatrix Matrix homeserver
+Wants=network-online.target
+After=network-online.target
+Documentation=https://gaussmatrix.dev/
+
+[Service]
+User=gaussmatrix
+Group=gaussmatrix
+Type=notify
+WatchdogSec=30
+
+Environment="GAUSSMATRIX_CONFIG=/etc/gaussmatrix/gaussmatrix.toml"
+
+ExecStart=/usr/sbin/gaussmatrix
+
+ReadWritePaths=/var/lib/gaussmatrix /etc/gaussmatrix
+
+AmbientCapabilities=
+CapabilityBoundingSet=
+
+ManagedOOMPreference=avoid
+
+DevicePolicy=closed
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=yes
+#ProcSubset=pid
+ProtectClock=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectHostname=yes
+ProtectKernelLogs=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectProc=invisible
+ProtectSystem=strict
+PrivateDevices=yes
+PrivateMounts=yes
+PrivateTmp=yes
+PrivateUsers=yes
+PrivateIPC=yes
+RemoveIPC=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service @resources
+SystemCallFilter=~@clock @debug @module @mount @reboot @swap @cpu-emulation @obsolete @timer @chown @setuid @privileged @keyring @ipc
+SystemCallErrorNumber=EPERM
+
+RuntimeDirectory=gaussmatrix
+RuntimeDirectoryMode=0750
+
+Restart=on-failure
+RestartSec=5
+
+TimeoutStopSec=2m
+TimeoutStartSec=2m
+
+StartLimitInterval=1m
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=matrix-gaussmatrix.service

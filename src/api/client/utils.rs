@@ -1,0 +1,17 @@
+use ruma::{RoomId, UserId};
+use gaussmatrix_core::{Err, Result, warn};
+use gaussmatrix_service::Services;
+
+pub(crate) async fn invite_check(
+	services: &Services,
+	sender_user: &UserId,
+	room_id: &RoomId,
+) -> Result {
+	if services.config.block_non_admin_invites && !services.admin.user_is_admin(sender_user).await
+	{
+		warn!("{sender_user} is not an admin and attempted to send an invite to {room_id}");
+		return Err!(Request(Forbidden("Invites are not allowed on this server.")));
+	}
+
+	Ok(())
+}

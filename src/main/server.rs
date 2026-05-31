@@ -1,0 +1,91 @@
+use std::{path::PathBuf, sync::Arc};
+
+use tokio::sync::Mutex;
+use gaussmatrix_core::{
+	Error, Result,
+	config::Config,
+	implement, info,
+	metrics::Metrics,
+	utils::{stream, sys},
+};
+
+use crate::{Args, Runtime, args, logging::TracingFlameGuard, runtime::Handle};
+
+/// Server runtime state; complete
+pub struct Server {
+	/// Server runtime state; public portion
+	pub server: Arc<gaussmatrix_core::Server>,
+
+	pub services: Mutex<Option<Arc<gaussmatrix_service::Services>>>,
+
+	_tracing_flame_guard: TracingFlameGuard,
+
+	#[cfg(feature = "sentry_telemetry")]
+	_sentry_guard: Option<::sentry::ClientInitGuard>,
+
+	#[cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
+	// Module instances; TODO: move to mods::loaded mgmt vector
+	pub(crate) mods: tokio::sync::RwLock<Vec<gaussmatrix_core::mods::Module>>,
+}
+
+#[implement(Server)]
+pub fn new(args: Option<&Args>, runtime: Option<&Runtime>) -> Result<Arc<Self>, Error> {
+	let args_default = args.is_none().then(Args::default);
+
+	let args = args.unwrap_or_else(|| args_default.as_ref().expect("default arguments"));
+
+	let handle = runtime.map(Runtime::handle);
+
+	let _runtime_guard = handle.map(Handle::enter);
+
+	let metrics = runtime
+		.map(Runtime::metrics)
+		.unwrap_or_else(|| Metrics::new(None));
+
+	let config_paths = args
+		.config
+		.as_deref()
+		.into_iter()
+		.flat_map(<[_]>::iter)
+		.map(PathBuf::as_path);
+
+	let config = Config::load(config_paths)
+		.and_then(|raw| args::update(raw, args))
+		.and_then(|raw| Config::new(&raw))?;
+
+	let (tracing_flame_guard, logger) = crate::logging::init(&config)?;
+
+	config.check()?;
+
+	#[cfg(feature = "sentry_telemetry")]
+	let sentry_guard = crate::sentry::init(&config);
+
+	sys::maximize_fd_limit().expect("Unable to increase maximum file descriptor limit");
+
+	sys::maximize_thread_limit().expect("Unable to increase maximum thread count limit");
+
+	let (_old_width, _new_width) = stream::set_width(config.stream_width_default);
+	let (_old_amp, _new_amp) = stream::set_amplification(config.stream_amplification);
+
+	info!(
+		server_name = %config.server_name,
+		database_path = ?config.database_path,
+		log_levels = %config.log,
+		"{}",
+		gaussmatrix_core::version(),
+	);
+
+	Ok(Arc::new(Self {
+		server: Arc::new(gaussmatrix_core::Server::new(config, handle, logger, metrics)),
+
+		services: None.into(),
+
+		_tracing_flame_guard: tracing_flame_guard,
+
+		#[cfg(feature = "sentry_telemetry")]
+		_sentry_guard: sentry_guard,
+
+		#[cfg(all(gaussmatrix_mods, feature = "gaussmatrix_mods"))]
+		mods: tokio::sync::RwLock::new(Vec::new()),
+	}))
+}
