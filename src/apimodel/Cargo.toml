@@ -1,0 +1,24 @@
+[package]
+name = "gm-api"
+categories.workspace = true
+description = "GaussMatrix typed Matrix model (gm-api): event-content adapters bridging wire content into the resolution engine."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gm_api"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[dependencies]
+gm-stateres.workspace = true
+serde_json.workspace = true
+serde_json.features = ["std"]
+
+[lints]
+workspace = true

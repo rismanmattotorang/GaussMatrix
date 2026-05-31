@@ -137,7 +137,13 @@ preserves auditability.
       single-node profile. The first consumer — an append-only **`audit` service**
       (`Domain::AuditLog`) — is wired onto it end-to-end. Next: more consumers, then the
       Phase-2 distributed backend.
-- [ ] `gm-api` typed request/response model (extending `ruma`).
+- [~] `gm-api` typed request/response model (extending `ruma`). **Foundation landed**
+      (`src/apimodel`): the event-content adapter layer — parsing
+      `m.room.power_levels`/`member`/`join_rules` content (with Matrix defaults and the
+      integer-or-string power-level quirk) into the `gm-stateres` models, plus a
+      `StateEvent` adapter implementing `gm_stateres::Event`. This wires real Matrix
+      content into the resolution rules. Next: the `gm_stateres::Event` impl over the
+      server's ruma-backed `Pdu` and the CS/SS request/response surface.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.

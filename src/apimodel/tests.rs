@@ -1,0 +1,117 @@
+//! Tests for the content parsers and the `StateEvent` adapter.
+
+use std::collections::BTreeMap;
+
+use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLevelRules, StateMap};
+use serde_json::json;
+
+use crate::{
+	StateEvent, join_rule_from_content, membership_from_content, power_levels_from_content,
+};
+
+#[test]
+fn power_levels_apply_matrix_defaults_for_omitted_fields() {
+	let pl = power_levels_from_content(&json!({ "users": { "@a:x": 100 } }));
+	assert_eq!(pl.for_user("@a:x"), 100);
+	assert_eq!(pl.for_user("@b:x"), 0); // users_default
+	assert_eq!(pl.state_default, 50);
+	assert_eq!(pl.ban, 50);
+	assert_eq!(pl.kick, 50);
+	assert_eq!(pl.invite, 0);
+	assert_eq!(pl.events_default, 0);
+}
+
+#[test]
+fn power_levels_accept_integer_or_string_values() {
+	let pl = power_levels_from_content(&json!({
+		"users": { "@a:x": "75" },
+		"state_default": "60",
+		"ban": 70
+	}));
+	assert_eq!(pl.for_user("@a:x"), 75); // string-encoded integer
+	assert_eq!(pl.state_default, 60); // string-encoded integer
+	assert_eq!(pl.ban, 70); // integer
+}
+
+#[test]
+fn power_levels_required_for_uses_explicit_and_default() {
+	let pl = power_levels_from_content(&json!({ "events": { "m.room.name": 80 } }));
+	assert_eq!(pl.required_for("m.room.name", true), 80); // explicit
+	assert_eq!(pl.required_for("m.room.topic", true), 50); // state_default
+}
+
+#[test]
+fn membership_and_join_rule_extraction() {
+	assert_eq!(membership_from_content(&json!({ "membership": "join" })).as_deref(), Some("join"));
+	assert_eq!(membership_from_content(&json!({})).as_deref(), None);
+	assert_eq!(join_rule_from_content(&json!({ "join_rule": "public" })).as_deref(), Some("public"));
+	assert_eq!(join_rule_from_content(&json!({})).as_deref(), None);
+}
+
+#[test]
+fn state_event_projects_wire_fields() {
+	let event = StateEvent::new("$e", "m.room.name", "@alice")
+		.with_state_key("")
+		.with_origin_server_ts(42)
+		.with_auth_events(&["$c", "$pl"])
+		.with_power_level(50);
+
+	assert_eq!(event.event_id(), "$e");
+	assert_eq!(event.event_type(), "m.room.name");
+	assert_eq!(event.sender(), "@alice");
+	assert_eq!(event.origin_server_ts(), 42);
+	assert_eq!(event.power_level(), 50);
+	assert_eq!(event.auth_event_ids(), &["$c".to_owned(), "$pl".to_owned()]);
+}
+
+#[test]
+fn state_event_parses_typed_content() {
+	let pl = StateEvent::new("$pl", "m.room.power_levels", "@creator")
+		.with_content(&json!({ "users": { "@creator": 100 } }));
+	assert_eq!(pl.power_levels().unwrap().for_user("@creator"), 100);
+
+	let member = StateEvent::new("$m", "m.room.member", "@alice")
+		.with_state_key("@alice")
+		.with_content(&json!({ "membership": "join" }));
+	assert_eq!(member.membership(), Some("join"));
+
+	let rules = StateEvent::new("$jr", "m.room.join_rules", "@creator")
+		.with_content(&json!({ "join_rule": "public" }));
+	assert_eq!(rules.join_rule(), Some("public"));
+
+	// Content on an unrelated type leaves the projections empty.
+	let name = StateEvent::new("$n", "m.room.name", "@alice")
+		.with_content(&json!({ "name": "Room" }));
+	assert!(name.power_levels().is_none() && name.membership().is_none());
+}
+
+#[test]
+fn state_events_drive_the_resolution_rules() {
+	// A power-levels event and two topic events parsed from wire content,
+	// resolved against the gm-stateres rules.
+	let pl_content = json!({ "users": { "@creator": 100 }, "state_default": 50 });
+	let store: BTreeMap<String, StateEvent> = [
+		StateEvent::new("$c", "m.room.create", "@creator"),
+		StateEvent::new("$pl", "m.room.power_levels", "@creator").with_content(&pl_content),
+		StateEvent::new("$ok", "m.room.topic", "@creator").with_auth_events(&["$c", "$pl"]),
+		StateEvent::new("$no", "m.room.topic", "@bob").with_auth_events(&["$c", "$pl"]),
+	]
+	.into_iter()
+	.map(|event| (event.event_id().to_owned(), event))
+	.collect();
+
+	let mut state = StateMap::new();
+	state.insert(("m.room.create".to_owned(), String::new()), "$c".to_owned());
+	state.insert(("m.room.power_levels".to_owned(), String::new()), "$pl".to_owned());
+
+	let rules = PowerLevelRules;
+	// @creator (100 >= 50) authorised; @bob (default 0) rejected.
+	assert!(rules.is_authorized(&store["$ok"], &state, &store));
+	assert!(!rules.is_authorized(&store["$no"], &state, &store));
+
+	// Composed with create and membership gates via AllOf.
+	let components: [&dyn AuthRules<StateEvent>; 3] =
+		[&CreateRules, &PowerLevelRules, &MembershipRules];
+	let all = AllOf(&components);
+	assert!(all.is_authorized(&store["$ok"], &state, &store));
+}

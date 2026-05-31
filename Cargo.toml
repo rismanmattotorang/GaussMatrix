@@ -693,6 +693,16 @@ package = "gm-store"
 path = "src/store"
 default-features = false
 
+[workspace.dependencies.gm-stateres]
+package = "gm-stateres"
+path = "src/stateres"
+default-features = false
+
+[workspace.dependencies.gm-api]
+package = "gm-api"
+path = "src/apimodel"
+default-features = false
+
 ###############################################################################
 #
 # Release profiles
