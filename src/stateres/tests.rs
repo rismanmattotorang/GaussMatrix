@@ -6,8 +6,8 @@ use std::{
 };
 
 use crate::{
-	AuthRules, ConflictedState, Event, EventId, EventStore, PowerLevelRules, PowerLevels,
-	ResolvedStateCache, StateKey, StateMap, auth_difference, conflicting_event_ids,
+	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, PowerLevelRules,
+	PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference, conflicting_event_ids,
 	iterative_auth_checks, mainline_ordering, partition, resolve,
 	reverse_topological_power_sort,
 };
@@ -492,4 +492,56 @@ fn power_level_rules_default_to_permissive_without_power_levels() {
 	let s = store(vec![TestEvent::by("$e", "m.room.name", "@anyone", &[])]);
 	let rules = PowerLevelRules;
 	assert!(rules.is_authorized(&s["$e"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_authorize_the_room_root() {
+	let s = store(vec![TestEvent::state_event("$create", "m.room.create", "", &[])]);
+	// A create event with no auth events and an empty state key is the root.
+	assert!(CreateRules.is_authorized(&s["$create"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_reject_create_with_auth_events() {
+	let s = store(vec![TestEvent::state_event("$bad", "m.room.create", "", &["$x"])]);
+	assert!(!CreateRules.is_authorized(&s["$bad"], &StateMap::new(), &s));
+}
+
+#[test]
+fn create_rules_require_the_room_to_exist_for_other_events() {
+	let s = store(vec![TestEvent::state_event("$name", "m.room.name", "", &[])]);
+	let rules = CreateRules;
+
+	// No create event in state → rejected.
+	assert!(!rules.is_authorized(&s["$name"], &StateMap::new(), &s));
+
+	// Create event present → accepted.
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$create".to_owned());
+	assert!(rules.is_authorized(&s["$name"], &state, &s));
+}
+
+#[test]
+fn all_of_requires_every_rule_to_pass() {
+	let s = store(vec![
+		TestEvent::powerlevels("$pl", levels(), &[]),
+		TestEvent::by("$admin_evt", "m.room.topic", "@admin", &["$create", "$pl"]),
+		TestEvent::by("$bob_evt", "m.room.topic", "@bob", &["$create", "$pl"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.create", ""), "$create".to_owned());
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+
+	let components: [&dyn AuthRules<TestEvent>; 2] = [&CreateRules, &PowerLevelRules];
+	let rules = AllOf(&components);
+
+	// @admin passes both gates (room exists, power 100 >= 50).
+	assert!(rules.is_authorized(&s["$admin_evt"], &state, &s));
+	// @bob passes create but fails power (10 < 50) → overall rejected.
+	assert!(!rules.is_authorized(&s["$bob_evt"], &state, &s));
+
+	// Even @admin is rejected when the create gate fails (no create in state).
+	let mut without_create = StateMap::new();
+	without_create.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	assert!(!rules.is_authorized(&s["$admin_evt"], &without_create, &s));
 }

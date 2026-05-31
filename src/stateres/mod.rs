@@ -47,7 +47,7 @@ mod state_map;
 mod tests;
 
 pub use self::{
-	auth::{AuthRules, PowerLevelRules, iterative_auth_checks},
+	auth::{AllOf, AuthRules, CreateRules, PowerLevelRules, iterative_auth_checks},
 	cache::ResolvedStateCache,
 	event::Event,
 	order::{auth_difference, mainline_ordering, reverse_topological_power_sort},

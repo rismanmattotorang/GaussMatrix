@@ -22,6 +22,9 @@ use crate::{
 /// The state key of the room's power-levels event.
 const POWER_LEVELS_KEY: (&str, &str) = ("m.room.power_levels", "");
 
+/// The room's create event type.
+const CREATE_TYPE: &str = "m.room.create";
+
 /// The room-version authorisation rules: decide whether `event` is authorised
 /// against the partially-resolved `state`.
 ///
@@ -48,6 +51,36 @@ impl<E: Event> AuthRules<E> for PowerLevelRules {
 		let required = levels.required_for(event.event_type(), true);
 
 		levels.for_user(event.sender()) >= required
+	}
+}
+
+/// Create-event authorisation: the `m.room.create` event is the room root (no
+/// auth events, empty state key), and every other event requires the room to
+/// have been created (an `m.room.create` event present in the state).
+pub struct CreateRules;
+
+impl<E: Event> AuthRules<E> for CreateRules {
+	fn is_authorized(&self, event: &E, state: &StateMap, _store: &EventStore<E>) -> bool {
+		if event.event_type() == CREATE_TYPE {
+			event.auth_event_ids().is_empty() && event.state_key().is_empty()
+		} else {
+			state.contains_key(&(CREATE_TYPE.to_owned(), String::new()))
+		}
+	}
+}
+
+/// Authorise an event only if **every** contained rule authorises it.
+///
+/// The room-version rules are a set of gates an event must pass; `AllOf` lets
+/// the individual rule components (create, power levels, and — in a later
+/// increment — membership) be composed and applied together.
+pub struct AllOf<'rules, E: Event>(pub &'rules [&'rules dyn AuthRules<E>]);
+
+impl<E: Event> AuthRules<E> for AllOf<'_, E> {
+	fn is_authorized(&self, event: &E, state: &StateMap, store: &EventStore<E>) -> bool {
+		self.0
+			.iter()
+			.all(|rule| rule.is_authorized(event, state, store))
 	}
 }
 
