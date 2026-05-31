@@ -4,12 +4,14 @@ use std::{cell::Cell, collections::BTreeSet};
 
 use crate::{
 	ConflictedState, Event, EventId, ResolvedStateCache, StateKey, StateMap, auth_difference,
-	conflicting_event_ids, partition, resolve, reverse_topological_power_sort,
+	conflicting_event_ids, mainline_ordering, partition, resolve,
+	reverse_topological_power_sort,
 };
 
 /// A test event carrying just the fields the ordering needs.
 struct TestEvent {
 	id: EventId,
+	kind: String,
 	power: i64,
 	ts: u64,
 	auth: Vec<EventId>,
@@ -17,8 +19,13 @@ struct TestEvent {
 
 impl TestEvent {
 	fn new(id: &str, power: i64, ts: u64, auth: &[&str]) -> Self {
+		Self::typed(id, "", power, ts, auth)
+	}
+
+	fn typed(id: &str, kind: &str, power: i64, ts: u64, auth: &[&str]) -> Self {
 		Self {
 			id: id.to_owned(),
+			kind: kind.to_owned(),
 			power,
 			ts,
 			auth: auth.iter().map(|a| (*a).to_owned()).collect(),
@@ -29,11 +36,18 @@ impl TestEvent {
 impl Event for TestEvent {
 	fn event_id(&self) -> &str { &self.id }
 
+	fn event_type(&self) -> &str { &self.kind }
+
 	fn power_level(&self) -> i64 { self.power }
 
 	fn origin_server_ts(&self) -> u64 { self.ts }
 
 	fn auth_event_ids(&self) -> &[EventId] { &self.auth }
+}
+
+/// Build a by-id store from a set of events.
+fn store(events: Vec<TestEvent>) -> std::collections::BTreeMap<EventId, TestEvent> {
+	events.into_iter().map(|e| (e.id.clone(), e)).collect()
 }
 
 fn id_set(ids: &[&str]) -> BTreeSet<EventId> {
@@ -252,4 +266,47 @@ fn power_sort_equal_keys_broken_by_event_id() {
 	];
 	// Identical power and ts → smaller id first.
 	assert_eq!(reverse_topological_power_sort(&events), vec!["$a", "$b"]);
+}
+
+fn ids(list: &[&str]) -> Vec<EventId> { list.iter().map(|s| (*s).to_owned()).collect() }
+
+#[test]
+fn mainline_orders_by_closest_power_levels_ancestor() {
+	// Mainline of power-levels events: $pl0 (root) <- $pl1 <- $pl2 (resolved).
+	let s = store(vec![
+		TestEvent::typed("$pl0", "m.room.power_levels", 100, 1, &[]),
+		TestEvent::typed("$pl1", "m.room.power_levels", 100, 2, &["$pl0"]),
+		TestEvent::typed("$pl2", "m.room.power_levels", 100, 3, &["$pl1"]),
+		TestEvent::new("$eC", 50, 30, &["$pl2"]),
+		TestEvent::new("$eA", 50, 10, &["$pl0"]),
+		TestEvent::new("$eB", 50, 20, &["$pl1"]),
+	]);
+	// Depth: $eA→$pl0 (0), $eB→$pl1 (1), $eC→$pl2 (2). Ascending by depth.
+	let order = mainline_ordering(Some("$pl2"), &ids(&["$eC", "$eA", "$eB"]), &s);
+	assert_eq!(order, vec!["$eA", "$eB", "$eC"]);
+}
+
+#[test]
+fn mainline_breaks_ties_by_ts_then_id() {
+	// All three anchor to the same power-levels event → equal depth.
+	let s = store(vec![
+		TestEvent::typed("$pl0", "m.room.power_levels", 100, 1, &[]),
+		TestEvent::new("$late", 50, 99, &["$pl0"]),
+		TestEvent::new("$early", 50, 5, &["$pl0"]),
+		TestEvent::new("$b", 50, 5, &["$pl0"]),
+	]);
+	// ts orders $early/$b (5) before $late (99); equal ts → smaller id ($b < $early).
+	let order = mainline_ordering(Some("$pl0"), &ids(&["$late", "$early", "$b"]), &s);
+	assert_eq!(order, vec!["$b", "$early", "$late"]);
+}
+
+#[test]
+fn mainline_without_power_levels_orders_by_ts_then_id() {
+	let s = store(vec![
+		TestEvent::new("$y", 0, 20, &[]),
+		TestEvent::new("$x", 0, 10, &[]),
+	]);
+	// No mainline → all depth zero → ordered by ts.
+	let order = mainline_ordering(None, &ids(&["$y", "$x"]), &s);
+	assert_eq!(order, vec!["$x", "$y"]);
 }

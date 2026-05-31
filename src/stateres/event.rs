@@ -13,6 +13,9 @@ pub trait Event {
 	/// This event's identifier.
 	fn event_id(&self) -> &str;
 
+	/// This event's type (e.g. `m.room.power_levels`).
+	fn event_type(&self) -> &str;
+
 	/// The effective power level of this event's sender, as determined by the
 	/// authorisation state against which the event is being ordered.
 	fn power_level(&self) -> i64;

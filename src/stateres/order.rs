@@ -17,6 +17,16 @@ use crate::{event::Event, state_map::EventId};
 /// used to drive Kahn's algorithm.
 type Dependents = BTreeMap<EventId, Vec<EventId>>;
 
+/// A by-id lookup of the events relevant to a resolution.
+type EventStore<E> = BTreeMap<EventId, E>;
+
+/// Mainline order index: each power-levels event on the mainline mapped to its
+/// position, counting from the mainline root (0) toward the resolved event.
+type MainlineIndex = BTreeMap<EventId, usize>;
+
+/// The event type whose chain through auth events forms the mainline.
+const POWER_LEVELS_TYPE: &str = "m.room.power_levels";
+
 /// The auth difference of a set of state forks: every event id that appears in
 /// at least one fork's auth chain but not in all of them.
 ///
@@ -132,4 +142,82 @@ pub fn reverse_topological_power_sort<E: Event>(events: &[E]) -> Vec<EventId> {
 	}
 
 	ordered
+}
+
+/// Order `to_order` by mainline ordering against the resolved power-levels event.
+///
+/// The *mainline* is the chain of power-levels events reached by following auth
+/// events from `resolved_power_levels` back to the room's first power-levels
+/// event. Each event to order is assigned the mainline position of the closest
+/// power-levels event in its auth chain (its *mainline depth*); events are then
+/// ordered ascending by `(mainline_depth, origin_server_ts, event_id)`, so
+/// events anchored closer to the mainline root come first.
+///
+/// `store` must contain every event referenced (those being ordered and the
+/// power-levels events along their and the mainline's auth chains). Events with
+/// no power-levels ancestor on the mainline take depth zero.
+#[must_use]
+pub fn mainline_ordering<E: Event>(
+	resolved_power_levels: Option<&str>,
+	to_order: &[EventId],
+	store: &EventStore<E>,
+) -> Vec<EventId> {
+	// Build the mainline by following power-levels auth links from the resolved
+	// event, then index it from the root (0) toward the resolved event.
+	let mut mainline: Vec<EventId> = Vec::new();
+	let mut cursor = resolved_power_levels.map(str::to_owned);
+	while let Some(id) = cursor {
+		cursor = power_levels_in_auth(&id, store);
+		mainline.push(id);
+	}
+
+	let mut index: MainlineIndex = BTreeMap::new();
+	for (position, id) in mainline.iter().rev().enumerate() {
+		index.insert(id.clone(), position);
+	}
+
+	let mut keyed: Vec<(usize, u64, EventId)> = to_order
+		.iter()
+		.map(|id| {
+			let depth = mainline_depth(id, store, &index);
+			let ts = store.get(id).map_or(0, Event::origin_server_ts);
+			(depth, ts, id.clone())
+		})
+		.collect();
+
+	keyed.sort_unstable();
+	keyed.into_iter().map(|(_, _, id)| id).collect()
+}
+
+/// The mainline depth of `start`: the mainline position of the closest
+/// power-levels event reachable by following power-levels auth links, or zero if
+/// none is on the mainline.
+fn mainline_depth<E: Event>(
+	start: &str,
+	store: &EventStore<E>,
+	index: &MainlineIndex,
+) -> usize {
+	let mut cursor = Some(start.to_owned());
+	while let Some(id) = cursor {
+		if let Some(position) = index.get(&id) {
+			return *position;
+		}
+		cursor = power_levels_in_auth(&id, store);
+	}
+
+	0
+}
+
+/// The power-levels event among `id`'s auth events, if any.
+fn power_levels_in_auth<E: Event>(id: &str, store: &EventStore<E>) -> Option<EventId> {
+	let event = store.get(id)?;
+	event
+		.auth_event_ids()
+		.iter()
+		.find(|auth| {
+			store
+				.get(*auth)
+				.is_some_and(|e| e.event_type() == POWER_LEVELS_TYPE)
+		})
+		.cloned()
 }
