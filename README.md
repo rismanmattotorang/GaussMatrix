@@ -148,8 +148,10 @@ preserves auditability.
       serialization), plus a typed endpoint model (`Endpoint`/`Method`/`AuthScope` with
       `{param}` path-template matching), a `Router` resolving (method, path) to an
       endpoint (distinguishing 404/`M_UNRECOGNIZED` from 405), access-token extraction,
-      and the `/versions` response. Next: the `gm_stateres::Event` impl over the server's
-      ruma-backed `Pdu` to wire the engine into the live service.
+      and the `/versions` response. The `EventView` bridge + `StateEvent::from_view`, with a
+      feature-gated (`core-bridge`) blanket adapter over the server's ruma-backed
+      `gaussmatrix_core::matrix::Event`, wires real PDUs into the engine. Next: driving
+      resolution over live PDUs in the service.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.

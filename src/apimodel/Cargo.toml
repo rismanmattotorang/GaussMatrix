@@ -15,10 +15,16 @@ path = "mod.rs"
 bench = false
 crate-type = ["rlib"]
 
+[features]
+# Bridge a server PDU (gaussmatrix_core::matrix::Event) into the resolution
+# model. Off by default so gm-api stays light and free of the ruma/core build.
+core-bridge = ["dep:gaussmatrix-core"]
+
 [dependencies]
 gm-stateres.workspace = true
 serde_json.workspace = true
 serde_json.features = ["std"]
+gaussmatrix-core = { workspace = true, optional = true }
 
 [lints]
 workspace = true
