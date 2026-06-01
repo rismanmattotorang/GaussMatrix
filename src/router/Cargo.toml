@@ -134,6 +134,7 @@ gaussmatrix-admin.workspace = true
 gaussmatrix-api.workspace = true
 gaussmatrix-core.workspace = true
 gaussmatrix-service.workspace = true
+gm-shard.workspace = true
 
 [target.'cfg(all(unix, target_os = "linux"))'.dependencies]
 sd-notify.workspace = true

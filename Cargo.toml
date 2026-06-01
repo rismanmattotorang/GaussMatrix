@@ -708,6 +708,11 @@ package = "gm-agent"
 path = "src/agent"
 default-features = false
 
+[workspace.dependencies.gm-shard]
+package = "gm-shard"
+path = "src/shard"
+default-features = false
+
 ###############################################################################
 #
 # Release profiles
