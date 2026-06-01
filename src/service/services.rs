@@ -9,8 +9,8 @@ use gaussmatrix_database::Database;
 
 pub(crate) use crate::OnceServices;
 use crate::{
-	account_data, admin, appservice, audit, client, config, deactivate, emergency, federation,
-	globals,
+	account_data, admin, agent, appservice, audit, client, config, deactivate, emergency,
+	federation, globals,
 	key_backups,
 	manager::Manager,
 	media, membership, oauth, presence, pusher, registration_tokens, resolver,
@@ -23,6 +23,7 @@ use crate::{
 pub struct Services {
 	pub account_data: Arc<account_data::Service>,
 	pub admin: Arc<admin::Service>,
+	pub agent: Arc<agent::Service>,
 	pub appservice: Arc<appservice::Service>,
 	pub audit: Arc<audit::Service>,
 	pub config: Arc<config::Service>,
@@ -92,6 +93,7 @@ pub async fn build(server: Arc<Server>) -> Result<Arc<Self>> {
 	let res = Arc::new(Self {
 		account_data: account_data::Service::build(&args)?,
 		admin: admin::Service::build(&args)?,
+		agent: agent::Service::build(&args)?,
 		appservice: appservice::Service::build(&args)?,
 		audit: audit::Service::build(&args)?,
 		resolver: resolver::Service::build(&args)?,
@@ -156,6 +158,7 @@ pub(crate) fn services(&self) -> impl Iterator<Item = Arc<dyn Service>> + Send {
 	[
 		cast!(self.account_data),
 		cast!(self.admin),
+		cast!(self.agent),
 		cast!(self.appservice),
 		cast!(self.audit),
 		cast!(self.resolver),

@@ -133,6 +133,7 @@ gaussmatrix-core.workspace = true
 gaussmatrix-database.workspace = true
 gm-store.workspace = true
 gm-store.features = ["rocksdb"]
+gm-agent.workspace = true
 
 [dev-dependencies]
 criterion.workspace = true

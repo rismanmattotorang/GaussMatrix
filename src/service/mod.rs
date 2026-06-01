@@ -9,6 +9,7 @@ mod store_provider;
 
 pub mod account_data;
 pub mod admin;
+pub mod agent;
 pub mod appservice;
 pub mod audit;
 pub mod client;

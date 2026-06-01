@@ -190,6 +190,10 @@ preserves auditability.
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
       (permitted tools + accessible rooms + per-tool classification) and `mediate`
       returning `Execute` / `RequiresApproval` / `Denied`, default-deny.
+- [~] Live agentic loop wired into the service: an additive `agent` service mediates a tool
+      call through the `gm-agent` `Gateway` and records the decision to the live
+      tamper-evident `audit` log. Next: reading grants from room state + posting the in-band
+      events to the timeline.
 - [ ] Human-in-the-loop approval surfaced in GaussInteract; E2EE-aware mediation.
 - [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
       (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces

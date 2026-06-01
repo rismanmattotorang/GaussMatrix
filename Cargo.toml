@@ -703,6 +703,11 @@ package = "gm-api"
 path = "src/apimodel"
 default-features = false
 
+[workspace.dependencies.gm-agent]
+package = "gm-agent"
+path = "src/agent"
+default-features = false
+
 ###############################################################################
 #
 # Release profiles
