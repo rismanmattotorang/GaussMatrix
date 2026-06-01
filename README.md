@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-Apache--2.0-8A2BE2?style=flat-square)
 ![Language](https://img.shields.io/badge/built%20with-Rust-8A2BE2?style=flat-square&logo=rust&logoColor=white)
 ![Protocol](https://img.shields.io/badge/protocol-Matrix-098A09?style=flat-square)
-![Status](https://img.shields.io/badge/status-Phase%200%20%C2%B7%20foundation-8A2BE2?style=flat-square)
+![Status](https://img.shields.io/badge/status-Phase%201%20%C2%B7%20server%20core-8A2BE2?style=flat-square)
 
 <!-- ANCHOR: catchphrase -->
 
@@ -142,9 +142,14 @@ preserves auditability.
       (`src/apimodel`): the event-content adapter layer — parsing
       `m.room.power_levels`/`member`/`join_rules` content (with Matrix defaults and the
       integer-or-string power-level quirk) into the `gm-stateres` models, plus a
-      `StateEvent` adapter implementing `gm_stateres::Event`. This wires real Matrix
-      content into the resolution rules. Next: the `gm_stateres::Event` impl over the
-      server's ruma-backed `Pdu` and the CS/SS request/response surface.
+      `StateEvent` adapter implementing `gm_stateres::Event` (incl. `from_event_json`
+      ingestion of canonical events), and the standard Matrix error model
+      (`MatrixError`/`ErrorCode` with errcode + HTTP-status mapping and wire
+      serialization), plus a typed endpoint model (`Endpoint`/`Method`/`AuthScope` with
+      `{param}` path-template matching), a `Router` resolving (method, path) to an
+      endpoint (distinguishing 404/`M_UNRECOGNIZED` from 405), access-token extraction,
+      and the `/versions` response. Next: the `gm_stateres::Event` impl over the server's
+      ruma-backed `Pdu` to wire the engine into the live service.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.
@@ -153,10 +158,10 @@ preserves auditability.
       `resolve` — conflict partitioning, auth-difference, reverse-topological power
       ordering, mainline ordering, iterative auth checks, and the resolved-state cache —
       plus the room-version authorisation rules (create; power-level send and mutation;
-      membership join/invite/leave/kick/ban incl. the create-room bootstrap join and
-      knock) composed via `AllOf`. Pure/deterministic, 42 unit tests incl. end-to-end
-      resolution. Remaining: restricted joins, third-party invites, and parallel
-      signature verification.
+      membership join/invite/leave/kick/ban incl. the create-room bootstrap join, knock,
+      and restricted joins) composed via `AllOf`. Pure/deterministic, 44 unit tests incl.
+      end-to-end resolution. Remaining: third-party invites and parallel signature
+      verification (both require Ed25519 crypto, deferred to the integration layer).
 
 ### Phase 2 — Horizontal scale
 - [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.

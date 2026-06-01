@@ -6,7 +6,9 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	StateEvent, join_rule_from_content, membership_from_content, power_levels_from_content,
+	AuthScope, Endpoint, ErrorCode, MatrixError, Method, Route, Router, StateEvent, Versions,
+	extract_access_token, join_rule_from_content, match_template, membership_from_content,
+	power_levels_from_content,
 };
 
 #[test]
@@ -154,6 +156,20 @@ fn from_event_json_accepts_v1_auth_event_pairs() {
 }
 
 #[test]
+fn from_event_json_parses_restricted_join_authoriser() {
+	let event = json!({
+		"type": "m.room.member",
+		"sender": "@alice:x",
+		"state_key": "@alice:x",
+		"origin_server_ts": 1,
+		"content": { "membership": "join", "join_authorised_via_users_server": "@admin:x" }
+	});
+	let parsed = StateEvent::from_event_json("$j", &event).unwrap();
+	assert_eq!(parsed.membership(), Some("join"));
+	assert_eq!(parsed.join_authorised_via_users_server(), Some("@admin:x"));
+}
+
+#[test]
 fn from_event_json_rejects_events_missing_required_fields() {
 	// No sender / origin_server_ts.
 	assert!(StateEvent::from_event_json("$x", &json!({ "type": "m.room.name" })).is_none());
@@ -162,4 +178,147 @@ fn from_event_json_rejects_events_missing_required_fields() {
 		StateEvent::from_event_json("$x", &json!({ "sender": "@a:x", "origin_server_ts": 1 }))
 			.is_none()
 	);
+}
+
+#[test]
+fn error_codes_map_to_errcode_and_status() {
+	assert_eq!(ErrorCode::Forbidden.errcode(), "M_FORBIDDEN");
+	assert_eq!(ErrorCode::Forbidden.http_status(), 403);
+	assert_eq!(ErrorCode::UnknownToken.http_status(), 401);
+	assert_eq!(ErrorCode::NotFound.http_status(), 404);
+	assert_eq!(ErrorCode::Unrecognized.http_status(), 404);
+	assert_eq!(ErrorCode::LimitExceeded.errcode(), "M_LIMIT_EXCEEDED");
+	assert_eq!(ErrorCode::LimitExceeded.http_status(), 429);
+	assert_eq!(ErrorCode::TooLarge.http_status(), 413);
+	assert_eq!(ErrorCode::BadJson.http_status(), 400);
+	assert_eq!(ErrorCode::Unknown.http_status(), 500);
+}
+
+#[test]
+fn matrix_error_serializes_to_wire_body() {
+	let err = MatrixError::new(ErrorCode::Forbidden, "nope");
+	assert_eq!(err.http_status(), 403);
+	assert_eq!(err.to_json(), json!({ "errcode": "M_FORBIDDEN", "error": "nope" }));
+}
+
+#[test]
+fn rate_limited_error_includes_retry_after_and_displays() {
+	let err = MatrixError::rate_limited("slow down", 2000);
+	assert_eq!(err.http_status(), 429);
+	assert_eq!(
+		err.to_json(),
+		json!({ "errcode": "M_LIMIT_EXCEEDED", "error": "slow down", "retry_after_ms": 2000 })
+	);
+	assert_eq!(err.to_string(), "M_LIMIT_EXCEEDED: slow down");
+}
+
+#[test]
+fn match_template_captures_path_parameters() {
+	let params = match_template(
+		"/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}",
+		"/_matrix/client/v3/rooms/!r:x/send/m.room.message/123",
+	)
+	.unwrap();
+	assert_eq!(params["roomId"], "!r:x");
+	assert_eq!(params["eventType"], "m.room.message");
+	assert_eq!(params["txnId"], "123");
+}
+
+#[test]
+fn match_template_rejects_literal_and_arity_mismatches() {
+	// Different literal segment.
+	assert!(match_template("/_matrix/client/versions", "/_matrix/client/v3").is_none());
+	// Too few / too many segments.
+	assert!(match_template("/a/{b}/c", "/a/x").is_none());
+	assert!(match_template("/a/{b}", "/a/x/y").is_none());
+	// Exact literal match with no params.
+	assert_eq!(match_template("/_matrix/client/versions", "/_matrix/client/versions").unwrap().len(), 0);
+}
+
+#[test]
+fn endpoint_matches_method_and_path() {
+	let ep = Endpoint::new(Method::Get, "/_matrix/client/v3/rooms/{roomId}/state", AuthScope::User);
+	assert_eq!(ep.auth, AuthScope::User);
+
+	let params = ep.matches(Method::Get, "/_matrix/client/v3/rooms/!r:x/state").unwrap();
+	assert_eq!(params["roomId"], "!r:x");
+
+	// Wrong method → no match.
+	assert!(ep.matches(Method::Post, "/_matrix/client/v3/rooms/!r:x/state").is_none());
+	// Wrong path → no match.
+	assert!(ep.matches(Method::Get, "/_matrix/client/versions").is_none());
+}
+
+#[test]
+fn access_token_prefers_bearer_header() {
+	assert_eq!(
+		extract_access_token(Some("Bearer secret123"), Some("qtok")).as_deref(),
+		Some("secret123")
+	);
+	// Header present but not Bearer → no token, no query fallback.
+	assert_eq!(extract_access_token(Some("Basic abc"), Some("qtok")), None);
+	// Empty bearer token → none.
+	assert_eq!(extract_access_token(Some("Bearer "), None), None);
+}
+
+#[test]
+fn access_token_falls_back_to_query_param() {
+	assert_eq!(extract_access_token(None, Some("qtok")).as_deref(), Some("qtok"));
+	assert_eq!(extract_access_token(None, None), None);
+	assert_eq!(extract_access_token(None, Some("")), None);
+}
+
+#[test]
+fn versions_response_serializes() {
+	let versions = Versions::new(&["v1.11", "v1.12"])
+		.with_unstable_feature("org.matrix.msc3575", true);
+	assert_eq!(
+		versions.to_json(),
+		json!({
+			"versions": ["v1.11", "v1.12"],
+			"unstable_features": { "org.matrix.msc3575": true }
+		})
+	);
+}
+
+fn router() -> Router {
+	let mut router = Router::new();
+	router.register(Endpoint::new(Method::Get, "/_matrix/client/versions", AuthScope::None));
+	router.register(Endpoint::new(
+		Method::Get,
+		"/_matrix/client/v3/rooms/{roomId}/state",
+		AuthScope::User,
+	));
+	router.register(Endpoint::new(
+		Method::Put,
+		"/_matrix/client/v3/rooms/{roomId}/state",
+		AuthScope::User,
+	));
+	router
+}
+
+#[test]
+fn router_resolves_a_matching_endpoint_with_params() {
+	let router = router();
+	let route = router.resolve(Method::Get, "/_matrix/client/v3/rooms/!r:x/state");
+	match route {
+		| Route::Matched { endpoint, params } => {
+			assert_eq!(endpoint.method, Method::Get);
+			assert_eq!(endpoint.auth, AuthScope::User);
+			assert_eq!(params["roomId"], "!r:x");
+		},
+		| other => panic!("expected a match, got {other:?}"),
+	}
+}
+
+#[test]
+fn router_distinguishes_method_not_allowed_from_not_found() {
+	let router = router();
+	// Known path, unsupported method → 405.
+	assert_eq!(
+		router.resolve(Method::Post, "/_matrix/client/v3/rooms/!r:x/state"),
+		Route::MethodNotAllowed
+	);
+	// Unknown path → 404 / M_UNRECOGNIZED.
+	assert_eq!(router.resolve(Method::Get, "/_matrix/client/v3/nope"), Route::NotFound);
 }

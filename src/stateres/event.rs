@@ -45,4 +45,9 @@ pub trait Event {
 	/// The join rule (`public`/`invite`/…), present only for
 	/// `m.room.join_rules` events.
 	fn join_rule(&self) -> Option<&str>;
+
+	/// The authorising user of a restricted-room join
+	/// (`join_authorised_via_users_server`), present only on such
+	/// `m.room.member` join events.
+	fn join_authorised_via_users_server(&self) -> Option<&str>;
 }

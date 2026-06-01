@@ -47,6 +47,16 @@ pub fn join_rule_from_content(content: &Value) -> Option<String> {
 		.map(ToOwned::to_owned)
 }
 
+/// Extract `join_authorised_via_users_server` from `m.room.member` content (set
+/// on restricted-room joins).
+#[must_use]
+pub fn join_authorised_from_content(content: &Value) -> Option<String> {
+	content
+		.get("join_authorised_via_users_server")
+		.and_then(Value::as_str)
+		.map(ToOwned::to_owned)
+}
+
 /// Parse a single power-level value, accepting an integer or an integer-encoded
 /// string.
 fn parse_level(value: Option<&Value>) -> Option<i64> {

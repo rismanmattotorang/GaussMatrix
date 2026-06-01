@@ -3,7 +3,10 @@
 use gm_stateres::{Event, EventId, PowerLevels};
 use serde_json::Value;
 
-use crate::content::{join_rule_from_content, membership_from_content, power_levels_from_content};
+use crate::content::{
+	join_authorised_from_content, join_rule_from_content, membership_from_content,
+	power_levels_from_content,
+};
 
 /// A state event carrying the projections [`gm_stateres`] needs, built from the
 /// wire fields plus parsed content.
@@ -24,6 +27,7 @@ pub struct StateEvent {
 	power_levels: Option<PowerLevels>,
 	membership: Option<String>,
 	join_rule: Option<String>,
+	join_authorised: Option<String>,
 }
 
 impl StateEvent {
@@ -43,6 +47,7 @@ impl StateEvent {
 			power_levels: None,
 			membership: None,
 			join_rule: None,
+			join_authorised: None,
 		}
 	}
 
@@ -81,7 +86,10 @@ impl StateEvent {
 		match self.event_type.as_str() {
 			| "m.room.power_levels" =>
 				self.power_levels = Some(power_levels_from_content(content)),
-			| "m.room.member" => self.membership = membership_from_content(content),
+			| "m.room.member" => {
+				self.membership = membership_from_content(content);
+				self.join_authorised = join_authorised_from_content(content);
+			},
 			| "m.room.join_rules" => self.join_rule = join_rule_from_content(content),
 			| _ => {},
 		}
@@ -155,4 +163,8 @@ impl Event for StateEvent {
 	fn membership(&self) -> Option<&str> { self.membership.as_deref() }
 
 	fn join_rule(&self) -> Option<&str> { self.join_rule.as_deref() }
+
+	fn join_authorised_via_users_server(&self) -> Option<&str> {
+		self.join_authorised.as_deref()
+	}
 }
