@@ -3,8 +3,9 @@
 use serde_json::json;
 
 use crate::{
-	Action, CapabilityGrant, Decision, DenyReason, Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE,
-	ToolCall, ToolResult, mediation_record, tool_call_from_mcp, tool_result_to_mcp,
+	Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, DenyReason,
+	Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult, is_agent_id, mediation_record,
+	tool_call_from_mcp, tool_result_to_mcp,
 };
 
 fn grant() -> CapabilityGrant {
@@ -164,4 +165,44 @@ fn mcp_tool_result_round_trips() {
 	let err = tool_result_to_mcp(&ToolResult::failure("8", "boom"));
 	assert_eq!(err["result"]["isError"], true);
 	assert_eq!(err["result"]["content"][0]["text"], "boom");
+}
+
+#[test]
+fn capability_grant_round_trips_through_room_state_content() {
+	assert_eq!(CAPABILITY_GRANT_TYPE, "m.gauss.agent.capability");
+
+	let original = grant();
+	let content = original.to_content();
+	let restored = CapabilityGrant::from_content(&content);
+
+	// Mediation behaves identically after a state round-trip.
+	let room = "!room:example.org";
+	for tool in ["read_messages", "invite_user", "modify_power_levels", "unknown"] {
+		assert_eq!(
+			original.mediate(tool, room),
+			restored.mediate(tool, room),
+			"decision differs for {tool} after round-trip"
+		);
+	}
+	// And out-of-scope rooms remain denied.
+	assert_eq!(
+		restored.mediate("read_messages", "!elsewhere:example.org"),
+		Decision::Denied(DenyReason::RoomNotInScope)
+	);
+}
+
+#[test]
+fn capability_content_has_expected_shape() {
+	let content = grant().to_content();
+	assert_eq!(content["tools"]["read_messages"], "auto");
+	assert_eq!(content["tools"]["invite_user"], "review");
+	assert_eq!(content["tools"]["modify_power_levels"], "forbidden");
+	assert_eq!(content["default_action"], "review");
+	assert!(content["rooms"].as_array().unwrap().iter().any(|r| r == "!room:example.org"));
+}
+
+#[test]
+fn agent_namespace_membership() {
+	assert!(is_agent_id("@gauss.agent.summariser:example.org", DEFAULT_AGENT_NAMESPACE));
+	assert!(!is_agent_id("@alice:example.org", DEFAULT_AGENT_NAMESPACE));
 }
