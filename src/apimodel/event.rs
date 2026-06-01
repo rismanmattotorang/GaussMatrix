@@ -3,9 +3,12 @@
 use gm_stateres::{Event, EventId, PowerLevels};
 use serde_json::Value;
 
-use crate::content::{
-	join_authorised_from_content, join_rule_from_content, membership_from_content,
-	power_levels_from_content,
+use crate::{
+	content::{
+		join_authorised_from_content, join_rule_from_content, membership_from_content,
+		power_levels_from_content,
+	},
+	view::EventView,
 };
 
 /// A state event carrying the projections [`gm_stateres`] needs, built from the
@@ -130,6 +133,26 @@ impl StateEvent {
 		}
 
 		Some(state)
+	}
+}
+
+impl StateEvent {
+	/// Build a `StateEvent` from an [`EventView`] and the sender's resolved
+	/// power level (derived during resolution and supplied by the caller).
+	#[must_use]
+	pub fn from_view<V: EventView>(view: &V, power_level: i64) -> Self {
+		let mut state = Self::new(&view.event_id(), &view.event_type(), &view.sender())
+			.with_origin_server_ts(view.origin_server_ts())
+			.with_power_level(power_level)
+			.with_content(&view.content());
+
+		if let Some(state_key) = view.state_key() {
+			state = state.with_state_key(&state_key);
+		}
+
+		let auth = view.auth_event_ids();
+		let auth_refs: Vec<&str> = auth.iter().map(String::as_str).collect();
+		state.with_auth_events(&auth_refs)
 	}
 }
 

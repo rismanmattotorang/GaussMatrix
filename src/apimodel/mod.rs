@@ -28,6 +28,8 @@
 
 mod auth;
 mod content;
+#[cfg(feature = "core-bridge")]
+mod core_bridge;
 mod endpoint;
 mod error;
 mod event;
@@ -35,6 +37,7 @@ mod router;
 #[cfg(test)]
 mod tests;
 mod versions;
+mod view;
 
 pub use self::{
 	auth::extract_access_token,
@@ -47,4 +50,5 @@ pub use self::{
 	event::StateEvent,
 	router::{Route, Router},
 	versions::Versions,
+	view::EventView,
 };

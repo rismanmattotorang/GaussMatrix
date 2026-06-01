@@ -6,9 +6,9 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	AuthScope, Endpoint, ErrorCode, MatrixError, Method, Route, Router, StateEvent, Versions,
-	extract_access_token, join_rule_from_content, match_template, membership_from_content,
-	power_levels_from_content,
+	AuthScope, Endpoint, ErrorCode, EventView, MatrixError, Method, Route, Router, StateEvent,
+	Versions, extract_access_token, join_rule_from_content, match_template,
+	membership_from_content, power_levels_from_content,
 };
 
 #[test]
@@ -321,4 +321,50 @@ fn router_distinguishes_method_not_allowed_from_not_found() {
 	);
 	// Unknown path → 404 / M_UNRECOGNIZED.
 	assert_eq!(router.resolve(Method::Get, "/_matrix/client/v3/nope"), Route::NotFound);
+}
+
+/// A minimal `EventView` for testing `from_view` without ruma.
+struct MockView {
+	event_id: &'static str,
+	event_type: &'static str,
+	sender: &'static str,
+	state_key: Option<&'static str>,
+	origin_server_ts: u64,
+	auth: Vec<&'static str>,
+	content: serde_json::Value,
+}
+
+impl EventView for MockView {
+	fn event_id(&self) -> String { self.event_id.to_owned() }
+	fn event_type(&self) -> String { self.event_type.to_owned() }
+	fn sender(&self) -> String { self.sender.to_owned() }
+	fn state_key(&self) -> Option<String> { self.state_key.map(ToOwned::to_owned) }
+	fn origin_server_ts(&self) -> u64 { self.origin_server_ts }
+	fn auth_event_ids(&self) -> Vec<String> {
+		self.auth.iter().map(|a| (*a).to_owned()).collect()
+	}
+	fn content(&self) -> serde_json::Value { self.content.clone() }
+}
+
+#[test]
+fn from_view_builds_a_state_event_with_supplied_power_level() {
+	let view = MockView {
+		event_id: "$e",
+		event_type: "m.room.member",
+		sender: "@alice:x",
+		state_key: Some("@alice:x"),
+		origin_server_ts: 7,
+		auth: vec!["$c", "$pl"],
+		content: json!({ "membership": "join" }),
+	};
+	let event = StateEvent::from_view(&view, 42);
+
+	assert_eq!(event.event_id(), "$e");
+	assert_eq!(event.event_type(), "m.room.member");
+	assert_eq!(event.sender(), "@alice:x");
+	assert_eq!(event.state_key(), "@alice:x");
+	assert_eq!(event.origin_server_ts(), 7);
+	assert_eq!(event.power_level(), 42); // derived value supplied by the caller
+	assert_eq!(event.auth_event_ids(), &["$c".to_owned(), "$pl".to_owned()]);
+	assert_eq!(event.membership(), Some("join"));
 }
