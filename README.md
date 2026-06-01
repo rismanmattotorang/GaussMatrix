@@ -199,7 +199,10 @@ preserves auditability.
       `ToolCall`/`ToolResult` with event-content serialization.
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
-- [ ] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
+- [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
+      **Sliding-sync window landed** (`src/client`): `SlidingWindow` materialises only the
+      requested room ranges and reveals just the newly-visible rooms on expand/reorder — the
+      lazy-loading core behind the < 1.2 s cold start. Next: the timeline cache and E2EE.
 - [ ] One Flutter presentation layer over `gauss-core` via `uniffi` across Android,
       iOS, Web (WASM), and Linux/macOS/Windows.
 - [ ] Agent surface in the client: agent membership, inline tool calls/results,
