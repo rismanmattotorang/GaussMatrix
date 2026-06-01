@@ -1690,6 +1690,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "gauss-core"
+version = "1.7.0"
+
+[[package]]
 name = "gaussmatrix"
 version = "1.7.0"
 dependencies = [

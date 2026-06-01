@@ -1,0 +1,19 @@
+[package]
+name = "gauss-core"
+categories.workspace = true
+description = "GaussInteract shared client core (gauss-core): simplified sliding-sync window materialisation."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gauss_core"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[lints]
+workspace = true
