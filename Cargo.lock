@@ -2059,6 +2059,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "gm-fed"
+version = "1.7.0"
+
+[[package]]
 name = "gm-shard"
 version = "1.7.0"
 

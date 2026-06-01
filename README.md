@@ -172,8 +172,11 @@ preserves auditability.
       reassignment on add/drain, plus `reassignments` (the rebalancing diff a coordination
       service warms before cut-over). Next: the coordination service + distributed backend.
 - [ ] Distributed KV storage backend behind the `gm-store` trait.
-- [ ] Sharded federation sender (per-destination, no head-of-line blocking) and
-      partial-state joins in `gm-fed`.
+- [~] Sharded federation sender (per-destination, no head-of-line blocking) and
+      partial-state joins in `gm-fed`. **Sender core landed** (`src/fed`): `FederationSender`
+      with per-destination outbound queues and independent exponential backoff, so a slow or
+      unreachable peer never blocks delivery to healthy peers. Next: the async transport,
+      signing, and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer
