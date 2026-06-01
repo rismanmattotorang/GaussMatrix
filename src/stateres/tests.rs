@@ -1,15 +1,12 @@
 //! Unit tests for partitioning, the resolved-state cache, and resolution.
 
-use std::{
-	cell::Cell,
-	collections::{BTreeMap, BTreeSet},
-};
+use std::collections::{BTreeMap, BTreeSet};
 
 use crate::{
-	AllOf, AuthRules, ConflictedState, CreateRules, Event, EventId, EventStore, MembershipRules,
-	PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap, auth_difference,
-	conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition, resolve,
-	reverse_topological_power_sort,
+	AllOf, AuthRules, CreateRules, Event, EventId, EventStore, MembershipRules,
+	PowerLevelMutationRules, PowerLevelRules, PowerLevels, ResolvedStateCache, StateKey, StateMap,
+	auth_difference, conflicting_event_ids, iterative_auth_checks, mainline_ordering, partition,
+	resolve, reverse_topological_power_sort,
 };
 
 /// A test event carrying just the fields the ordering and auth rules need.
@@ -77,7 +74,13 @@ impl TestEvent {
 
 	/// An `m.room.power_levels` event carrying `levels`.
 	fn powerlevels(id: &str, levels: PowerLevels, auth: &[&str]) -> Self {
+		Self::powerlevels_by(id, "", levels, auth)
+	}
+
+	/// An `m.room.power_levels` event sent by `sender`, carrying `levels`.
+	fn powerlevels_by(id: &str, sender: &str, levels: PowerLevels, auth: &[&str]) -> Self {
 		let mut event = Self::typed(id, "m.room.power_levels", 0, 0, auth);
+		event.sender = sender.to_owned();
 		event.power_levels = Some(levels);
 		event
 	}
@@ -123,15 +126,6 @@ fn state(pairs: &[(&str, &str, &str)]) -> StateMap {
 	pairs
 		.iter()
 		.map(|(t, s, e)| (key(t, s), (*e).to_owned()))
-		.collect()
-}
-
-/// A deterministic stand-in for the room-version auth ordering: pick the
-/// lexicographically smallest event id per conflicted slot.
-fn order_smallest(conflicted: &ConflictedState) -> StateMap {
-	conflicted
-		.iter()
-		.map(|(k, ids)| (k.clone(), ids.iter().next().cloned().unwrap()))
 		.collect()
 }
 
@@ -225,46 +219,69 @@ fn cache_reinsert_refreshes_value_without_duplicate_slot() {
 	assert_eq!(cache.get(&k).unwrap().get(&key("a", "")).map(String::as_str), Some("$new"));
 }
 
+/// A small room (`$c` create, `$cj` creator join, `$pl` power levels) plus two
+/// conflicting room-name events — one by the creator, one by an unprivileged
+/// user — and the two forks differing only on the name. Returns the store and
+/// the two forks.
+fn conflicting_name_room() -> (BTreeMap<EventId, TestEvent>, StateMap, StateMap) {
+	let store = store(vec![
+		TestEvent::by("$c", "m.room.create", "@creator", &[]),
+		TestEvent::member("$cj", "@creator", "@creator", "join", &["$c"]),
+		TestEvent::powerlevels_by("$pl", "@creator", creator_levels(), &["$c", "$cj"]),
+		TestEvent::by("$n1", "m.room.name", "@creator", &["$c", "$pl"]),
+		TestEvent::by("$n2", "m.room.name", "@bob", &["$c", "$pl"]),
+	]);
+	let mut fork_a = StateMap::new();
+	fork_a.insert(key("m.room.create", ""), "$c".to_owned());
+	fork_a.insert(key("m.room.member", "@creator"), "$cj".to_owned());
+	fork_a.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	fork_a.insert(key("m.room.name", ""), "$n1".to_owned());
+	let mut fork_b = fork_a.clone();
+	fork_b.insert(key("m.room.name", ""), "$n2".to_owned());
+	(store, fork_a, fork_b)
+}
+
+fn full_rules() -> [&'static dyn AuthRules<TestEvent>; 4] {
+	[&CreateRules, &PowerLevelRules, &PowerLevelMutationRules, &MembershipRules]
+}
+
 #[test]
 fn resolve_without_conflict_returns_unconflicted() {
-	let a = state(&[("m.room.name", "", "$n1")]);
-	let b = a.clone();
+	let (s, fork, _) = conflicting_name_room();
+	let components = full_rules();
 	let mut cache = ResolvedStateCache::new(4);
-	let resolved = resolve(&[a, b], &mut cache, order_smallest);
-	assert_eq!(resolved.len(), 1);
+	let resolved = resolve(&[fork.clone(), fork], &[], &s, &AllOf(&components), &mut cache);
+	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$n1"));
 	assert!(cache.is_empty(), "no conflict means nothing to memoise");
 }
 
 #[test]
-fn resolve_orders_conflict_and_merges_with_unconflicted() {
-	let a = state(&[("m.room.name", "", "$n1"), ("m.room.topic", "", "$shared")]);
-	let b = state(&[("m.room.name", "", "$n2"), ("m.room.topic", "", "$shared")]);
+fn resolve_picks_the_authorized_conflicting_event() {
+	let (s, fork_a, fork_b) = conflicting_name_room();
+	let components = full_rules();
 	let mut cache = ResolvedStateCache::new(4);
-	let resolved = resolve(&[a, b], &mut cache, order_smallest);
+	let resolved = resolve(&[fork_a, fork_b], &[], &s, &AllOf(&components), &mut cache);
 
-	// topic was unconflicted; name was resolved to the smallest id ($n1 < $n2).
-	assert_eq!(resolved.get(&key("m.room.topic", "")).map(String::as_str), Some("$shared"));
+	// The creator's name (power 100 >= 50) wins; @bob's (power 0) is rejected.
 	assert_eq!(resolved.get(&key("m.room.name", "")).map(String::as_str), Some("$n1"));
+	// Unconflicted state is preserved.
+	assert_eq!(resolved.get(&key("m.room.create", "")).map(String::as_str), Some("$c"));
+	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
 	assert_eq!(cache.len(), 1);
 }
 
 #[test]
-fn resolve_memoises_and_skips_reordering_on_cache_hit() {
-	let a = state(&[("m.room.name", "", "$n1")]);
-	let b = state(&[("m.room.name", "", "$n2")]);
-	let calls = Cell::new(0_u32);
+fn resolve_memoises_the_conflict_resolution() {
+	let (s, fork_a, fork_b) = conflicting_name_room();
+	let components = full_rules();
+	let rules = AllOf(&components);
 	let mut cache = ResolvedStateCache::new(4);
 
-	let counting = |c: &ConflictedState| {
-		calls.set(calls.get().saturating_add(1));
-		order_smallest(c)
-	};
-
-	let first = resolve(&[a.clone(), b.clone()], &mut cache, counting);
-	let second = resolve(&[a, b], &mut cache, counting);
+	let first = resolve(&[fork_a.clone(), fork_b.clone()], &[], &s, &rules, &mut cache);
+	let second = resolve(&[fork_a, fork_b], &[], &s, &rules, &mut cache);
 
 	assert_eq!(first, second);
-	assert_eq!(calls.get(), 1, "ordering must run once; the second resolve hits the cache");
+	assert_eq!(cache.len(), 1, "the conflict resolution is cached once");
 }
 
 #[test]
@@ -284,29 +301,28 @@ fn auth_difference_empty_when_all_agree() {
 #[test]
 fn power_sort_orders_auth_events_before_dependents() {
 	// $c authed by $b, $b authed by $a → topological order must be $a, $b, $c.
-	let events = [
+	let s = store(vec![
 		TestEvent::new("$c", 100, 1, &["$b"]),
 		TestEvent::new("$a", 100, 1, &[]),
 		TestEvent::new("$b", 100, 1, &["$a"]),
-	];
-	assert_eq!(reverse_topological_power_sort(&events), vec!["$a", "$b", "$c"]);
+	]);
+	assert_eq!(reverse_topological_power_sort(&ids(&["$c", "$a", "$b"]), &s), vec![
+		"$a", "$b", "$c"
+	]);
 }
 
 #[test]
 fn power_sort_breaks_ties_by_power_then_ts_then_id() {
-	// Three independent events (no auth deps among them).
-	let events = [
-		// lower power, should come last among these
+	// Independent events (no auth deps among them).
+	let s = store(vec![
 		TestEvent::new("$low", 10, 5, &[]),
-		// highest power, comes first
 		TestEvent::new("$high", 100, 9, &[]),
-		// mid power, two with equal power broken by ts then id
 		TestEvent::new("$mid_late", 50, 20, &[]),
 		TestEvent::new("$mid_early", 50, 10, &[]),
-	];
-	// highest power first; equal-power pair ordered by earlier ts; lowest last.
+	]);
+	// Highest power first; equal-power pair ordered by earlier ts; lowest last.
 	assert_eq!(
-		reverse_topological_power_sort(&events),
+		reverse_topological_power_sort(&ids(&["$low", "$high", "$mid_late", "$mid_early"]), &s),
 		vec!["$high", "$mid_early", "$mid_late", "$low"]
 	);
 }
@@ -314,18 +330,18 @@ fn power_sort_breaks_ties_by_power_then_ts_then_id() {
 #[test]
 fn power_sort_ignores_auth_events_outside_the_set() {
 	// $a's auth event $external is not in the set and must not block emission.
-	let events = [TestEvent::new("$a", 50, 1, &["$external"])];
-	assert_eq!(reverse_topological_power_sort(&events), vec!["$a"]);
+	let s = store(vec![TestEvent::new("$a", 50, 1, &["$external"])]);
+	assert_eq!(reverse_topological_power_sort(&ids(&["$a"]), &s), vec!["$a"]);
 }
 
 #[test]
 fn power_sort_equal_keys_broken_by_event_id() {
-	let events = [
+	let s = store(vec![
 		TestEvent::new("$b", 50, 10, &[]),
 		TestEvent::new("$a", 50, 10, &[]),
-	];
+	]);
 	// Identical power and ts → smaller id first.
-	assert_eq!(reverse_topological_power_sort(&events), vec!["$a", "$b"]);
+	assert_eq!(reverse_topological_power_sort(&ids(&["$b", "$a"]), &s), vec!["$a", "$b"]);
 }
 
 fn ids(list: &[&str]) -> Vec<EventId> { list.iter().map(|s| (*s).to_owned()).collect() }
@@ -735,4 +751,85 @@ fn end_to_end_resolution_rejects_unauthorized_conflicting_event() {
 	// The unconflicted state is preserved.
 	assert_eq!(resolved.get(&key("m.room.create", "")).map(String::as_str), Some("$c"));
 	assert_eq!(resolved.get(&key("m.room.power_levels", "")).map(String::as_str), Some("$pl"));
+}
+
+/// Power levels with the given explicit user levels and `state_default`.
+fn pl(users: &[(&str, i64)], state_default: i64) -> PowerLevels {
+	PowerLevels {
+		users: users.iter().map(|(u, l)| ((*u).to_owned(), *l)).collect(),
+		users_default: 0,
+		events: BTreeMap::new(),
+		events_default: 0,
+		state_default,
+		invite: 0,
+		kick: 50,
+		ban: 50,
+	}
+}
+
+#[test]
+fn power_level_mutation_blocks_escalation_above_sender() {
+	let s = store(vec![
+		// Current levels: @mod has 60.
+		TestEvent::powerlevels("$pl0", pl(&[("@mod", 60)], 50), &[]),
+		// @mod tries to grant @evil 100 (above @mod's own 60).
+		TestEvent::powerlevels_by("$escalate", "@mod", pl(&[("@mod", 60), ("@evil", 100)], 50), &["$pl0"]),
+		// @mod grants @evil 50 (within reach).
+		TestEvent::powerlevels_by("$grant_ok", "@mod", pl(&[("@mod", 60), ("@evil", 50)], 50), &["$pl0"]),
+		// @mod raises state_default to 70 (above own level).
+		TestEvent::powerlevels_by("$raise_state", "@mod", pl(&[("@mod", 60)], 70), &["$pl0"]),
+		// @mod lowers their own level.
+		TestEvent::powerlevels_by("$lower_self", "@mod", pl(&[("@mod", 40)], 50), &["$pl0"]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.power_levels", ""), "$pl0".to_owned());
+
+	let rules = PowerLevelMutationRules;
+	assert!(!rules.is_authorized(&s["$escalate"], &state, &s), "cannot grant above own level");
+	assert!(rules.is_authorized(&s["$grant_ok"], &state, &s), "may grant within own level");
+	assert!(
+		!rules.is_authorized(&s["$raise_state"], &state, &s),
+		"cannot raise a scalar level above own level"
+	);
+	assert!(rules.is_authorized(&s["$lower_self"], &state, &s), "may lower own level");
+}
+
+#[test]
+fn power_level_mutation_passes_non_power_levels_events() {
+	let s = store(vec![TestEvent::by("$name", "m.room.name", "@anyone", &[])]);
+	assert!(PowerLevelMutationRules.is_authorized(&s["$name"], &StateMap::new(), &s));
+}
+
+#[test]
+fn membership_knock_requires_a_knock_join_rule() {
+	let s = store(vec![
+		TestEvent::joinrules("$knock", "knock", &[]),
+		TestEvent::joinrules("$invite", "invite", &[]),
+		TestEvent::member("$k", "@alice", "@alice", "knock", &[]),
+	]);
+
+	// Knock room: alice may knock.
+	let mut knock_room = StateMap::new();
+	knock_room.insert(key("m.room.join_rules", ""), "$knock".to_owned());
+	assert!(MembershipRules.is_authorized(&s["$k"], &knock_room, &s));
+
+	// Invite-only room: knocking is not allowed.
+	let mut invite_room = StateMap::new();
+	invite_room.insert(key("m.room.join_rules", ""), "$invite".to_owned());
+	assert!(!MembershipRules.is_authorized(&s["$k"], &invite_room, &s));
+}
+
+#[test]
+fn membership_knock_rejected_when_banned() {
+	let s = store(vec![
+		TestEvent::joinrules("$knock", "knock", &[]),
+		TestEvent::member("$ban", "@admin", "@alice", "ban", &[]),
+		TestEvent::member("$k", "@alice", "@alice", "knock", &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.join_rules", ""), "$knock".to_owned());
+	state.insert(key("m.room.member", "@alice"), "$ban".to_owned());
+
+	// A banned user cannot knock.
+	assert!(!MembershipRules.is_authorized(&s["$k"], &state, &s));
 }

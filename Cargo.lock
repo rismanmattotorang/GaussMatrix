@@ -2043,6 +2043,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0cc23270f6e1808e30a928bdc84dea0b9b4136a8bc82338574f23baf47bbd280"
 
 [[package]]
+name = "gm-api"
+version = "1.7.0"
+dependencies = [
+ "gm-stateres",
+ "serde_json",
+]
+
+[[package]]
 name = "gm-stateres"
 version = "1.7.0"
 

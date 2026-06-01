@@ -79,23 +79,28 @@ impl PartialOrd for PowerKey {
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
 }
 
-/// Order `events` into reverse topological power order: each event appears after
-/// the auth events that are also in `events`, and among events whose in-set auth
-/// dependencies are already satisfied, the one with the highest sender power
-/// level (ties: earliest `origin_server_ts`, then smallest id) is emitted first.
+/// Order the events named by `ids` into reverse topological power order: each
+/// event appears after the auth events that are also in the set, and among
+/// events whose in-set auth dependencies are already satisfied, the one with the
+/// highest sender power level (ties: earliest `origin_server_ts`, then smallest
+/// id) is emitted first.
 ///
-/// Auth events referenced but not present in `events` are ignored — the order is
-/// over the given subset only. The auth graph is assumed acyclic, as Matrix auth
-/// chains are.
+/// Ids absent from `store`, and auth events outside the set, are ignored — the
+/// order is over the present subset only. The auth graph is assumed acyclic, as
+/// Matrix auth chains are.
 #[must_use]
-pub fn reverse_topological_power_sort<E: Event>(events: &[E]) -> Vec<EventId> {
-	let present: BTreeSet<&str> = events.iter().map(Event::event_id).collect();
+pub fn reverse_topological_power_sort<E: Event>(
+	ids: &[EventId],
+	store: &EventStore<E>,
+) -> Vec<EventId> {
+	let events: Vec<&E> = ids.iter().filter_map(|id| store.get(id)).collect();
+	let present: BTreeSet<&str> = events.iter().map(|event| event.event_id()).collect();
 
 	let mut key_of: BTreeMap<EventId, PowerKey> = BTreeMap::new();
 	let mut remaining: BTreeMap<EventId, usize> = BTreeMap::new();
 	let mut dependents: Dependents = BTreeMap::new();
 
-	for event in events {
+	for event in &events {
 		let id = event.event_id().to_owned();
 		let deps: BTreeSet<EventId> = event
 			.auth_event_ids()

@@ -134,20 +134,29 @@ preserves auditability.
       RocksDB roundtrip and reopen-persistence tests. The service core now **holds a
       backend-agnostic `gm-store::DynStore`** (`Services.store`), opened by
       `store_provider` as a tuned RocksDB engine at `<database_path>/gm-store` for the
-      single-node profile. The first consumer — an append-only **`audit` service**
-      (`Domain::AuditLog`) — is wired onto it end-to-end. Next: more consumers, then the
-      Phase-2 distributed backend.
-- [ ] `gm-api` typed request/response model (extending `ruma`).
+      single-node profile. The first consumer — a tamper-evident, hash-chained **`audit`
+      service** (`Domain::AuditLog`), where each entry commits to its predecessor's
+      SHA-256 and `verify()` detects any retroactive edit (spec §IV-D) — is wired onto it
+      end-to-end. Next: more consumers, then the Phase-2 distributed backend.
+- [~] `gm-api` typed request/response model (extending `ruma`). **Foundation landed**
+      (`src/apimodel`): the event-content adapter layer — parsing
+      `m.room.power_levels`/`member`/`join_rules` content (with Matrix defaults and the
+      integer-or-string power-level quirk) into the `gm-stateres` models, plus a
+      `StateEvent` adapter implementing `gm_stateres::Event`. This wires real Matrix
+      content into the resolution rules. Next: the `gm_stateres::Event` impl over the
+      server's ruma-backed `Pdu` and the CS/SS request/response surface.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.
-- [~] `gm-stateres` parallel state-resolution engine (room versions 1–12) with a
-      resolved-state cache. **Foundation landed** (`src/stateres`): the state-res-v2
-      conflict partitioning (unconflicted/conflicted split), the resolved-state cache
-      (memoised by the conflicting event-id set, bounded eviction), and the resolution
-      skeleton that ties them together with the auth-rule ordering as an injected step.
-      Pure/deterministic and unit-tested. Next: the RV1–12 authorisation ordering and
-      parallel signature verification.
+- [x] `gm-stateres` state-resolution engine (room versions 1–12) with a
+      resolved-state cache. **Landed** (`src/stateres`): the full state-res-v2 two-pass
+      `resolve` — conflict partitioning, auth-difference, reverse-topological power
+      ordering, mainline ordering, iterative auth checks, and the resolved-state cache —
+      plus the room-version authorisation rules (create; power-level send and mutation;
+      membership join/invite/leave/kick/ban incl. the create-room bootstrap join and
+      knock) composed via `AllOf`. Pure/deterministic, 42 unit tests incl. end-to-end
+      resolution. Remaining: restricted joins, third-party invites, and parallel
+      signature verification.
 
 ### Phase 2 — Horizontal scale
 - [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.
