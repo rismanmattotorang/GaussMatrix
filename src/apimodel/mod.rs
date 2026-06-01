@@ -27,6 +27,7 @@
 #![forbid(unsafe_code)]
 
 mod content;
+mod endpoint;
 mod error;
 mod event;
 #[cfg(test)]
@@ -37,6 +38,7 @@ pub use self::{
 		join_authorised_from_content, join_rule_from_content, membership_from_content,
 		power_levels_from_content,
 	},
+	endpoint::{AuthScope, Endpoint, Method, PathParams, match_template},
 	error::{ErrorCode, MatrixError},
 	event::StateEvent,
 };

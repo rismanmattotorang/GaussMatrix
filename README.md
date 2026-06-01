@@ -145,7 +145,8 @@ preserves auditability.
       `StateEvent` adapter implementing `gm_stateres::Event` (incl. `from_event_json`
       ingestion of canonical events), and the standard Matrix error model
       (`MatrixError`/`ErrorCode` with errcode + HTTP-status mapping and wire
-      serialization) that the CS/SS response surface is built on. Next: the
+      serialization), plus a typed endpoint model (`Endpoint`/`Method`/`AuthScope` with
+      `{param}` path-template matching) the HTTP ingress dispatches on. Next: the
       `gm_stateres::Event` impl over the server's ruma-backed `Pdu` and more of the CS/SS
       request/response model.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a

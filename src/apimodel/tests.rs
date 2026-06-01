@@ -6,8 +6,8 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	ErrorCode, MatrixError, StateEvent, join_rule_from_content, membership_from_content,
-	power_levels_from_content,
+	AuthScope, Endpoint, ErrorCode, MatrixError, Method, StateEvent, join_rule_from_content,
+	match_template, membership_from_content, power_levels_from_content,
 };
 
 #[test]
@@ -209,4 +209,41 @@ fn rate_limited_error_includes_retry_after_and_displays() {
 		json!({ "errcode": "M_LIMIT_EXCEEDED", "error": "slow down", "retry_after_ms": 2000 })
 	);
 	assert_eq!(err.to_string(), "M_LIMIT_EXCEEDED: slow down");
+}
+
+#[test]
+fn match_template_captures_path_parameters() {
+	let params = match_template(
+		"/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}",
+		"/_matrix/client/v3/rooms/!r:x/send/m.room.message/123",
+	)
+	.unwrap();
+	assert_eq!(params["roomId"], "!r:x");
+	assert_eq!(params["eventType"], "m.room.message");
+	assert_eq!(params["txnId"], "123");
+}
+
+#[test]
+fn match_template_rejects_literal_and_arity_mismatches() {
+	// Different literal segment.
+	assert!(match_template("/_matrix/client/versions", "/_matrix/client/v3").is_none());
+	// Too few / too many segments.
+	assert!(match_template("/a/{b}/c", "/a/x").is_none());
+	assert!(match_template("/a/{b}", "/a/x/y").is_none());
+	// Exact literal match with no params.
+	assert_eq!(match_template("/_matrix/client/versions", "/_matrix/client/versions").unwrap().len(), 0);
+}
+
+#[test]
+fn endpoint_matches_method_and_path() {
+	let ep = Endpoint::new(Method::Get, "/_matrix/client/v3/rooms/{roomId}/state", AuthScope::User);
+	assert_eq!(ep.auth, AuthScope::User);
+
+	let params = ep.matches(Method::Get, "/_matrix/client/v3/rooms/!r:x/state").unwrap();
+	assert_eq!(params["roomId"], "!r:x");
+
+	// Wrong method → no match.
+	assert!(ep.matches(Method::Post, "/_matrix/client/v3/rooms/!r:x/state").is_none());
+	// Wrong path → no match.
+	assert!(ep.matches(Method::Get, "/_matrix/client/versions").is_none());
 }
