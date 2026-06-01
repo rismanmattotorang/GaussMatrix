@@ -1,0 +1,23 @@
+[package]
+name = "gm-agent"
+categories.workspace = true
+description = "GaussMatrix agentic layer (gm-agent): capability scoping, mediation decisions, and the agent event model."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gm_agent"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[dependencies]
+serde_json.workspace = true
+serde_json.features = ["std"]
+
+[lints]
+workspace = true
