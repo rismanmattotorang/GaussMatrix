@@ -2,7 +2,12 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
-use serde_json::json;
+use serde_json::{Map, Value, json};
+
+/// The state event type carrying an agent's capability grant. Keyed by the
+/// agent's user id, the grant is visible, versioned, and federated room state,
+/// so revocation is immediate (§IV-C).
+pub const CAPABILITY_GRANT_TYPE: &str = "m.gauss.agent.capability";
 
 /// How an agent's invocation of a permitted tool is handled.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -19,6 +24,29 @@ impl Default for Action {
 	/// Permitted-but-unclassified tools default to requiring approval — the
 	/// conservative, human-in-the-loop choice.
 	fn default() -> Self { Self::Review }
+}
+
+impl Action {
+	/// The stable wire label (`auto` / `review` / `forbidden`).
+	#[must_use]
+	pub const fn label(self) -> &'static str {
+		match self {
+			| Self::Auto => "auto",
+			| Self::Review => "review",
+			| Self::Forbidden => "forbidden",
+		}
+	}
+
+	/// Parse an action from its wire label.
+	#[must_use]
+	pub fn from_label(label: &str) -> Option<Self> {
+		match label {
+			| "auto" => Some(Self::Auto),
+			| "review" => Some(Self::Review),
+			| "forbidden" => Some(Self::Forbidden),
+			| _ => None,
+		}
+	}
 }
 
 /// Why a tool invocation was denied.
@@ -95,6 +123,64 @@ impl CapabilityGrant {
 			| Action::Review => Decision::RequiresApproval,
 			| Action::Forbidden => Decision::Denied(DenyReason::ToolForbidden),
 		}
+	}
+
+	/// Serialise the grant into `m.gauss.agent.capability` state-event content.
+	#[must_use]
+	pub fn to_content(&self) -> Value {
+		let rooms: Vec<Value> = self
+			.accessible_rooms
+			.iter()
+			.map(|room| Value::from(room.clone()))
+			.collect();
+
+		let mut tools = Map::new();
+		for tool in &self.permitted_tools {
+			let action = self.tool_actions.get(tool).copied().unwrap_or(self.default_action);
+			tools.insert(tool.clone(), Value::from(action.label()));
+		}
+
+		json!({
+			"rooms": rooms,
+			"tools": Value::Object(tools),
+			"default_action": self.default_action.label(),
+		})
+	}
+
+	/// Parse a grant from `m.gauss.agent.capability` state-event content.
+	///
+	/// Unknown or malformed fields are ignored; an absent `default_action`
+	/// keeps the conservative default ([`Action::Review`]).
+	#[must_use]
+	pub fn from_content(content: &Value) -> Self {
+		let mut grant = Self::new();
+
+		if let Some(default) = content
+			.get("default_action")
+			.and_then(Value::as_str)
+			.and_then(Action::from_label)
+		{
+			grant.default_action = default;
+		}
+
+		if let Some(rooms) = content.get("rooms").and_then(Value::as_array) {
+			for room in rooms.iter().filter_map(Value::as_str) {
+				grant.accessible_rooms.insert(room.to_owned());
+			}
+		}
+
+		if let Some(tools) = content.get("tools").and_then(Value::as_object) {
+			for (tool, action) in tools {
+				let action = action
+					.as_str()
+					.and_then(Action::from_label)
+					.unwrap_or(grant.default_action);
+				grant.permitted_tools.insert(tool.clone());
+				grant.tool_actions.insert(tool.clone(), action);
+			}
+		}
+
+		grant
 	}
 }
 

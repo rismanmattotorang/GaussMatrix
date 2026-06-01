@@ -32,12 +32,16 @@ mod capability;
 mod events;
 mod gateway;
 mod mcp;
+mod provisioning;
 #[cfg(test)]
 mod tests;
 
 pub use self::{
-	capability::{Action, CapabilityGrant, Decision, DenyReason, mediation_record},
+	capability::{
+		Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, Decision, DenyReason, mediation_record,
+	},
 	events::{TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult},
 	gateway::{Gateway, Mediation},
 	mcp::{tool_call_from_mcp, tool_result_to_mcp},
+	provisioning::{DEFAULT_AGENT_NAMESPACE, is_agent_id},
 };
