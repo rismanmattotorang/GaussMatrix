@@ -174,13 +174,20 @@ preserves auditability.
 
 ### Phase 3 — Agentic AI layer
 - [ ] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge).
+      **Policy core landed** (`src/agent`): `CapabilityGrant`/`mediate` and the agent
+      event model (below); the MCP transport and provisioning build on it.
 - [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
-- [ ] Capability scoping (least-privilege grants as versioned room state) with
-      `auto` / `review` / `forbidden` action classification.
+- [~] Capability scoping (least-privilege grants as versioned room state) with
+      `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
+      (permitted tools + accessible rooms + per-tool classification) and `mediate`
+      returning `Execute` / `RequiresApproval` / `Denied`, default-deny.
 - [ ] Human-in-the-loop approval surfaced in GaussInteract; E2EE-aware mediation.
-- [ ] Tamper-evident, hash-chained audit log in a dedicated storage column family.
-- [ ] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
-      `m.gauss.agent.tool_result`) for replayable, auditable interactions.
+- [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
+      (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces
+      audit-ready decision records.)
+- [~] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
+      `m.gauss.agent.tool_result`) for replayable, auditable interactions. **Landed**:
+      `ToolCall`/`ToolResult` with event-content serialization.
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [ ] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
