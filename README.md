@@ -173,9 +173,11 @@ preserves auditability.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer
-- [ ] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge).
-      **Policy core landed** (`src/agent`): `CapabilityGrant`/`mediate` and the agent
-      event model (below); the MCP transport and provisioning build on it.
+- [~] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge).
+      **Gateway core landed** (`src/agent`): the `Gateway` (the sole channel — mediates a
+      call → audit record → in-band event), the MCP `tools/call` request/response bridge,
+      `CapabilityGrant`/`mediate`, and the agent event model. The network MCP transport and
+      cross-signed provisioning build on it. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
 - [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`

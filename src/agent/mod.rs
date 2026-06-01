@@ -30,10 +30,14 @@
 
 mod capability;
 mod events;
+mod gateway;
+mod mcp;
 #[cfg(test)]
 mod tests;
 
 pub use self::{
 	capability::{Action, CapabilityGrant, Decision, DenyReason, mediation_record},
 	events::{TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult},
+	gateway::{Gateway, Mediation},
+	mcp::{tool_call_from_mcp, tool_result_to_mcp},
 };
