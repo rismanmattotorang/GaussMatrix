@@ -1,5 +1,6 @@
 #![expect(clippy::toplevel_ref_arg)]
 
+pub mod agent;
 pub mod client;
 pub mod oidc;
 pub mod router;

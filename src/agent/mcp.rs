@@ -8,9 +8,13 @@
 use serde_json::{Value, json};
 
 use crate::{
-	capability::{Action, CapabilityGrant},
+	capability::{Action, CapabilityGrant, Decision},
 	events::{ToolCall, ToolResult},
 };
+
+/// JSON-RPC error code returned when a tool call is rejected by the capability
+/// grant — the implementation-defined server-error range (JSON-RPC 2.0 §5.1).
+const MCP_FORBIDDEN: i64 = -32_004;
 
 /// Handle a read-only MCP request (`tools/list`, `resources/list`) against a
 /// capability grant, returning the JSON-RPC response.
@@ -90,6 +94,40 @@ pub fn tool_result_to_mcp(result: &ToolResult) -> Value {
 		"result": {
 			"content": [ { "type": "text", "text": text } ],
 			"isError": is_error,
+		},
+	})
+}
+
+/// Render the synchronous MCP `tools/call` response for a *mediated* call.
+///
+/// GaussMatrix mediates and records the call in-band; the tool's actual result
+/// returns later as an `m.gauss.agent.tool_result`. This acknowledges only the
+/// mediation outcome: an accepted or pending-approval call yields a `result`
+/// carrying the decision `status`, while a denial yields a JSON-RPC `error`
+/// whose message is the decision label — so a caller can tell "rejected" from
+/// "accepted, awaiting result" without inspecting the timeline.
+#[must_use]
+pub fn mcp_call_ack(call: &ToolCall, decision: Decision) -> Value {
+	let id = Value::from(call.call_id.clone());
+
+	if decision.is_denied() {
+		return json!({
+			"jsonrpc": "2.0",
+			"id": id,
+			"error": { "code": MCP_FORBIDDEN, "message": decision.label() },
+		});
+	}
+
+	json!({
+		"jsonrpc": "2.0",
+		"id": id,
+		"result": {
+			"status": decision.label(),
+			"content": [ {
+				"type": "text",
+				"text": format!("tool call '{}' {}", call.tool, decision.label()),
+			} ],
+			"isError": false,
 		},
 	})
 }
