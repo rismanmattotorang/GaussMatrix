@@ -22,4 +22,4 @@ mod ring;
 #[cfg(test)]
 mod tests;
 
-pub use self::ring::{ShardId, ShardRing};
+pub use self::ring::{Reassignment, ShardId, ShardRing};

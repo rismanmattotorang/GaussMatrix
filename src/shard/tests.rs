@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::ShardRing;
+use crate::{Reassignment, ShardRing};
 
 fn ring(shards: &[&str]) -> ShardRing {
 	let mut ring = ShardRing::new();
@@ -105,4 +105,40 @@ fn removing_a_shard_only_moves_its_rooms() {
 			assert_eq!(new, old.as_str(), "rooms not on the removed shard keep their owner");
 		}
 	}
+}
+
+#[test]
+fn reassignments_on_add_target_only_the_new_shard() {
+	let all = rooms(2000);
+	let before = ring(&["a", "b", "c"]);
+	let after = ring(&["a", "b", "c", "d"]);
+
+	let moves: Vec<Reassignment> = before.reassignments(&after, &all);
+	assert!(!moves.is_empty());
+	for mv in &moves {
+		// Adding a shard only pulls rooms onto the new shard.
+		assert_eq!(mv.to, "d", "rooms only move onto the added shard");
+		assert!(matches!(mv.from.as_str(), "a" | "b" | "c"));
+	}
+}
+
+#[test]
+fn reassignments_on_drain_come_only_from_the_removed_shard() {
+	let all = rooms(2000);
+	let before = ring(&["a", "b", "c"]);
+	let after = ring(&["a", "c"]);
+
+	let moves = before.reassignments(&after, &all);
+	assert!(!moves.is_empty());
+	for mv in &moves {
+		assert_eq!(mv.from, "b", "only the drained shard's rooms move");
+		assert!(matches!(mv.to.as_str(), "a" | "c"));
+	}
+}
+
+#[test]
+fn reassignments_empty_when_ring_unchanged() {
+	let all = rooms(200);
+	let ring = ring(&["a", "b"]);
+	assert!(ring.reassignments(&ring, &all).is_empty());
 }

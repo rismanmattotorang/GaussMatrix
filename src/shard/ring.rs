@@ -5,6 +5,17 @@ use std::collections::{BTreeMap, BTreeSet};
 /// A shard identifier (e.g. a worker name or address).
 pub type ShardId = String;
 
+/// A room whose owning shard changes between two ring states.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Reassignment {
+	/// The affected room.
+	pub room: String,
+	/// The shard that owned it before.
+	pub from: ShardId,
+	/// The shard that owns it after.
+	pub to: ShardId,
+}
+
 /// Virtual nodes per shard. More points spread a shard's keyspace more evenly,
 /// keeping the partitions balanced and the reassignment on membership change
 /// close to its `1/N` ideal.
@@ -62,6 +73,26 @@ impl ShardRing {
 	/// The shards currently in the ring.
 	pub fn shards(&self) -> impl Iterator<Item = &str> + '_ {
 		self.shards.iter().map(String::as_str)
+	}
+
+	/// The reassignments needed to move the given `rooms` from this ring's
+	/// placement to `target`'s — the work a coordination service warms before
+	/// cut-over when a shard is added or drained. Only rooms whose owner changes
+	/// are returned.
+	#[must_use]
+	pub fn reassignments(&self, target: &Self, rooms: &[String]) -> Vec<Reassignment> {
+		rooms
+			.iter()
+			.filter_map(|room| {
+				let from = self.shard_for(room)?;
+				let to = target.shard_for(room)?;
+				(from != to).then(|| Reassignment {
+					room: room.clone(),
+					from: from.to_owned(),
+					to: to.to_owned(),
+				})
+			})
+			.collect()
 	}
 
 	/// The number of shards.
