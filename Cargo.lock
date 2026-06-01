@@ -1939,6 +1939,7 @@ dependencies = [
  "futures",
  "gaussmatrix_core",
  "gaussmatrix_database",
+ "gm-agent",
  "gm-store",
  "hickory-resolver",
  "http",
