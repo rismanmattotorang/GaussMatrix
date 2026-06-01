@@ -153,10 +153,10 @@ preserves auditability.
       `resolve` — conflict partitioning, auth-difference, reverse-topological power
       ordering, mainline ordering, iterative auth checks, and the resolved-state cache —
       plus the room-version authorisation rules (create; power-level send and mutation;
-      membership join/invite/leave/kick/ban incl. the create-room bootstrap join and
-      knock) composed via `AllOf`. Pure/deterministic, 42 unit tests incl. end-to-end
-      resolution. Remaining: restricted joins, third-party invites, and parallel
-      signature verification.
+      membership join/invite/leave/kick/ban incl. the create-room bootstrap join, knock,
+      and restricted joins) composed via `AllOf`. Pure/deterministic, 44 unit tests incl.
+      end-to-end resolution. Remaining: third-party invites and parallel signature
+      verification (both require Ed25519 crypto, deferred to the integration layer).
 
 ### Phase 2 — Horizontal scale
 - [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.

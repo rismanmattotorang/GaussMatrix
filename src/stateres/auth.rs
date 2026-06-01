@@ -129,9 +129,21 @@ impl<E: Event> AuthRules<E> for MembershipRules {
 				if is_bootstrap_join(event, state, store) {
 					return true;
 				}
+				// An existing invite or membership satisfies any non-public rule.
+				if matches!(target_membership.as_str(), "invite" | "join") {
+					return true;
+				}
 				match current_join_rule(state, store).as_str() {
 					| "public" => true,
-					| "invite" => matches!(target_membership.as_str(), "invite" | "join"),
+					// Restricted joins: a joined user with invite power vouches
+					// for the join via join_authorised_via_users_server. (The
+					// allowed-rooms membership check is a server-side join-time
+					// concern, not part of event authorisation.)
+					| "restricted" | "knock_restricted" =>
+						event.join_authorised_via_users_server().is_some_and(|authoriser| {
+							membership_of(authoriser, state, store) == "join"
+								&& levels.for_user(authoriser) >= levels.invite
+						}),
 					| _ => false,
 				}
 			},

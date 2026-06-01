@@ -32,6 +32,9 @@ mod event;
 mod tests;
 
 pub use self::{
-	content::{join_rule_from_content, membership_from_content, power_levels_from_content},
+	content::{
+		join_authorised_from_content, join_rule_from_content, membership_from_content,
+		power_levels_from_content,
+	},
 	event::StateEvent,
 };

@@ -21,6 +21,7 @@ struct TestEvent {
 	power_levels: Option<PowerLevels>,
 	membership: Option<String>,
 	join_rule: Option<String>,
+	join_authorised: Option<String>,
 }
 
 impl TestEvent {
@@ -40,7 +41,15 @@ impl TestEvent {
 			power_levels: None,
 			membership: None,
 			join_rule: None,
+			join_authorised: None,
 		}
+	}
+
+	/// A restricted-room self-join, optionally authorised by `authoriser`.
+	fn restricted_join(id: &str, sender: &str, authoriser: Option<&str>, auth: &[&str]) -> Self {
+		let mut event = Self::member(id, sender, sender, "join", auth);
+		event.join_authorised = authoriser.map(ToOwned::to_owned);
+		event
 	}
 
 	/// An `m.room.member` event setting `target`'s membership, sent by `sender`.
@@ -106,6 +115,10 @@ impl Event for TestEvent {
 	fn membership(&self) -> Option<&str> { self.membership.as_deref() }
 
 	fn join_rule(&self) -> Option<&str> { self.join_rule.as_deref() }
+
+	fn join_authorised_via_users_server(&self) -> Option<&str> {
+		self.join_authorised.as_deref()
+	}
 }
 
 /// Build a by-id store from a set of events.
@@ -817,6 +830,44 @@ fn membership_knock_requires_a_knock_join_rule() {
 	let mut invite_room = StateMap::new();
 	invite_room.insert(key("m.room.join_rules", ""), "$invite".to_owned());
 	assert!(!MembershipRules.is_authorized(&s["$k"], &invite_room, &s));
+}
+
+#[test]
+fn membership_restricted_join_requires_a_joined_authorising_user() {
+	let s = store(vec![
+		TestEvent::joinrules("$jr", "restricted", &[]),
+		TestEvent::powerlevels("$pl", membership_levels(), &[]), // @admin 100, invite 50
+		TestEvent::member("$adminjoin", "@admin", "@admin", "join", &[]),
+		TestEvent::restricted_join("$ok", "@alice", Some("@admin"), &[]),
+		TestEvent::restricted_join("$unjoined_auth", "@bob", Some("@nobody"), &[]),
+		TestEvent::restricted_join("$no_auth", "@carol", None, &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.join_rules", ""), "$jr".to_owned());
+	state.insert(key("m.room.power_levels", ""), "$pl".to_owned());
+	state.insert(key("m.room.member", "@admin"), "$adminjoin".to_owned());
+
+	// Authorised by a joined user with invite power (@admin 100 >= 50).
+	assert!(MembershipRules.is_authorized(&s["$ok"], &state, &s));
+	// Authoriser is not joined → rejected.
+	assert!(!MembershipRules.is_authorized(&s["$unjoined_auth"], &state, &s));
+	// No authorising user → rejected.
+	assert!(!MembershipRules.is_authorized(&s["$no_auth"], &state, &s));
+}
+
+#[test]
+fn membership_restricted_join_allows_an_already_invited_user() {
+	let s = store(vec![
+		TestEvent::joinrules("$jr", "restricted", &[]),
+		TestEvent::member("$inv", "@admin", "@alice", "invite", &[]),
+		TestEvent::restricted_join("$join", "@alice", None, &[]),
+	]);
+	let mut state = StateMap::new();
+	state.insert(key("m.room.join_rules", ""), "$jr".to_owned());
+	state.insert(key("m.room.member", "@alice"), "$inv".to_owned());
+
+	// Already invited → may join without an authorising user.
+	assert!(MembershipRules.is_authorized(&s["$join"], &state, &s));
 }
 
 #[test]

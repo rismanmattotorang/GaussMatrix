@@ -154,6 +154,20 @@ fn from_event_json_accepts_v1_auth_event_pairs() {
 }
 
 #[test]
+fn from_event_json_parses_restricted_join_authoriser() {
+	let event = json!({
+		"type": "m.room.member",
+		"sender": "@alice:x",
+		"state_key": "@alice:x",
+		"origin_server_ts": 1,
+		"content": { "membership": "join", "join_authorised_via_users_server": "@admin:x" }
+	});
+	let parsed = StateEvent::from_event_json("$j", &event).unwrap();
+	assert_eq!(parsed.membership(), Some("join"));
+	assert_eq!(parsed.join_authorised_via_users_server(), Some("@admin:x"));
+}
+
+#[test]
 fn from_event_json_rejects_events_missing_required_fields() {
 	// No sender / origin_server_ts.
 	assert!(StateEvent::from_event_json("$x", &json!({ "type": "m.room.name" })).is_none());
