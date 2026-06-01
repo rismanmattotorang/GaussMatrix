@@ -26,14 +26,17 @@
 
 #![forbid(unsafe_code)]
 
+mod auth;
 mod content;
 mod endpoint;
 mod error;
 mod event;
 #[cfg(test)]
 mod tests;
+mod versions;
 
 pub use self::{
+	auth::extract_access_token,
 	content::{
 		join_authorised_from_content, join_rule_from_content, membership_from_content,
 		power_levels_from_content,
@@ -41,4 +44,5 @@ pub use self::{
 	endpoint::{AuthScope, Endpoint, Method, PathParams, match_template},
 	error::{ErrorCode, MatrixError},
 	event::StateEvent,
+	versions::Versions,
 };

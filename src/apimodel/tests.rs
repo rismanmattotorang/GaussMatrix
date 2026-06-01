@@ -6,8 +6,9 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	AuthScope, Endpoint, ErrorCode, MatrixError, Method, StateEvent, join_rule_from_content,
-	match_template, membership_from_content, power_levels_from_content,
+	AuthScope, Endpoint, ErrorCode, MatrixError, Method, StateEvent, Versions,
+	extract_access_token, join_rule_from_content, match_template, membership_from_content,
+	power_levels_from_content,
 };
 
 #[test]
@@ -246,4 +247,36 @@ fn endpoint_matches_method_and_path() {
 	assert!(ep.matches(Method::Post, "/_matrix/client/v3/rooms/!r:x/state").is_none());
 	// Wrong path → no match.
 	assert!(ep.matches(Method::Get, "/_matrix/client/versions").is_none());
+}
+
+#[test]
+fn access_token_prefers_bearer_header() {
+	assert_eq!(
+		extract_access_token(Some("Bearer secret123"), Some("qtok")).as_deref(),
+		Some("secret123")
+	);
+	// Header present but not Bearer → no token, no query fallback.
+	assert_eq!(extract_access_token(Some("Basic abc"), Some("qtok")), None);
+	// Empty bearer token → none.
+	assert_eq!(extract_access_token(Some("Bearer "), None), None);
+}
+
+#[test]
+fn access_token_falls_back_to_query_param() {
+	assert_eq!(extract_access_token(None, Some("qtok")).as_deref(), Some("qtok"));
+	assert_eq!(extract_access_token(None, None), None);
+	assert_eq!(extract_access_token(None, Some("")), None);
+}
+
+#[test]
+fn versions_response_serializes() {
+	let versions = Versions::new(&["v1.11", "v1.12"])
+		.with_unstable_feature("org.matrix.msc3575", true);
+	assert_eq!(
+		versions.to_json(),
+		json!({
+			"versions": ["v1.11", "v1.12"],
+			"unstable_features": { "org.matrix.msc3575": true }
+		})
+	);
 }

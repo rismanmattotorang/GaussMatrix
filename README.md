@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/badge/license-Apache--2.0-8A2BE2?style=flat-square)
 ![Language](https://img.shields.io/badge/built%20with-Rust-8A2BE2?style=flat-square&logo=rust&logoColor=white)
 ![Protocol](https://img.shields.io/badge/protocol-Matrix-098A09?style=flat-square)
-![Status](https://img.shields.io/badge/status-Phase%200%20%C2%B7%20foundation-8A2BE2?style=flat-square)
+![Status](https://img.shields.io/badge/status-Phase%201%20%C2%B7%20server%20core-8A2BE2?style=flat-square)
 
 <!-- ANCHOR: catchphrase -->
 
