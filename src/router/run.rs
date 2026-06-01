@@ -9,7 +9,7 @@ use gaussmatrix_core::{
 };
 use gaussmatrix_service::Services;
 
-use crate::{handle::ServerHandle, serve};
+use crate::{handle::ServerHandle, serve, shard};
 
 /// Main loop base
 #[tracing::instrument(skip_all)]
@@ -80,6 +80,9 @@ pub(crate) async fn start(server: Arc<Server>) -> Result<Arc<Services>> {
 	debug!("Starting...");
 
 	let services = Services::build(server).await?.start().await?;
+
+	// Seed the front-end room-placement ring (single-node profile).
+	let _placement = shard::init_local(services.server.name.as_str());
 
 	#[cfg(all(feature = "systemd", target_os = "linux"))]
 	sd_notify::notify(&[sd_notify::NotifyState::Ready])

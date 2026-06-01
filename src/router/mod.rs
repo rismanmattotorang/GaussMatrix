@@ -4,6 +4,7 @@ mod request;
 mod router;
 mod run;
 mod serve;
+pub mod shard;
 
 use std::{panic::AssertUnwindSafe, pin::Pin, sync::Arc};
 
