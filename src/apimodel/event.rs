@@ -87,6 +87,52 @@ impl StateEvent {
 		}
 		self
 	}
+
+	/// Build a `StateEvent` from a canonical Matrix event JSON object and a
+	/// separately-supplied `event_id` (which, from room version 3, is not carried
+	/// in the event body but computed as a reference hash).
+	///
+	/// Returns `None` if a required field (`type`, `sender`, `origin_server_ts`)
+	/// is missing or malformed. The `auth_events` array is accepted in both the
+	/// room v1/v2 form (`[event_id, hashes]` pairs) and the v3+ form (event-id
+	/// strings). The sender's resolved power level is not part of the event and
+	/// is left at zero.
+	#[must_use]
+	pub fn from_event_json(event_id: &str, event: &Value) -> Option<Self> {
+		let event_type = event.get("type")?.as_str()?;
+		let sender = event.get("sender")?.as_str()?;
+		let origin_server_ts = event.get("origin_server_ts")?.as_u64()?;
+
+		let mut state =
+			Self::new(event_id, event_type, sender).with_origin_server_ts(origin_server_ts);
+
+		if let Some(state_key) = event.get("state_key").and_then(Value::as_str) {
+			state = state.with_state_key(state_key);
+		}
+
+		let auth_events: Vec<&str> = event
+			.get("auth_events")
+			.and_then(Value::as_array)
+			.map(|entries| entries.iter().filter_map(auth_event_id).collect())
+			.unwrap_or_default();
+		state = state.with_auth_events(&auth_events);
+
+		if let Some(content) = event.get("content") {
+			state = state.with_content(content);
+		}
+
+		Some(state)
+	}
+}
+
+/// Extract an auth event id from an `auth_events` entry, accepting the v3+ form
+/// (an event-id string) and the v1/v2 form (`[event_id, hashes]`).
+fn auth_event_id(entry: &Value) -> Option<&str> {
+	match entry {
+		| Value::String(id) => Some(id),
+		| Value::Array(pair) => pair.first().and_then(Value::as_str),
+		| _ => None,
+	}
 }
 
 impl Event for StateEvent {

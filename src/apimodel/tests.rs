@@ -115,3 +115,51 @@ fn state_events_drive_the_resolution_rules() {
 	let all = AllOf(&components);
 	assert!(all.is_authorized(&store["$ok"], &state, &store));
 }
+
+#[test]
+fn from_event_json_parses_a_v3_member_event() {
+	let event = json!({
+		"type": "m.room.member",
+		"sender": "@alice:example.org",
+		"state_key": "@alice:example.org",
+		"origin_server_ts": 1000,
+		"auth_events": ["$c", "$pl"],
+		"content": { "membership": "join" }
+	});
+	let parsed = StateEvent::from_event_json("$evt", &event).unwrap();
+
+	assert_eq!(parsed.event_id(), "$evt");
+	assert_eq!(parsed.event_type(), "m.room.member");
+	assert_eq!(parsed.sender(), "@alice:example.org");
+	assert_eq!(parsed.state_key(), "@alice:example.org");
+	assert_eq!(parsed.origin_server_ts(), 1000);
+	assert_eq!(parsed.auth_event_ids(), &["$c".to_owned(), "$pl".to_owned()]);
+	assert_eq!(parsed.membership(), Some("join"));
+}
+
+#[test]
+fn from_event_json_accepts_v1_auth_event_pairs() {
+	// Room v1/v2 carry auth_events as [event_id, hashes] pairs.
+	let event = json!({
+		"type": "m.room.power_levels",
+		"sender": "@a:x",
+		"state_key": "",
+		"origin_server_ts": 5,
+		"auth_events": [["$c", { "sha256": "abc" }], ["$prev", { "sha256": "def" }]],
+		"content": { "users": { "@a:x": 100 } }
+	});
+	let parsed = StateEvent::from_event_json("$pl", &event).unwrap();
+	assert_eq!(parsed.auth_event_ids(), &["$c".to_owned(), "$prev".to_owned()]);
+	assert_eq!(parsed.power_levels().unwrap().for_user("@a:x"), 100);
+}
+
+#[test]
+fn from_event_json_rejects_events_missing_required_fields() {
+	// No sender / origin_server_ts.
+	assert!(StateEvent::from_event_json("$x", &json!({ "type": "m.room.name" })).is_none());
+	// No type.
+	assert!(
+		StateEvent::from_event_json("$x", &json!({ "sender": "@a:x", "origin_server_ts": 1 }))
+			.is_none()
+	);
+}
