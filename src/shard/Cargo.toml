@@ -1,0 +1,19 @@
+[package]
+name = "gm-shard"
+categories.workspace = true
+description = "GaussMatrix room sharding (gm-shard): consistent-hash placement of rooms across worker shards."
+edition.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+name = "gm_shard"
+path = "mod.rs"
+bench = false
+crate-type = ["rlib"]
+
+[lints]
+workspace = true

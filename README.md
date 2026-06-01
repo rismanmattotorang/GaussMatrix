@@ -166,7 +166,10 @@ preserves auditability.
       verification (both require Ed25519 crypto, deferred to the integration layer).
 
 ### Phase 2 — Horizontal scale
-- [ ] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.
+- [~] `gm-shard` consistent-hash room placement, coordination, and online rebalancing.
+      **Placement landed** (`src/shard`): `ShardRing` — deterministic, portable consistent-hash
+      placement (FNV-1a + splitmix64, 128 vnodes/shard) with balanced partitions and minimal
+      reassignment on add/drain. Next: the coordination service + distributed backend.
 - [ ] Distributed KV storage backend behind the `gm-store` trait.
 - [ ] Sharded federation sender (per-destination, no head-of-line blocking) and
       partial-state joins in `gm-fed`.
