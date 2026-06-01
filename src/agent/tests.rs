@@ -4,8 +4,8 @@ use serde_json::json;
 
 use crate::{
 	Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, DenyReason,
-	Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult, is_agent_id, mediation_record,
-	tool_call_from_mcp, tool_result_to_mcp,
+	Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult, handle_mcp, is_agent_id,
+	mediation_record, tool_call_from_mcp, tool_result_to_mcp,
 };
 
 fn grant() -> CapabilityGrant {
@@ -205,4 +205,38 @@ fn capability_content_has_expected_shape() {
 fn agent_namespace_membership() {
 	assert!(is_agent_id("@gauss.agent.summariser:example.org", DEFAULT_AGENT_NAMESPACE));
 	assert!(!is_agent_id("@alice:example.org", DEFAULT_AGENT_NAMESPACE));
+}
+
+#[test]
+fn mcp_tools_list_is_scoped_to_callable_tools() {
+	let response = handle_mcp(&grant(), &json!({ "jsonrpc": "2.0", "id": 1, "method": "tools/list" }))
+		.unwrap();
+	let names: Vec<&str> = response["result"]["tools"]
+		.as_array()
+		.unwrap()
+		.iter()
+		.map(|t| t["name"].as_str().unwrap())
+		.collect();
+
+	assert!(names.contains(&"read_messages"));
+	assert!(names.contains(&"invite_user"));
+	// A forbidden tool is never offered.
+	assert!(!names.contains(&"modify_power_levels"));
+	assert_eq!(response["id"], 1);
+}
+
+#[test]
+fn mcp_resources_list_exposes_accessible_rooms() {
+	let response =
+		handle_mcp(&grant(), &json!({ "id": "a", "method": "resources/list" })).unwrap();
+	let resources = response["result"]["resources"].as_array().unwrap();
+	assert_eq!(resources.len(), 1);
+	assert_eq!(resources[0]["uri"], "matrix://room/!room:example.org");
+}
+
+#[test]
+fn mcp_dispatcher_ignores_tools_call_and_unknown_methods() {
+	// tools/call proceeds through the gateway, not the read-only dispatcher.
+	assert!(handle_mcp(&grant(), &json!({ "method": "tools/call" })).is_none());
+	assert!(handle_mcp(&grant(), &json!({ "method": "prompts/list" })).is_none());
 }
