@@ -27,6 +27,7 @@
 #![forbid(unsafe_code)]
 
 mod content;
+mod error;
 mod event;
 #[cfg(test)]
 mod tests;
@@ -36,5 +37,6 @@ pub use self::{
 		join_authorised_from_content, join_rule_from_content, membership_from_content,
 		power_levels_from_content,
 	},
+	error::{ErrorCode, MatrixError},
 	event::StateEvent,
 };

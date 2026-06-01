@@ -142,9 +142,12 @@ preserves auditability.
       (`src/apimodel`): the event-content adapter layer — parsing
       `m.room.power_levels`/`member`/`join_rules` content (with Matrix defaults and the
       integer-or-string power-level quirk) into the `gm-stateres` models, plus a
-      `StateEvent` adapter implementing `gm_stateres::Event`. This wires real Matrix
-      content into the resolution rules. Next: the `gm_stateres::Event` impl over the
-      server's ruma-backed `Pdu` and the CS/SS request/response surface.
+      `StateEvent` adapter implementing `gm_stateres::Event` (incl. `from_event_json`
+      ingestion of canonical events), and the standard Matrix error model
+      (`MatrixError`/`ErrorCode` with errcode + HTTP-status mapping and wire
+      serialization) that the CS/SS response surface is built on. Next: the
+      `gm_stateres::Event` impl over the server's ruma-backed `Pdu` and more of the CS/SS
+      request/response model.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.

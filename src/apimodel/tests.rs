@@ -6,7 +6,8 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	StateEvent, join_rule_from_content, membership_from_content, power_levels_from_content,
+	ErrorCode, MatrixError, StateEvent, join_rule_from_content, membership_from_content,
+	power_levels_from_content,
 };
 
 #[test]
@@ -176,4 +177,36 @@ fn from_event_json_rejects_events_missing_required_fields() {
 		StateEvent::from_event_json("$x", &json!({ "sender": "@a:x", "origin_server_ts": 1 }))
 			.is_none()
 	);
+}
+
+#[test]
+fn error_codes_map_to_errcode_and_status() {
+	assert_eq!(ErrorCode::Forbidden.errcode(), "M_FORBIDDEN");
+	assert_eq!(ErrorCode::Forbidden.http_status(), 403);
+	assert_eq!(ErrorCode::UnknownToken.http_status(), 401);
+	assert_eq!(ErrorCode::NotFound.http_status(), 404);
+	assert_eq!(ErrorCode::Unrecognized.http_status(), 404);
+	assert_eq!(ErrorCode::LimitExceeded.errcode(), "M_LIMIT_EXCEEDED");
+	assert_eq!(ErrorCode::LimitExceeded.http_status(), 429);
+	assert_eq!(ErrorCode::TooLarge.http_status(), 413);
+	assert_eq!(ErrorCode::BadJson.http_status(), 400);
+	assert_eq!(ErrorCode::Unknown.http_status(), 500);
+}
+
+#[test]
+fn matrix_error_serializes_to_wire_body() {
+	let err = MatrixError::new(ErrorCode::Forbidden, "nope");
+	assert_eq!(err.http_status(), 403);
+	assert_eq!(err.to_json(), json!({ "errcode": "M_FORBIDDEN", "error": "nope" }));
+}
+
+#[test]
+fn rate_limited_error_includes_retry_after_and_displays() {
+	let err = MatrixError::rate_limited("slow down", 2000);
+	assert_eq!(err.http_status(), 429);
+	assert_eq!(
+		err.to_json(),
+		json!({ "errcode": "M_LIMIT_EXCEEDED", "error": "slow down", "retry_after_ms": 2000 })
+	);
+	assert_eq!(err.to_string(), "M_LIMIT_EXCEEDED: slow down");
 }
