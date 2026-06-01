@@ -125,6 +125,19 @@ impl CapabilityGrant {
 		}
 	}
 
+	/// The rooms this grant makes accessible.
+	pub fn rooms(&self) -> impl Iterator<Item = &str> + '_ {
+		self.accessible_rooms.iter().map(String::as_str)
+	}
+
+	/// The permitted tools and their action classification.
+	pub fn tools(&self) -> impl Iterator<Item = (&str, Action)> + '_ {
+		self.permitted_tools.iter().map(move |tool| {
+			let action = self.tool_actions.get(tool).copied().unwrap_or(self.default_action);
+			(tool.as_str(), action)
+		})
+	}
+
 	/// Serialise the grant into `m.gauss.agent.capability` state-event content.
 	#[must_use]
 	pub fn to_content(&self) -> Value {

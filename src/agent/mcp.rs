@@ -7,7 +7,52 @@
 
 use serde_json::{Value, json};
 
-use crate::events::{ToolCall, ToolResult};
+use crate::{
+	capability::{Action, CapabilityGrant},
+	events::{ToolCall, ToolResult},
+};
+
+/// Handle a read-only MCP request (`tools/list`, `resources/list`) against a
+/// capability grant, returning the JSON-RPC response.
+///
+/// The listings are **scoped to the grant**: only callable tools (forbidden
+/// ones are withheld) and only accessible rooms are exposed — the inbound half
+/// of the gateway (§IV-B), which never reveals more than the agent was granted.
+/// Returns `None` for other methods (`tools/call` proceeds through the
+/// [`Gateway`](crate::Gateway), not here).
+#[must_use]
+pub fn handle_mcp(grant: &CapabilityGrant, request: &Value) -> Option<Value> {
+	let method = request.get("method").and_then(Value::as_str)?;
+	let result = match method {
+		| "tools/list" => tools_list_result(grant),
+		| "resources/list" => resources_list_result(grant),
+		| _ => return None,
+	};
+
+	let id = request.get("id").cloned().unwrap_or(Value::Null);
+	Some(json!({ "jsonrpc": "2.0", "id": id, "result": result }))
+}
+
+/// The `tools/list` result: the grant's callable tools (forbidden ones omitted).
+fn tools_list_result(grant: &CapabilityGrant) -> Value {
+	let tools: Vec<Value> = grant
+		.tools()
+		.filter(|(_, action)| *action != Action::Forbidden)
+		.map(|(name, action)| json!({ "name": name, "annotations": { "action": action.label() } }))
+		.collect();
+
+	json!({ "tools": tools })
+}
+
+/// The `resources/list` result: the grant's accessible rooms as MCP resources.
+fn resources_list_result(grant: &CapabilityGrant) -> Value {
+	let resources: Vec<Value> = grant
+		.rooms()
+		.map(|room| json!({ "uri": format!("matrix://room/{room}"), "name": room }))
+		.collect();
+
+	json!({ "resources": resources })
+}
 
 /// Parse an MCP `tools/call` JSON-RPC request into a [`ToolCall`].
 ///
