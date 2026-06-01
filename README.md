@@ -134,9 +134,10 @@ preserves auditability.
       RocksDB roundtrip and reopen-persistence tests. The service core now **holds a
       backend-agnostic `gm-store::DynStore`** (`Services.store`), opened by
       `store_provider` as a tuned RocksDB engine at `<database_path>/gm-store` for the
-      single-node profile. The first consumer — an append-only **`audit` service**
-      (`Domain::AuditLog`) — is wired onto it end-to-end. Next: more consumers, then the
-      Phase-2 distributed backend.
+      single-node profile. The first consumer — a tamper-evident, hash-chained **`audit`
+      service** (`Domain::AuditLog`), where each entry commits to its predecessor's
+      SHA-256 and `verify()` detects any retroactive edit (spec §IV-D) — is wired onto it
+      end-to-end. Next: more consumers, then the Phase-2 distributed backend.
 - [~] `gm-api` typed request/response model (extending `ruma`). **Foundation landed**
       (`src/apimodel`): the event-content adapter layer — parsing
       `m.room.power_levels`/`member`/`join_rules` content (with Matrix defaults and the
