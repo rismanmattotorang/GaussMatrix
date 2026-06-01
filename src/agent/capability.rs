@@ -71,6 +71,23 @@ pub enum Decision {
 	Denied(DenyReason),
 }
 
+impl Decision {
+	/// A stable label for this decision (`execute`, `requires_approval`, or
+	/// `denied:<reason>`), used in the audit record and on the MCP wire.
+	#[must_use]
+	pub fn label(self) -> String {
+		match self {
+			| Self::Execute => "execute".to_owned(),
+			| Self::RequiresApproval => "requires_approval".to_owned(),
+			| Self::Denied(reason) => format!("denied:{}", reason_label(reason)),
+		}
+	}
+
+	/// Whether the invocation was rejected.
+	#[must_use]
+	pub const fn is_denied(self) -> bool { matches!(self, Self::Denied(_)) }
+}
+
 /// An agent's capability grant: an explicit, least-privilege set of permitted
 /// tools, accessible rooms, and per-tool action classification.
 ///
@@ -205,19 +222,10 @@ pub fn mediation_record(agent: &str, tool: &str, room: &str, decision: Decision)
 		"agent": agent,
 		"tool": tool,
 		"room": room,
-		"decision": decision_label(decision),
+		"decision": decision.label(),
 	});
 
 	serde_json::to_vec(&body).unwrap_or_default()
-}
-
-/// A stable label for a decision, used in the audit record.
-fn decision_label(decision: Decision) -> String {
-	match decision {
-		| Decision::Execute => "execute".to_owned(),
-		| Decision::RequiresApproval => "requires_approval".to_owned(),
-		| Decision::Denied(reason) => format!("denied:{}", reason_label(reason)),
-	}
 }
 
 /// A stable label for a deny reason.

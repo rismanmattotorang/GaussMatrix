@@ -42,6 +42,6 @@ pub use self::{
 	},
 	events::{TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult},
 	gateway::{Gateway, Mediation},
-	mcp::{handle_mcp, tool_call_from_mcp, tool_result_to_mcp},
+	mcp::{handle_mcp, mcp_call_ack, tool_call_from_mcp, tool_result_to_mcp},
 	provisioning::{DEFAULT_AGENT_NAMESPACE, is_agent_id},
 };

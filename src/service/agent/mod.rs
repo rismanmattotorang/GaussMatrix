@@ -17,7 +17,7 @@ use gaussmatrix_core::{
 };
 use gm_agent::{
 	CAPABILITY_GRANT_TYPE, CapabilityGrant, Gateway, Mediation, TOOL_CALL_TYPE, TOOL_RESULT_TYPE,
-	ToolCall, ToolResult,
+	ToolCall, ToolResult, handle_mcp, mcp_call_ack, tool_call_from_mcp,
 };
 use ruma::{OwnedEventId, RoomId, UserId, events::StateEventType};
 use serde_json::{Value as JsonValue, value::to_raw_value};
@@ -82,6 +82,34 @@ pub async fn handle_tool_call(
 	}
 
 	Ok(mediation)
+}
+
+/// Run an inbound MCP JSON-RPC `request` for `agent`, scoped to `room_id`'s
+/// capability grant — the live MCP gateway (§IV-B).
+///
+/// A `tools/call` flows through the full mediated loop (decide → audit →
+/// in-band `m.gauss.agent.tool_call` when it proceeds) and returns the
+/// synchronous MCP acknowledgement; read-only methods (`tools/list`,
+/// `resources/list`) return grant-scoped listings. Returns `None` for
+/// unrecognised methods.
+#[implement(Service)]
+pub async fn handle_mcp_request(
+	&self,
+	agent: &UserId,
+	room_id: &RoomId,
+	request: &JsonValue,
+) -> Result<Option<JsonValue>> {
+	let grant = self.grant_for(room_id).await;
+
+	if let Some(call) = tool_call_from_mcp(request) {
+		let mediation = self.mediate_tool_call(agent.as_str(), &grant, room_id.as_str(), &call)?;
+		if let Some(event) = &mediation.event {
+			self.post_agent_event(agent, room_id, TOOL_CALL_TYPE, event).await?;
+		}
+		return Ok(Some(mcp_call_ack(&call, mediation.decision)));
+	}
+
+	Ok(handle_mcp(&grant, request))
 }
 
 /// Post a completed tool result in-band as an `m.gauss.agent.tool_result` event.

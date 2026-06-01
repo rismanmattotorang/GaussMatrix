@@ -5,7 +5,7 @@ use serde_json::json;
 use crate::{
 	Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, DenyReason,
 	Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult, handle_mcp, is_agent_id,
-	mediation_record, tool_call_from_mcp, tool_result_to_mcp,
+	mcp_call_ack, mediation_record, tool_call_from_mcp, tool_result_to_mcp,
 };
 
 fn grant() -> CapabilityGrant {
@@ -165,6 +165,28 @@ fn mcp_tool_result_round_trips() {
 	let err = tool_result_to_mcp(&ToolResult::failure("8", "boom"));
 	assert_eq!(err["result"]["isError"], true);
 	assert_eq!(err["result"]["content"][0]["text"], "boom");
+}
+
+#[test]
+fn mcp_call_ack_reports_mediation_outcome() {
+	let call = ToolCall::new("7", "read_messages", json!({}));
+
+	// An accepted call: JSON-RPC result carrying the decision status.
+	let ack = mcp_call_ack(&call, Decision::Execute);
+	assert_eq!(ack["id"], "7");
+	assert_eq!(ack["result"]["status"], "execute");
+	assert_eq!(ack["result"]["isError"], false);
+	assert!(ack.get("error").is_none());
+
+	// Pending approval is likewise an accepted (non-error) result.
+	let pending = mcp_call_ack(&call, Decision::RequiresApproval);
+	assert_eq!(pending["result"]["status"], "requires_approval");
+
+	// A denial: JSON-RPC error whose message is the decision label.
+	let denied = mcp_call_ack(&call, Decision::Denied(DenyReason::ToolForbidden));
+	assert!(denied.get("result").is_none());
+	assert_eq!(denied["error"]["code"], -32_004);
+	assert_eq!(denied["error"]["message"], "denied:tool_forbidden");
 }
 
 #[test]

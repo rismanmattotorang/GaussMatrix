@@ -180,27 +180,30 @@ preserves auditability.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer
-- [~] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge).
-      **Gateway core landed** (`src/agent`): the `Gateway` (the sole channel — mediates a
-      call → audit record → in-band event), the MCP `tools/call` request/response bridge,
-      `CapabilityGrant`/`mediate`, and the agent event model. The network MCP transport and
-      cross-signed provisioning build on it. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
+- [x] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge),
+      **live over HTTP**. `POST /_gauss/agent/v1/rooms/{roomId}/mcp` is the sole channel
+      through which an agent acts: a bearer-authenticated, room-joined agent submits an MCP
+      JSON-RPC request scoped to that room's capability grant; `tools/call` is mediated →
+      audited → reflected in-band, and `tools/list` / `resources/list` return grant-scoped
+      listings. Built on the `Gateway` core in `src/agent`. Cross-signed provisioning builds
+      on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
 - [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
       (permitted tools + accessible rooms + per-tool classification) and `mediate`
       returning `Execute` / `RequiresApproval` / `Denied`, default-deny.
-- [~] Live agentic loop wired into the service: an additive `agent` service mediates a tool
-      call through the `gm-agent` `Gateway` and records the decision to the live
-      tamper-evident `audit` log. Next: reading grants from room state + posting the in-band
-      events to the timeline.
+- [x] Live agentic loop wired end-to-end: the `agent` service reads the per-room
+      `m.gauss.agent.capability` grant from live room state, mediates a tool call through the
+      `gm-agent` `Gateway`, records the decision to the tamper-evident `audit` log, and posts
+      the in-band `m.gauss.agent.tool_call` / `m.gauss.agent.tool_result` events to the room
+      timeline — all reachable through the MCP gateway endpoint.
 - [ ] Human-in-the-loop approval surfaced in GaussInteract; E2EE-aware mediation.
 - [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
       (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces
       audit-ready decision records.)
-- [~] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
-      `m.gauss.agent.tool_result`) for replayable, auditable interactions. **Landed**:
-      `ToolCall`/`ToolResult` with event-content serialization.
+- [x] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
+      `m.gauss.agent.tool_result`) for replayable, auditable interactions — posted to the
+      room timeline by the live agent service as mediated calls proceed.
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).

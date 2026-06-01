@@ -19,7 +19,7 @@ pub(super) use self::{
 	args::Args as Ruma, auth::auth_uiaa, client_ip::ClientIp, response::RumaResponse,
 	state::State,
 };
-use crate::{client, oidc, server};
+use crate::{agent, client, oidc, server};
 
 pub fn build(router: Router<State>, server: &Server) -> Router<State> {
 	let config = &server.config;
@@ -30,6 +30,7 @@ pub fn build(router: Router<State>, server: &Server) -> Router<State> {
 	let router = register_client_state_and_sync_routes(router);
 	let router = register_client_media_and_device_routes(router);
 	let router = register_client_misc_routes(router);
+	let router = register_agent_routes(router);
 	let router = register_oidc_routes(router);
 	let router = register_server_misc_routes(router);
 	let router = register_federation_routes(router, config.allow_federation);
@@ -247,6 +248,12 @@ fn register_client_misc_routes(router: Router<State>) -> Router<State> {
 		.ruma_route(&client::well_known_support)
 		.ruma_route(&client::well_known_client)
 		.route("/_gaussmatrix/server_version", get(client::gaussmatrix_server_version))
+}
+
+fn register_agent_routes(router: Router<State>) -> Router<State> {
+	// The agentic MCP gateway (SPECS §IV-B): every agent tool call is scoped,
+	// mediated, audited, and reflected in-band through this endpoint.
+	router.route("/_gauss/agent/v1/rooms/{room_id}/mcp", post(agent::mcp_gateway_route))
 }
 
 fn register_oidc_routes(router: Router<State>) -> Router<State> {
