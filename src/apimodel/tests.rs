@@ -6,7 +6,7 @@ use gm_stateres::{AllOf, AuthRules, CreateRules, Event, MembershipRules, PowerLe
 use serde_json::json;
 
 use crate::{
-	AuthScope, Endpoint, ErrorCode, MatrixError, Method, StateEvent, Versions,
+	AuthScope, Endpoint, ErrorCode, MatrixError, Method, Route, Router, StateEvent, Versions,
 	extract_access_token, join_rule_from_content, match_template, membership_from_content,
 	power_levels_from_content,
 };
@@ -279,4 +279,46 @@ fn versions_response_serializes() {
 			"unstable_features": { "org.matrix.msc3575": true }
 		})
 	);
+}
+
+fn router() -> Router {
+	let mut router = Router::new();
+	router.register(Endpoint::new(Method::Get, "/_matrix/client/versions", AuthScope::None));
+	router.register(Endpoint::new(
+		Method::Get,
+		"/_matrix/client/v3/rooms/{roomId}/state",
+		AuthScope::User,
+	));
+	router.register(Endpoint::new(
+		Method::Put,
+		"/_matrix/client/v3/rooms/{roomId}/state",
+		AuthScope::User,
+	));
+	router
+}
+
+#[test]
+fn router_resolves_a_matching_endpoint_with_params() {
+	let router = router();
+	let route = router.resolve(Method::Get, "/_matrix/client/v3/rooms/!r:x/state");
+	match route {
+		| Route::Matched { endpoint, params } => {
+			assert_eq!(endpoint.method, Method::Get);
+			assert_eq!(endpoint.auth, AuthScope::User);
+			assert_eq!(params["roomId"], "!r:x");
+		},
+		| other => panic!("expected a match, got {other:?}"),
+	}
+}
+
+#[test]
+fn router_distinguishes_method_not_allowed_from_not_found() {
+	let router = router();
+	// Known path, unsupported method → 405.
+	assert_eq!(
+		router.resolve(Method::Post, "/_matrix/client/v3/rooms/!r:x/state"),
+		Route::MethodNotAllowed
+	);
+	// Unknown path → 404 / M_UNRECOGNIZED.
+	assert_eq!(router.resolve(Method::Get, "/_matrix/client/v3/nope"), Route::NotFound);
 }

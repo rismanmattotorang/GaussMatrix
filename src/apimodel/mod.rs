@@ -31,6 +31,7 @@ mod content;
 mod endpoint;
 mod error;
 mod event;
+mod router;
 #[cfg(test)]
 mod tests;
 mod versions;
@@ -44,5 +45,6 @@ pub use self::{
 	endpoint::{AuthScope, Endpoint, Method, PathParams, match_template},
 	error::{ErrorCode, MatrixError},
 	event::StateEvent,
+	router::{Route, Router},
 	versions::Versions,
 };

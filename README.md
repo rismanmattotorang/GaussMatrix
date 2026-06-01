@@ -146,9 +146,10 @@ preserves auditability.
       ingestion of canonical events), and the standard Matrix error model
       (`MatrixError`/`ErrorCode` with errcode + HTTP-status mapping and wire
       serialization), plus a typed endpoint model (`Endpoint`/`Method`/`AuthScope` with
-      `{param}` path-template matching) the HTTP ingress dispatches on. Next: the
-      `gm_stateres::Event` impl over the server's ruma-backed `Pdu` and more of the CS/SS
-      request/response model.
+      `{param}` path-template matching), a `Router` resolving (method, path) to an
+      endpoint (distinguishing 404/`M_UNRECOGNIZED` from 405), access-token extraction,
+      and the `/versions` response. Next: the `gm_stateres::Event` impl over the server's
+      ruma-backed `Pdu` to wire the engine into the live service.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.
