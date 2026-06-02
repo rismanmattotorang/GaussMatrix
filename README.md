@@ -177,11 +177,12 @@ preserves auditability.
       with per-destination outbound queues and independent exponential backoff, so a slow or
       unreachable peer never blocks delivery to healthy peers. **Wired into the running server**
       as the additive `fed` service (a shared, async-mutex-guarded scheduler registered in
-      `Services`): the production `sending` service mirrors real federation transaction outcomes
-      into it, so `federation scheduler-status` shows a **live per-destination health view**
-      (queued destinations and peers currently in backoff with their failure counts). Next: the
-      full cutover that routes the outbound path through the scheduler, plus async transport,
-      signing, and partial-state joins/backfill.
+      `Services`), run in **shadow mode** by the production `sending` service: it enqueues an
+      in-flight marker per federation transaction and mirrors the outcome (drain + success, or
+      backoff on failure), so `federation scheduler-status` shows a **live per-destination view**
+      (pending shadow transactions and peers in backoff) while the durable send path stays
+      authoritative. Next: the full cutover that makes the scheduler drive delivery, plus async
+      transport, signing, and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer
