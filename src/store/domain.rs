@@ -56,12 +56,16 @@ pub enum Domain {
 	/// Per-destination federation health (backoff state), so the outbound
 	/// scheduler's view survives restarts (§V).
 	FederationHealth = 12,
+
+	/// Durable per-destination outbound federation queue, so queued traffic
+	/// survives restarts — the basis for an authoritative scheduler (§V).
+	FederationQueue = 13,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 13] = [
+	pub const ALL: [Self; 14] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -75,6 +79,7 @@ impl Domain {
 		Self::AgentRegistry,
 		Self::AgentRateLimits,
 		Self::FederationHealth,
+		Self::FederationQueue,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -97,6 +102,7 @@ impl Domain {
 			| Self::AgentRegistry => "agent_registry",
 			| Self::AgentRateLimits => "agent_rate_limits",
 			| Self::FederationHealth => "federation_health",
+			| Self::FederationQueue => "federation_queue",
 		}
 	}
 
@@ -117,6 +123,7 @@ impl Domain {
 			| Self::AgentRegistry => 10,
 			| Self::AgentRateLimits => 11,
 			| Self::FederationHealth => 12,
+			| Self::FederationQueue => 13,
 		}
 	}
 

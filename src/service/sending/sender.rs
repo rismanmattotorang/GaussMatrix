@@ -165,7 +165,7 @@ impl Service {
 	async fn mirror_fed_health(&self, response: &SendingResult) {
 		match response {
 			| Ok(Destination::Federation(server)) => {
-				self.services.fed.take(server.as_str()).await;
+				self.services.fed.take(server.as_str());
 				self.services.fed.mark_success(server.as_str()).await;
 			},
 			| Err((Destination::Federation(server), _)) =>
@@ -238,7 +238,7 @@ impl Service {
 				// destination in the gm-fed scheduler. Observability only — the
 				// durable path below remains authoritative.
 				if let Destination::Federation(server) = &msg.dest {
-					self.services.fed.queue(server.as_str(), Vec::new()).await;
+					self.services.fed.queue(server.as_str(), Vec::new());
 				}
 				futures.push(self.send_events(msg.dest, events));
 			} else {
