@@ -45,5 +45,5 @@ pub use self::{
 	},
 	gateway::{Gateway, Mediation},
 	mcp::{handle_mcp, mcp_call_ack, tool_call_from_mcp, tool_result_to_mcp},
-	provisioning::{DEFAULT_AGENT_NAMESPACE, is_agent_id},
+	provisioning::{AgentProfile, DEFAULT_AGENT_NAMESPACE, ProvisionError, is_agent_id},
 };

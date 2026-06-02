@@ -45,12 +45,15 @@ pub enum Domain {
 	/// Per-call agent approval state, binding a tool call's execution to its
 	/// human-in-the-loop decision (§IV-C).
 	AgentApprovals = 9,
+
+	/// Provisioned agent identities keyed by user id (§IV-A).
+	AgentRegistry = 10,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 10] = [
+	pub const ALL: [Self; 11] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -61,6 +64,7 @@ impl Domain {
 		Self::AccountData,
 		Self::AuditLog,
 		Self::AgentApprovals,
+		Self::AgentRegistry,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -80,6 +84,7 @@ impl Domain {
 			| Self::AccountData => "account_data",
 			| Self::AuditLog => "audit_log",
 			| Self::AgentApprovals => "agent_approvals",
+			| Self::AgentRegistry => "agent_registry",
 		}
 	}
 
@@ -97,6 +102,7 @@ impl Domain {
 			| Self::AccountData => 7,
 			| Self::AuditLog => 8,
 			| Self::AgentApprovals => 9,
+			| Self::AgentRegistry => 10,
 		}
 	}
 

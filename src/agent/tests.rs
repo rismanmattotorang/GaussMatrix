@@ -3,10 +3,10 @@
 use serde_json::json;
 
 use crate::{
-	Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, DenyReason,
-	Gateway, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall,
-	ToolResult, handle_mcp, is_agent_id, mcp_call_ack, mediation_record, tool_call_from_mcp,
-	tool_result_to_mcp,
+	Action, AgentProfile, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision,
+	DenyReason, Gateway, ProvisionError, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE,
+	ToolApproval, ToolCall, ToolResult, handle_mcp, is_agent_id, mcp_call_ack, mediation_record,
+	tool_call_from_mcp, tool_result_to_mcp,
 };
 
 fn grant() -> CapabilityGrant {
@@ -233,6 +233,34 @@ fn tool_approval_round_trips_and_audits() {
 
 	// Missing required fields are rejected.
 	assert!(ToolApproval::from_content(&json!({ "call_id": "9" })).is_none());
+}
+
+#[test]
+fn agent_provisioning_validates_and_round_trips() {
+	let agent = "@gauss.agent.scheduler:example.org";
+
+	// A valid provisioning record round-trips through its stored content.
+	let profile =
+		AgentProfile::provision(agent, DEFAULT_AGENT_NAMESPACE, "scheduler-bot", "ed25519:AbC", Some("Scheduler"))
+			.unwrap();
+	assert_eq!(profile.agent_id, agent);
+	assert_eq!(profile.operator, "scheduler-bot");
+	assert_eq!(AgentProfile::from_content(&profile.to_content()), Some(profile));
+
+	// A non-namespace id is rejected.
+	assert_eq!(
+		AgentProfile::provision("@alice:example.org", DEFAULT_AGENT_NAMESPACE, "op", "k", None),
+		Err(ProvisionError::NotInNamespace),
+	);
+
+	// A missing signing key is rejected — agents must be cross-signed.
+	assert_eq!(
+		AgentProfile::provision(agent, DEFAULT_AGENT_NAMESPACE, "op", "  ", None),
+		Err(ProvisionError::MissingSigningKey),
+	);
+
+	// Required fields are enforced on parse.
+	assert!(AgentProfile::from_content(&json!({ "agent_id": agent })).is_none());
 }
 
 #[test]

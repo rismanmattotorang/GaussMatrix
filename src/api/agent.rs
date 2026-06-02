@@ -11,7 +11,10 @@
 //! `POST /_gauss/agent/v1/rooms/{roomId}/approval` is the human-in-the-loop
 //! gate: a human room member approves or rejects a call that required approval
 //! (agent identities cannot approve), recorded in-band and in the audit log.
-//! Every action is scoped, mediated, auditable, and visible in-band.
+//! `PUT /_gauss/agent/v1/provision/{userId}` provisions an agent through the
+//! Application Service API (§IV-A): an appservice binds a cross-signing key to a
+//! user in its namespace, and only provisioned agents may use the action
+//! endpoints. Every action is scoped, mediated, auditable, and visible in-band.
 
 use std::time::SystemTime;
 
@@ -40,12 +43,57 @@ pub(crate) async fn mcp_gateway_route(
 	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
 	Json(request): Json<Value>,
 ) -> Result<impl IntoResponse> {
-	let agent = authenticate_member(&services, auth.token(), &room_id).await?;
+	let agent = authenticate_agent(&services, auth.token(), &room_id).await?;
 
 	match services.agent.handle_mcp_request(&agent, &room_id, &request).await? {
 		| Some(response) => Ok(Json(response)),
 		| None => Err!(Request(InvalidParam("Unsupported MCP method."))),
 	}
+}
+
+/// The body of an agent provisioning request.
+#[derive(Deserialize)]
+pub(crate) struct ProvisionBody {
+	/// The agent's bound cross-signing master public key (opaque, base64).
+	signing_key: String,
+	/// An optional human-readable display name.
+	#[serde(default)]
+	display_name: Option<String>,
+}
+
+/// `PUT /_gauss/agent/v1/provision/{userId}` — provision an agent identity.
+///
+/// Authenticated by an **Application Service** access token; the appservice may
+/// only provision a user within its own declared namespace (§IV-A). Binds the
+/// agent to a cross-signing public key and records it in the registry.
+pub(crate) async fn provision_route(
+	State(services): State<crate::State>,
+	Path(user_id): Path<OwnedUserId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+	Json(body): Json<ProvisionBody>,
+) -> Result<impl IntoResponse> {
+	let info = services
+		.appservice
+		.find_from_access_token(auth.token())
+		.await
+		.map_err(|_| err!(Request(Forbidden("A valid appservice token is required."))))?;
+
+	if !info.is_user_match(&user_id) {
+		return Err!(Request(Forbidden("Agent id is outside the appservice's namespace.")));
+	}
+
+	let profile = services.agent.provision_agent(
+		&user_id,
+		&info.registration.id,
+		&body.signing_key,
+		body.display_name.as_deref(),
+	)?;
+
+	Ok(Json(json!({
+		"agent_id": profile.agent_id,
+		"operator": profile.operator,
+		"display_name": profile.display_name,
+	})))
 }
 
 /// The body of a tool-call approval decision.
@@ -99,11 +147,28 @@ pub(crate) async fn tool_result_route(
 	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
 	Json(content): Json<Value>,
 ) -> Result<impl IntoResponse> {
-	let agent = authenticate_member(&services, auth.token(), &room_id).await?;
+	let agent = authenticate_agent(&services, auth.token(), &room_id).await?;
 
 	let event_id = services.agent.ingest_tool_result(&agent, &room_id, &content).await?;
 
 	Ok(Json(json!({ "event_id": event_id })))
+}
+
+/// Authenticate a calling **agent**: a room member (per [`authenticate_member`])
+/// that has been provisioned through the registry (§IV-A). The action endpoints
+/// are reachable only by provisioned agents.
+async fn authenticate_agent(
+	services: &crate::State,
+	token: &str,
+	room_id: &RoomId,
+) -> Result<OwnedUserId> {
+	let agent = authenticate_member(services, token, room_id).await?;
+
+	if !services.agent.is_provisioned(&agent)? {
+		return Err!(Request(Forbidden("Caller is not a provisioned agent.")));
+	}
+
+	Ok(agent)
 }
 
 /// Authenticate the caller from its access `token` and require that it is joined

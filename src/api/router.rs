@@ -9,7 +9,7 @@ pub mod state;
 use axum::{
 	Router,
 	response::IntoResponse,
-	routing::{any, get, post},
+	routing::{any, get, post, put},
 };
 pub use client_ip::{ConfiguredIpSource, TrustedPeerSubnets};
 use gaussmatrix_core::{Server, err};
@@ -254,6 +254,7 @@ fn register_agent_routes(router: Router<State>) -> Router<State> {
 	// The agentic gateway (SPECS §IV-B): every agent tool call is scoped,
 	// mediated, audited, and reflected in-band; the result half closes the loop.
 	router
+		.route("/_gauss/agent/v1/provision/{user_id}", put(agent::provision_route))
 		.route("/_gauss/agent/v1/rooms/{room_id}/mcp", post(agent::mcp_gateway_route))
 		.route(
 			"/_gauss/agent/v1/rooms/{room_id}/tool_result",
