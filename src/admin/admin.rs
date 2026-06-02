@@ -4,6 +4,7 @@ use gaussmatrix_core::Result;
 
 use crate::{
 	Context,
+	agent::{self, AgentCommand},
 	appservice::{self, AppserviceCommand},
 	debug::{self, DebugCommand},
 	federation::{self, FederationCommand},
@@ -37,6 +38,10 @@ impl gaussmatrix_service::admin::Command for Root {
 #[derive(Debug, Parser)]
 #[command(name = "gaussmatrix", version = gaussmatrix_core::version())]
 pub(super) enum AdminCommand {
+	#[command(subcommand)]
+	/// - Commands for managing agentic-AI identities, grants, and audit
+	Agent(AgentCommand),
+
 	#[command(subcommand)]
 	/// - Commands for managing appservices
 	Appservices(AppserviceCommand),
@@ -79,6 +84,7 @@ pub(super) async fn process(command: AdminCommand, context: &Context<'_>) -> Res
 	use AdminCommand::*;
 
 	match command {
+		| Agent(command) => agent::process(command, context).await,
 		| Appservices(command) => appservice::process(command, context).await,
 		| Media(command) => media::process(command, context).await,
 		| Users(command) => user::process(command, context).await,

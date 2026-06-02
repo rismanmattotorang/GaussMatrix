@@ -251,6 +251,50 @@ pub fn is_provisioned(&self, agent_id: &UserId) -> Result<bool> {
 		.map_err(|e| err!(Database("agent registry lookup failed: {e}")))
 }
 
+/// Remove an agent's provisioning record, auditing the action. Returns whether
+/// a record existed.
+#[implement(Service)]
+pub fn deprovision_agent(&self, agent_id: &UserId) -> Result<bool> {
+	if !self.is_provisioned(agent_id)? {
+		return Ok(false);
+	}
+
+	self.services
+		.store
+		.delete(Domain::AgentRegistry, agent_id.as_str().as_bytes().to_vec())
+		.map_err(|e| err!(Database("agent registry delete failed: {e}")))?;
+
+	let record = serde_json::to_vec(&serde_json::json!({
+		"agent": agent_id.as_str(),
+		"action": "deprovision",
+	}))
+	.unwrap_or_default();
+	self.services.audit.append(&record)?;
+
+	Ok(true)
+}
+
+/// Every provisioned agent profile, for operator inspection.
+#[implement(Service)]
+pub fn provisioned_agents(&self) -> Result<Vec<AgentProfile>> {
+	let scanned = self
+		.services
+		.store
+		.prefix_scan(Domain::AgentRegistry, b"")
+		.map_err(|e| err!(Database("agent registry scan failed: {e}")))?;
+
+	let mut out = Vec::with_capacity(scanned.len());
+	for (_key, value) in scanned {
+		let content: JsonValue = serde_json::from_slice(&value)
+			.map_err(|e| err!(Database("agent profile is corrupt: {e}")))?;
+		if let Some(profile) = AgentProfile::from_content(&content) {
+			out.push(profile);
+		}
+	}
+
+	Ok(out)
+}
+
 /// Record a human-in-the-loop approval decision on a tool call that required
 /// approval (§IV-C): append it to the audit log and post it in-band as an
 /// `m.gauss.agent.tool_approval`, correlated to the call by `call_id`.

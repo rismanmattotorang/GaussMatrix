@@ -6,6 +6,7 @@ pub(crate) mod context;
 mod tests;
 pub(crate) mod utils;
 
+pub(crate) mod agent;
 pub(crate) mod appservice;
 pub(crate) mod debug;
 pub(crate) mod federation;
