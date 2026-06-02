@@ -190,10 +190,13 @@ preserves auditability.
       reports a completed call's result, posted in-band as `m.gauss.agent.tool_result` and
       correlated by `call_id`. Built on the `Gateway` core in `src/agent`. Cross-signed
       provisioning builds on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
-- [~] Agents as cross-signed Matrix identities provisioned via the Application Service API.
-      **Namespace recognition landed**: `gm-agent` models the agent namespace (`@gauss.agent.`)
-      and the server distinguishes agent principals from humans (`agent::Service::is_agent`),
-      which the approval gate relies on. Next: Appservice registration and cross-signing.
+- [x] Agents as cross-signed Matrix identities provisioned via the Application Service API.
+      `PUT /_gauss/agent/v1/provision/{userId}`, authenticated by an **appservice** token,
+      binds a cross-signing public key to a user **in that appservice's own namespace** and
+      records it in the `AgentRegistry` store domain; the action is audited. Only **provisioned**
+      agents may use the gateway endpoints (`agent::Service::is_provisioned`); the human-in-the-
+      loop approval gate continues to refuse agent identities. Signature verification against the
+      bound key is the crypto layer's job; this is the identity contract it builds on.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
       (permitted tools + accessible rooms + per-tool classification) and `mediate`

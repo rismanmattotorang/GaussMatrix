@@ -16,9 +16,9 @@ use gaussmatrix_core::{
 	matrix::{Event, pdu::PduBuilder},
 };
 use gm_agent::{
-	CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, Gateway, Mediation,
-	TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall, ToolResult,
-	handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
+	AgentProfile, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision,
+	Gateway, Mediation, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval,
+	ToolCall, ToolResult, handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
 };
 use gm_store::Domain;
 use ruma::{OwnedEventId, RoomId, UserId, events::StateEventType};
@@ -174,12 +174,81 @@ pub async fn ingest_tool_result(
 	self.record_tool_result(agent, room_id, &result).await
 }
 
-/// Whether `user_id` is a provisioned agent identity (§IV-A) — a principal in
-/// the agent namespace, as opposed to a human participant.
+/// Whether `user_id` is in the agent namespace (§IV-A) — a candidate agent
+/// principal, as opposed to a human participant. Namespace membership alone does
+/// not imply provisioning; see [`is_provisioned`](Self::is_provisioned).
 #[implement(Service)]
 #[must_use]
 pub fn is_agent(&self, user_id: &UserId) -> bool {
 	is_agent_id(user_id.as_str(), DEFAULT_AGENT_NAMESPACE)
+}
+
+/// Provision an agent identity (§IV-A): validate the namespace and cross-signing
+/// key, persist the [`AgentProfile`] in the registry, and audit the action.
+/// `operator` is the appservice that owns the agent's namespace.
+#[implement(Service)]
+pub fn provision_agent(
+	&self,
+	agent_id: &UserId,
+	operator: &str,
+	signing_key: &str,
+	display_name: Option<&str>,
+) -> Result<AgentProfile> {
+	let profile = AgentProfile::provision(
+		agent_id.as_str(),
+		DEFAULT_AGENT_NAMESPACE,
+		operator,
+		signing_key,
+		display_name,
+	)
+	.map_err(|e| {
+		let reason = e.label();
+		err!(Request(InvalidParam("cannot provision agent: {reason}")))
+	})?;
+
+	let value = serde_json::to_vec(&profile.to_content())
+		.map_err(|e| err!(Database("agent profile serialization failed: {e}")))?;
+	self.services
+		.store
+		.put(Domain::AgentRegistry, agent_id.as_str().as_bytes().to_vec(), value)
+		.map_err(|e| err!(Database("agent registry write failed: {e}")))?;
+
+	let record = serde_json::to_vec(&serde_json::json!({
+		"operator": operator,
+		"agent": agent_id.as_str(),
+		"action": "provision",
+	}))
+	.unwrap_or_default();
+	self.services.audit.append(&record)?;
+
+	Ok(profile)
+}
+
+/// The provisioning record for `agent_id`, if it has been provisioned.
+#[implement(Service)]
+pub fn agent_profile(&self, agent_id: &UserId) -> Result<Option<AgentProfile>> {
+	let stored = self
+		.services
+		.store
+		.get(Domain::AgentRegistry, agent_id.as_str().as_bytes())
+		.map_err(|e| err!(Database("agent registry read failed: {e}")))?;
+
+	let Some(bytes) = stored else {
+		return Ok(None);
+	};
+	let content: JsonValue = serde_json::from_slice(&bytes)
+		.map_err(|e| err!(Database("agent profile is corrupt: {e}")))?;
+
+	Ok(AgentProfile::from_content(&content))
+}
+
+/// Whether `agent_id` has been provisioned through the registry (§IV-A).
+#[implement(Service)]
+pub fn is_provisioned(&self, agent_id: &UserId) -> Result<bool> {
+	self.services
+		.store
+		.contains(Domain::AgentRegistry, agent_id.as_str().as_bytes())
+		.map_err(|e| err!(Database("agent registry lookup failed: {e}")))
 }
 
 /// Record a human-in-the-loop approval decision on a tool call that required
