@@ -108,3 +108,22 @@ fn backoff_state_reports_failing_destinations() {
 	sender.mark_success("flaky.example.org");
 	assert!(sender.backoff_state(3_000).is_empty());
 }
+
+#[test]
+fn backoff_persists_and_restores() {
+	let mut sender = FederationSender::new();
+	sender.mark_failure("peer.example.org", 1_000);
+
+	// The persisted view of a destination's backoff.
+	let (attempt, available_at) = sender.backoff_for("peer.example.org").unwrap();
+	assert_eq!(attempt, 1);
+	assert_eq!(available_at, 2_000);
+	assert!(sender.backoff_for("healthy.example.org").is_none());
+
+	// A fresh scheduler restored from that state behaves identically.
+	let mut restored = FederationSender::new();
+	restored.restore("peer.example.org", attempt, available_at);
+	restored.queue("peer.example.org", b"x".to_vec());
+	assert!(restored.ready(1_999).is_empty());
+	assert!(restored.ready(2_000).contains(&"peer.example.org".to_owned()));
+}

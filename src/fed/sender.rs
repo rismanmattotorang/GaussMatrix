@@ -104,6 +104,19 @@ impl FederationSender {
 	fn available_at(&self, destination: &str) -> u64 {
 		self.backoff.get(destination).map_or(0, |state| state.available_at)
 	}
+
+	/// The backoff state for `destination` — its consecutive-failure count and
+	/// availability time — if it has any. Used to persist health durably.
+	#[must_use]
+	pub fn backoff_for(&self, destination: &str) -> Option<(u32, u64)> {
+		self.backoff.get(destination).map(|state| (state.attempt, state.available_at))
+	}
+
+	/// Restore a destination's persisted backoff state (e.g. on startup), so the
+	/// scheduler's health view survives restarts. Idempotent.
+	pub fn restore(&mut self, destination: &str, attempt: u32, available_at: u64) {
+		self.backoff.insert(destination.to_owned(), Backoff { attempt, available_at });
+	}
 }
 
 /// Exponential backoff for the `attempt`-th consecutive failure, capped.
