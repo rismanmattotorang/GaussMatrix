@@ -177,9 +177,11 @@ preserves auditability.
       with per-destination outbound queues and independent exponential backoff, so a slow or
       unreachable peer never blocks delivery to healthy peers. **Wired into the running server**
       as the additive `fed` service (a shared, async-mutex-guarded scheduler registered in
-      `Services`), inspectable via the `federation scheduler-status` admin command. Next: the
-      production cutover that routes the outbound path through it, plus async transport, signing,
-      and partial-state joins/backfill.
+      `Services`): the production `sending` service mirrors real federation transaction outcomes
+      into it, so `federation scheduler-status` shows a **live per-destination health view**
+      (queued destinations and peers currently in backoff with their failure counts). Next: the
+      full cutover that routes the outbound path through the scheduler, plus async transport,
+      signing, and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer

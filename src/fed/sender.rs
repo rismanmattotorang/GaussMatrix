@@ -53,6 +53,18 @@ impl FederationSender {
 			.collect()
 	}
 
+	/// Destinations in backoff at `now`: each with its consecutive-failure count
+	/// and the time it becomes available again. The live health view of peers
+	/// currently being retried.
+	#[must_use]
+	pub fn backoff_state(&self, now: u64) -> Vec<(Destination, u32, u64)> {
+		self.backoff
+			.iter()
+			.filter(|(_, state)| state.available_at > now)
+			.map(|(destination, state)| (destination.clone(), state.attempt, state.available_at))
+			.collect()
+	}
+
 	/// The destinations that have queued traffic and are not in backoff at
 	/// `now` — those ready to send, independent of any backed-off peer.
 	#[must_use]

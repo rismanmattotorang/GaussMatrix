@@ -146,11 +146,28 @@ impl Service {
 		futures: &mut SendingFutures<'a>,
 		statuses: &mut CurTransactionStatus,
 	) {
+		// Mirror the per-destination outcome into the live gm-fed scheduler so its
+		// health view reflects real federation traffic (observability only).
+		self.mirror_fed_health(&response).await;
+
 		match response {
 			| Err((dest, e)) => Self::handle_response_err(dest, statuses, &e),
 			| Ok(dest) =>
 				self.handle_response_ok(&dest, futures, statuses)
 					.await,
+		}
+	}
+
+	/// Reflect a federation transaction outcome into the `fed` scheduler's
+	/// per-destination backoff/health state. Non-federation destinations and the
+	/// scheduler's own state are untouched; this never affects delivery.
+	async fn mirror_fed_health(&self, response: &SendingResult) {
+		match response {
+			| Ok(Destination::Federation(server)) =>
+				self.services.fed.mark_success(server.as_str()).await,
+			| Err((Destination::Federation(server), _)) =>
+				self.services.fed.mark_failure(server.as_str()).await,
+			| _ => {},
 		}
 	}
 
