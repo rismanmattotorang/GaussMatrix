@@ -325,6 +325,10 @@ fn capability_rate_limit_round_trips() {
 	let restored = CapabilityGrant::from_content(&grant.to_content());
 	assert_eq!(restored.rate_limit_for("send_message"), Some(limit));
 
+	// The configured limits are enumerable.
+	let listed: Vec<(&str, _)> = restored.rate_limits().collect();
+	assert_eq!(listed, vec![("send_message", limit)]);
+
 	// Tools without a configured limit report none.
 	assert!(grant.rate_limit_for("other").is_none());
 
