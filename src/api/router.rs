@@ -259,6 +259,7 @@ fn register_agent_routes(router: Router<State>) -> Router<State> {
 			"/_gauss/agent/v1/rooms/{room_id}/tool_result",
 			post(agent::tool_result_route),
 		)
+		.route("/_gauss/agent/v1/rooms/{room_id}/approval", post(agent::approval_route))
 }
 
 fn register_oidc_routes(router: Router<State>) -> Router<State> {

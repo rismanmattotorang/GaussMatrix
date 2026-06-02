@@ -4,8 +4,9 @@ use serde_json::json;
 
 use crate::{
 	Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, DenyReason,
-	Gateway, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolCall, ToolResult, handle_mcp, is_agent_id,
-	mcp_call_ack, mediation_record, tool_call_from_mcp, tool_result_to_mcp,
+	Gateway, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall,
+	ToolResult, handle_mcp, is_agent_id, mcp_call_ack, mediation_record, tool_call_from_mcp,
+	tool_result_to_mcp,
 };
 
 fn grant() -> CapabilityGrant {
@@ -205,6 +206,33 @@ fn mcp_call_ack_reports_mediation_outcome() {
 	assert!(denied.get("result").is_none());
 	assert_eq!(denied["error"]["code"], -32_004);
 	assert_eq!(denied["error"]["message"], "denied:tool_forbidden");
+}
+
+#[test]
+fn tool_approval_round_trips_and_audits() {
+	assert_eq!(TOOL_APPROVAL_TYPE, "m.gauss.agent.tool_approval");
+
+	// An approval round-trips through its event content.
+	let approved = ToolApproval::new("7", true, "@alice:example.org", Some("looks safe"));
+	let restored = ToolApproval::from_content(&approved.to_content());
+	assert_eq!(restored, Some(approved.clone()));
+	assert_eq!(approved.to_content()["approved"], true);
+
+	// A rejection without a reason round-trips too.
+	let rejected = ToolApproval::new("8", false, "@bob:example.org", None);
+	assert_eq!(ToolApproval::from_content(&rejected.to_content()), Some(rejected.clone()));
+
+	// The audit record names the reviewer, the call, and the outcome.
+	let record: serde_json::Value = serde_json::from_slice(&approved.audit_record()).unwrap();
+	assert_eq!(record["reviewer"], "@alice:example.org");
+	assert_eq!(record["call_id"], "7");
+	assert_eq!(record["decision"], "approved");
+	let rejected_record: serde_json::Value =
+		serde_json::from_slice(&rejected.audit_record()).unwrap();
+	assert_eq!(rejected_record["decision"], "rejected");
+
+	// Missing required fields are rejected.
+	assert!(ToolApproval::from_content(&json!({ "call_id": "9" })).is_none());
 }
 
 #[test]

@@ -16,8 +16,9 @@ use gaussmatrix_core::{
 	matrix::{Event, pdu::PduBuilder},
 };
 use gm_agent::{
-	CAPABILITY_GRANT_TYPE, CapabilityGrant, Gateway, Mediation, TOOL_CALL_TYPE, TOOL_RESULT_TYPE,
-	ToolCall, ToolResult, handle_mcp, mcp_call_ack, tool_call_from_mcp,
+	CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Gateway, Mediation,
+	TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall, ToolResult,
+	handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
 };
 use ruma::{OwnedEventId, RoomId, UserId, events::StateEventType};
 use serde_json::{Value as JsonValue, value::to_raw_value};
@@ -136,6 +137,33 @@ pub async fn ingest_tool_result(
 		.ok_or_else(|| err!(Request(InvalidParam("tool result requires a call_id"))))?;
 
 	self.record_tool_result(agent, room_id, &result).await
+}
+
+/// Whether `user_id` is a provisioned agent identity (§IV-A) — a principal in
+/// the agent namespace, as opposed to a human participant.
+#[implement(Service)]
+#[must_use]
+pub fn is_agent(&self, user_id: &UserId) -> bool {
+	is_agent_id(user_id.as_str(), DEFAULT_AGENT_NAMESPACE)
+}
+
+/// Record a human-in-the-loop approval decision on a tool call that required
+/// approval (§IV-C): append it to the audit log and post it in-band as an
+/// `m.gauss.agent.tool_approval`, correlated to the call by `call_id`.
+#[implement(Service)]
+pub async fn record_approval(
+	&self,
+	reviewer: &UserId,
+	room_id: &RoomId,
+	call_id: &str,
+	approved: bool,
+	reason: Option<&str>,
+) -> Result<OwnedEventId> {
+	let approval = ToolApproval::new(call_id, approved, reviewer.as_str(), reason);
+	self.services.audit.append(&approval.audit_record())?;
+
+	self.post_agent_event(reviewer, room_id, TOOL_APPROVAL_TYPE, &approval.to_content())
+		.await
 }
 
 /// Build and append a namespaced agent event to the room timeline.
