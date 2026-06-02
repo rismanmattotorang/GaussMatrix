@@ -159,12 +159,15 @@ impl Service {
 	}
 
 	/// Reflect a federation transaction outcome into the `fed` scheduler's
-	/// per-destination backoff/health state. Non-federation destinations and the
-	/// scheduler's own state are untouched; this never affects delivery.
+	/// shadow state: a delivered destination is drained and its backoff cleared;
+	/// a failed one is left queued and backed off. Non-federation destinations
+	/// are untouched and delivery is never affected (shadow mode).
 	async fn mirror_fed_health(&self, response: &SendingResult) {
 		match response {
-			| Ok(Destination::Federation(server)) =>
-				self.services.fed.mark_success(server.as_str()).await,
+			| Ok(Destination::Federation(server)) => {
+				self.services.fed.take(server.as_str()).await;
+				self.services.fed.mark_success(server.as_str()).await;
+			},
 			| Err((Destination::Federation(server), _)) =>
 				self.services.fed.mark_failure(server.as_str()).await,
 			| _ => {},
@@ -231,6 +234,12 @@ impl Service {
 		let iv = vec![(msg.queue_id, msg.event)];
 		if let Ok(Some(events)) = self.select_events(&msg.dest, iv, statuses).await {
 			if !events.is_empty() {
+				// Shadow mode: record an in-flight transaction for this federation
+				// destination in the gm-fed scheduler. Observability only — the
+				// durable path below remains authoritative.
+				if let Destination::Federation(server) = &msg.dest {
+					self.services.fed.queue(server.as_str(), Vec::new()).await;
+				}
 				futures.push(self.send_events(msg.dest, events));
 			} else {
 				statuses.remove(&msg.dest);

@@ -7,10 +7,13 @@
 //! unreachable peer never blocks delivery to healthy peers. The service owns the
 //! clock, so callers record outcomes without managing time.
 //!
-//! The production `sending` service mirrors real federation transaction outcomes
-//! here ([`mark_success`](Service::mark_success) / [`mark_failure`](Service::mark_failure)),
-//! giving a live per-destination health view; routing the outbound path itself
-//! through the scheduler is the remaining cutover.
+//! The production `sending` service runs the scheduler in **shadow mode**: it
+//! enqueues an in-flight marker per federation transaction and mirrors the
+//! outcome here (drain + [`mark_success`](Service::mark_success) on delivery,
+//! [`mark_failure`](Service::mark_failure) on error), giving a live
+//! per-destination view (pending shadow transactions and peers in backoff)
+//! while the durable send path stays authoritative. Making the scheduler drive
+//! delivery is the remaining cutover.
 
 use std::{
 	sync::Arc,
