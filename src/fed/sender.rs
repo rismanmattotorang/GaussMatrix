@@ -42,6 +42,17 @@ impl FederationSender {
 		self.queues.get(destination).map_or(0, VecDeque::len)
 	}
 
+	/// Every destination with queued traffic and its queue depth, for
+	/// observability. Empty queues are omitted.
+	#[must_use]
+	pub fn queue_depths(&self) -> Vec<(Destination, usize)> {
+		self.queues
+			.iter()
+			.filter(|(_, queue)| !queue.is_empty())
+			.map(|(destination, queue)| (destination.clone(), queue.len()))
+			.collect()
+	}
+
 	/// The destinations that have queued traffic and are not in backoff at
 	/// `now` — those ready to send, independent of any backed-off peer.
 	#[must_use]

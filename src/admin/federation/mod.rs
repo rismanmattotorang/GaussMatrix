@@ -3,6 +3,7 @@ mod enable_room;
 mod fetch_support_well_known;
 mod incoming_federation;
 mod remote_user_in_rooms;
+mod scheduler_status;
 
 use clap::Subcommand;
 use ruma::{OwnedRoomId, OwnedServerName, OwnedUserId};
@@ -43,4 +44,7 @@ pub(super) enum FederationCommand {
 	RemoteUserInRooms {
 		user_id: OwnedUserId,
 	},
+
+	/// - Show the per-destination outbound scheduler queue depths (gm-fed)
+	SchedulerStatus,
 }

@@ -67,3 +67,22 @@ fn empty_destinations_are_not_ready() {
 	sender.take("peer.example.org");
 	assert!(sender.ready(10_000).is_empty(), "a drained destination has nothing to send");
 }
+
+#[test]
+fn queue_depths_reports_nonempty_destinations() {
+	let mut sender = FederationSender::new();
+	sender.queue("a.example.org", b"1".to_vec());
+	sender.queue("a.example.org", b"2".to_vec());
+	sender.queue("b.example.org", b"3".to_vec());
+
+	let mut depths = sender.queue_depths();
+	depths.sort();
+	assert_eq!(depths, vec![
+		("a.example.org".to_owned(), 2),
+		("b.example.org".to_owned(), 1),
+	]);
+
+	// A drained destination drops out of the report.
+	sender.take("a.example.org");
+	assert_eq!(sender.queue_depths(), vec![("b.example.org".to_owned(), 1)]);
+}

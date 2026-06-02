@@ -1942,6 +1942,7 @@ dependencies = [
  "gaussmatrix_database",
  "gm-agent",
  "gm-api",
+ "gm-fed",
  "gm-stateres",
  "gm-store",
  "hickory-resolver",
