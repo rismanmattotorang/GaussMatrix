@@ -11,10 +11,12 @@
 //! `POST /_gauss/agent/v1/rooms/{roomId}/approval` is the human-in-the-loop
 //! gate: a human room member approves or rejects a call that required approval
 //! (agent identities cannot approve), recorded in-band and in the audit log.
-//! `PUT /_gauss/agent/v1/provision/{userId}` provisions an agent through the
-//! Application Service API (§IV-A): an appservice binds a cross-signing key to a
-//! user in its namespace, and only provisioned agents may use the action
-//! endpoints. Every action is scoped, mediated, auditable, and visible in-band.
+//! `PUT/GET/DELETE /_gauss/agent/v1/provision/{userId}` provisions, reads, and
+//! revokes an agent through the Application Service API (§IV-A): an appservice
+//! binds a cross-signing key to a user in its namespace, and only provisioned
+//! agents may use the action endpoints. `GET /_gauss/agent/v1/rooms/{roomId}/grant`
+//! lets a room member read the room's effective capability grant. Every action
+//! is scoped, mediated, auditable, and visible in-band.
 
 use std::time::SystemTime;
 
@@ -27,10 +29,11 @@ use axum_extra::{
 	TypedHeader,
 	headers::{Authorization, authorization::Bearer},
 };
-use ruma::{OwnedRoomId, OwnedUserId, RoomId};
+use ruma::{OwnedRoomId, OwnedUserId, RoomId, UserId};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use gaussmatrix_core::{Err, Result, err};
+use gaussmatrix_service::appservice::RegistrationInfo;
 
 /// `POST /_gauss/agent/v1/rooms/{roomId}/mcp` — the MCP gateway.
 ///
@@ -72,15 +75,7 @@ pub(crate) async fn provision_route(
 	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
 	Json(body): Json<ProvisionBody>,
 ) -> Result<impl IntoResponse> {
-	let info = services
-		.appservice
-		.find_from_access_token(auth.token())
-		.await
-		.map_err(|_| err!(Request(Forbidden("A valid appservice token is required."))))?;
-
-	if !info.is_user_match(&user_id) {
-		return Err!(Request(Forbidden("Agent id is outside the appservice's namespace.")));
-	}
+	let info = authorize_appservice(&services, auth.token(), &user_id).await?;
 
 	let profile = services.agent.provision_agent(
 		&user_id,
@@ -94,6 +89,56 @@ pub(crate) async fn provision_route(
 		"operator": profile.operator,
 		"display_name": profile.display_name,
 	})))
+}
+
+/// `GET /_gauss/agent/v1/provision/{userId}` — read an agent's provisioning
+/// record. Authenticated by an appservice token scoped to the agent's namespace.
+pub(crate) async fn get_profile_route(
+	State(services): State<crate::State>,
+	Path(user_id): Path<OwnedUserId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+) -> Result<impl IntoResponse> {
+	authorize_appservice(&services, auth.token(), &user_id).await?;
+
+	match services.agent.agent_profile(&user_id)? {
+		| Some(profile) => Ok(Json(profile.to_content())),
+		| None => Err!(Request(NotFound("No such provisioned agent."))),
+	}
+}
+
+/// `DELETE /_gauss/agent/v1/provision/{userId}` — revoke an agent's provisioning.
+/// Authenticated by an appservice token scoped to the agent's namespace.
+pub(crate) async fn revoke_route(
+	State(services): State<crate::State>,
+	Path(user_id): Path<OwnedUserId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+) -> Result<impl IntoResponse> {
+	authorize_appservice(&services, auth.token(), &user_id).await?;
+
+	let deprovisioned = services.agent.deprovision_agent(&user_id)?;
+
+	Ok(Json(json!({ "deprovisioned": deprovisioned })))
+}
+
+/// Authenticate an appservice token and require that `user_id` is within the
+/// appservice's declared namespace — the admission check for agent provisioning
+/// management (§IV-A).
+async fn authorize_appservice(
+	services: &crate::State,
+	token: &str,
+	user_id: &UserId,
+) -> Result<RegistrationInfo> {
+	let info = services
+		.appservice
+		.find_from_access_token(token)
+		.await
+		.map_err(|_| err!(Request(Forbidden("A valid appservice token is required."))))?;
+
+	if !info.is_user_match(user_id) {
+		return Err!(Request(Forbidden("Agent id is outside the appservice's namespace.")));
+	}
+
+	Ok(info)
 }
 
 /// The body of a tool-call approval decision.
@@ -152,6 +197,20 @@ pub(crate) async fn tool_result_route(
 	let event_id = services.agent.ingest_tool_result(&agent, &room_id, &content).await?;
 
 	Ok(Json(json!({ "event_id": event_id })))
+}
+
+/// `GET /_gauss/agent/v1/rooms/{roomId}/grant` — read a room's effective
+/// capability grant. Any joined room member may inspect it.
+pub(crate) async fn get_grant_route(
+	State(services): State<crate::State>,
+	Path(room_id): Path<OwnedRoomId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+) -> Result<impl IntoResponse> {
+	authenticate_member(&services, auth.token(), &room_id).await?;
+
+	let grant = services.agent.grant_for(&room_id).await;
+
+	Ok(Json(grant.to_content()))
 }
 
 /// Authenticate a calling **agent**: a room member (per [`authenticate_member`])

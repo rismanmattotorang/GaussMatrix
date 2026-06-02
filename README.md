@@ -191,12 +191,14 @@ preserves auditability.
       correlated by `call_id`. Built on the `Gateway` core in `src/agent`. Cross-signed
       provisioning builds on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
 - [x] Agents as cross-signed Matrix identities provisioned via the Application Service API.
-      `PUT /_gauss/agent/v1/provision/{userId}`, authenticated by an **appservice** token,
-      binds a cross-signing public key to a user **in that appservice's own namespace** and
-      records it in the `AgentRegistry` store domain; the action is audited. Only **provisioned**
-      agents may use the gateway endpoints (`agent::Service::is_provisioned`); the human-in-the-
-      loop approval gate continues to refuse agent identities. Signature verification against the
-      bound key is the crypto layer's job; this is the identity contract it builds on.
+      `PUT`/`GET`/`DELETE /_gauss/agent/v1/provision/{userId}`, authenticated by an
+      **appservice** token, provision (binding a cross-signing public key), read, and revoke a
+      user **in that appservice's own namespace**, recorded in the `AgentRegistry` store domain
+      and audited. Only **provisioned** agents may use the gateway endpoints
+      (`agent::Service::is_provisioned`); the human-in-the-loop approval gate continues to refuse
+      agent identities. `GET /_gauss/agent/v1/rooms/{roomId}/grant` lets a room member read the
+      room's effective grant. Signature verification against the bound key is the crypto layer's
+      job; this is the identity contract it builds on.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
       (permitted tools + accessible rooms + per-tool classification) and `mediate`
@@ -234,7 +236,8 @@ preserves auditability.
 - [x] Per-tool rate limits: a grant may carry `tool → {max, window_secs}` limits, enforced at
       mediation time with a fixed-window counter per `(agent, room, tool)` in the
       `AgentRateLimits` store domain. Exceeding a limit yields a `denied:rate_limited` decision
-      (audited, no in-band event). Configure via `agent grant-set … --rate tool:max:window_secs`.
+      (audited, no in-band event). Configure via `agent grant-set … --rate tool:max:window_secs`;
+      inspect live standing with `agent quota <user> <room>` (used / remaining / reset per tool).
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).

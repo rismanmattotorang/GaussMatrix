@@ -254,13 +254,19 @@ fn register_agent_routes(router: Router<State>) -> Router<State> {
 	// The agentic gateway (SPECS §IV-B): every agent tool call is scoped,
 	// mediated, audited, and reflected in-band; the result half closes the loop.
 	router
-		.route("/_gauss/agent/v1/provision/{user_id}", put(agent::provision_route))
+		.route(
+			"/_gauss/agent/v1/provision/{user_id}",
+			put(agent::provision_route)
+				.get(agent::get_profile_route)
+				.delete(agent::revoke_route),
+		)
 		.route("/_gauss/agent/v1/rooms/{room_id}/mcp", post(agent::mcp_gateway_route))
 		.route(
 			"/_gauss/agent/v1/rooms/{room_id}/tool_result",
 			post(agent::tool_result_route),
 		)
 		.route("/_gauss/agent/v1/rooms/{room_id}/approval", post(agent::approval_route))
+		.route("/_gauss/agent/v1/rooms/{room_id}/grant", get(agent::get_grant_route))
 }
 
 fn register_oidc_routes(router: Router<State>) -> Router<State> {

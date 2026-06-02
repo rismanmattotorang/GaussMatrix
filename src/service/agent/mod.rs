@@ -80,6 +80,23 @@ fn decode_window(bytes: &[u8]) -> Option<(u64, u32)> {
 	Some((u64::from_be_bytes(start), u32::from_be_bytes(count)))
 }
 
+/// A tool's current rate-limit standing for an `(agent, room)` (§IV-C).
+#[derive(Clone, Debug)]
+pub struct ToolQuota {
+	/// The tool name.
+	pub tool: String,
+	/// The configured maximum invocations per window.
+	pub max: u32,
+	/// Invocations used in the current window.
+	pub used: u32,
+	/// Invocations remaining in the current window.
+	pub remaining: u32,
+	/// The window length, in seconds.
+	pub window_secs: u64,
+	/// Seconds until the current window resets.
+	pub resets_in_secs: u64,
+}
+
 impl crate::Service for Service {
 	fn build(args: &crate::Args<'_>) -> Result<Arc<Self>> {
 		Ok(Arc::new(Self { services: args.services.clone() }))
@@ -477,6 +494,41 @@ pub fn provisioned_agents(&self) -> Result<Vec<AgentProfile>> {
 		if let Some(profile) = AgentProfile::from_content(&content) {
 			out.push(profile);
 		}
+	}
+
+	Ok(out)
+}
+
+/// The live rate-limit standing for `agent` in `room_id`: one [`ToolQuota`] per
+/// rate-limited tool in the room's grant, reading the windowed counters (§IV-C).
+#[implement(Service)]
+pub async fn quota(&self, agent: &UserId, room_id: &RoomId) -> Result<Vec<ToolQuota>> {
+	let grant = self.grant_for(room_id).await;
+	let now = now_secs();
+
+	let mut out = Vec::new();
+	for (tool, limit) in grant.rate_limits() {
+		let key = rate_limit_key(agent.as_str(), room_id.as_str(), tool);
+		let stored = self
+			.services
+			.store
+			.get(Domain::AgentRateLimits, &key)
+			.map_err(|e| err!(Database("rate-limit read failed: {e}")))?;
+
+		let (used, resets_in_secs) = match stored.as_deref().and_then(decode_window) {
+			| Some((start, count)) if now.saturating_sub(start) < limit.window_secs =>
+				(count, limit.window_secs.saturating_sub(now.saturating_sub(start))),
+			| _ => (0, limit.window_secs),
+		};
+
+		out.push(ToolQuota {
+			tool: tool.to_owned(),
+			max: limit.max,
+			used,
+			remaining: limit.max.saturating_sub(used),
+			window_secs: limit.window_secs,
+			resets_in_secs,
+		});
 	}
 
 	Ok(out)
