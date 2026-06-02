@@ -15,8 +15,10 @@
 //! revokes an agent through the Application Service API (§IV-A): an appservice
 //! binds a cross-signing key to a user in its namespace, and only provisioned
 //! agents may use the action endpoints. `GET /_gauss/agent/v1/rooms/{roomId}/grant`
-//! lets a room member read the room's effective capability grant. Every action
-//! is scoped, mediated, auditable, and visible in-band.
+//! lets a room member read the room's effective capability grant, and
+//! `GET /_gauss/agent/v1/rooms/{roomId}/quota` lets an agent read its own live
+//! rate-limit standing. Every action is scoped, mediated, auditable, and visible
+//! in-band.
 
 use std::time::SystemTime;
 
@@ -211,6 +213,36 @@ pub(crate) async fn get_grant_route(
 	let grant = services.agent.grant_for(&room_id).await;
 
 	Ok(Json(grant.to_content()))
+}
+
+/// `GET /_gauss/agent/v1/rooms/{roomId}/quota` — the calling agent's live
+/// rate-limit standing in the room (§IV-C): used / remaining / reset per
+/// rate-limited tool. Lets an agent check its quota before acting.
+pub(crate) async fn get_quota_route(
+	State(services): State<crate::State>,
+	Path(room_id): Path<OwnedRoomId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+) -> Result<impl IntoResponse> {
+	let agent = authenticate_agent(&services, auth.token(), &room_id).await?;
+
+	let quota: Vec<Value> = services
+		.agent
+		.quota(&agent, &room_id)
+		.await?
+		.into_iter()
+		.map(|q| {
+			json!({
+				"tool": q.tool,
+				"max": q.max,
+				"used": q.used,
+				"remaining": q.remaining,
+				"window_secs": q.window_secs,
+				"resets_in_secs": q.resets_in_secs,
+			})
+		})
+		.collect();
+
+	Ok(Json(json!({ "quota": quota })))
 }
 
 /// Authenticate a calling **agent**: a room member (per [`authenticate_member`])

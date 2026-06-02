@@ -267,6 +267,7 @@ fn register_agent_routes(router: Router<State>) -> Router<State> {
 		)
 		.route("/_gauss/agent/v1/rooms/{room_id}/approval", post(agent::approval_route))
 		.route("/_gauss/agent/v1/rooms/{room_id}/grant", get(agent::get_grant_route))
+		.route("/_gauss/agent/v1/rooms/{room_id}/quota", get(agent::get_quota_route))
 }
 
 fn register_oidc_routes(router: Router<State>) -> Router<State> {
