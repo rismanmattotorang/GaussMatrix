@@ -1,12 +1,14 @@
-//! The agentic MCP gateway endpoint (SPECS §IV-B).
+//! The agentic gateway endpoints (SPECS §IV-B).
 //!
-//! `POST /_gauss/agent/v1/rooms/{roomId}/mcp` is the sole HTTP channel through
-//! which an agent acts. An authenticated agent submits a Model Context Protocol
-//! JSON-RPC request, scoped to the target room's capability grant: a
-//! `tools/call` is mediated, recorded in the tamper-evident audit log, and — when
-//! it proceeds — reflected in-band as an `m.gauss.agent.tool_call` event; the
-//! read-only `tools/list` / `resources/list` methods return grant-scoped
-//! listings. Every call is scoped, mediated, auditable, and visible in-band.
+//! These are the HTTP channels through which an agent acts and reports back.
+//! `POST /_gauss/agent/v1/rooms/{roomId}/mcp` is the action channel: an
+//! authenticated, room-joined agent submits a Model Context Protocol JSON-RPC
+//! request scoped to the room's capability grant — a `tools/call` is mediated,
+//! audited, and reflected in-band, while `tools/list` / `resources/list` return
+//! grant-scoped listings. `POST /_gauss/agent/v1/rooms/{roomId}/tool_result`
+//! closes the loop: the agent runtime reports a completed call's result, which
+//! is posted in-band as an `m.gauss.agent.tool_result`, correlated by `call_id`.
+//! Every action is scoped, mediated, auditable, and visible in-band.
 
 use std::time::SystemTime;
 
@@ -19,8 +21,8 @@ use axum_extra::{
 	TypedHeader,
 	headers::{Authorization, authorization::Bearer},
 };
-use ruma::OwnedRoomId;
-use serde_json::Value;
+use ruma::{OwnedRoomId, OwnedUserId, RoomId};
+use serde_json::{Value, json};
 use gaussmatrix_core::{Err, Result, err};
 
 /// `POST /_gauss/agent/v1/rooms/{roomId}/mcp` — the MCP gateway.
@@ -34,9 +36,42 @@ pub(crate) async fn mcp_gateway_route(
 	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
 	Json(request): Json<Value>,
 ) -> Result<impl IntoResponse> {
+	let agent = authenticate_agent(&services, auth.token(), &room_id).await?;
+
+	match services.agent.handle_mcp_request(&agent, &room_id, &request).await? {
+		| Some(response) => Ok(Json(response)),
+		| None => Err!(Request(InvalidParam("Unsupported MCP method."))),
+	}
+}
+
+/// `POST /_gauss/agent/v1/rooms/{roomId}/tool_result` — report a tool result.
+///
+/// The agent runtime reports a completed call's result (`call_id` plus `output`
+/// or `error`); it is posted in-band as an `m.gauss.agent.tool_result`. The
+/// response carries the resulting event id.
+pub(crate) async fn tool_result_route(
+	State(services): State<crate::State>,
+	Path(room_id): Path<OwnedRoomId>,
+	TypedHeader(auth): TypedHeader<Authorization<Bearer>>,
+	Json(content): Json<Value>,
+) -> Result<impl IntoResponse> {
+	let agent = authenticate_agent(&services, auth.token(), &room_id).await?;
+
+	let event_id = services.agent.ingest_tool_result(&agent, &room_id, &content).await?;
+
+	Ok(Json(json!({ "event_id": event_id })))
+}
+
+/// Authenticate the calling agent from its access `token` and require that it is
+/// joined to `room_id` — the shared admission check for the gateway endpoints.
+async fn authenticate_agent(
+	services: &crate::State,
+	token: &str,
+	room_id: &RoomId,
+) -> Result<OwnedUserId> {
 	let (agent, _device, expires_at) = services
 		.users
-		.find_from_token(auth.token())
+		.find_from_token(token)
 		.await
 		.map_err(|_| err!(Request(MissingToken("Invalid access token."))))?;
 
@@ -44,12 +79,9 @@ pub(crate) async fn mcp_gateway_route(
 		return Err!(Request(MissingToken("Access token has expired.")));
 	}
 
-	if !services.state_cache.is_joined(&agent, &room_id).await {
+	if !services.state_cache.is_joined(&agent, room_id).await {
 		return Err!(Request(Forbidden("Agent is not joined to the target room.")));
 	}
 
-	match services.agent.handle_mcp_request(&agent, &room_id, &request).await? {
-		| Some(response) => Ok(Json(response)),
-		| None => Err!(Request(InvalidParam("Unsupported MCP method."))),
-	}
+	Ok(agent)
 }

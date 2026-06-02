@@ -168,6 +168,24 @@ fn mcp_tool_result_round_trips() {
 }
 
 #[test]
+fn tool_result_parses_from_content() {
+	// A success result round-trips through its event content.
+	let success = ToolResult::success("7", json!({ "n": 3 }));
+	assert_eq!(ToolResult::from_content(&success.to_content()), Some(success));
+
+	// A failure result round-trips too.
+	let failure = ToolResult::failure("8", "boom");
+	assert_eq!(ToolResult::from_content(&failure.to_content()), Some(failure));
+
+	// A null output is treated as absent, not as a successful empty output.
+	let nulled = ToolResult::from_content(&json!({ "call_id": "9", "output": null }));
+	assert_eq!(nulled, Some(ToolResult { call_id: "9".to_owned(), output: None, error: None }));
+
+	// Missing call_id is rejected.
+	assert!(ToolResult::from_content(&json!({ "output": 1 })).is_none());
+}
+
+#[test]
 fn mcp_call_ack_reports_mediation_outcome() {
 	let call = ToolCall::new("7", "read_messages", json!({}));
 

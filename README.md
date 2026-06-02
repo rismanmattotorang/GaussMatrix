@@ -181,12 +181,15 @@ preserves auditability.
 
 ### Phase 3 — Agentic AI layer
 - [x] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge),
-      **live over HTTP**. `POST /_gauss/agent/v1/rooms/{roomId}/mcp` is the sole channel
-      through which an agent acts: a bearer-authenticated, room-joined agent submits an MCP
-      JSON-RPC request scoped to that room's capability grant; `tools/call` is mediated →
-      audited → reflected in-band, and `tools/list` / `resources/list` return grant-scoped
-      listings. Built on the `Gateway` core in `src/agent`. Cross-signed provisioning builds
-      on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
+      **live over HTTP, full call→result loop**. `POST /_gauss/agent/v1/rooms/{roomId}/mcp`
+      is the sole channel through which an agent acts: a bearer-authenticated, room-joined
+      agent submits an MCP JSON-RPC request scoped to that room's capability grant;
+      `tools/call` is mediated → audited → reflected in-band, and `tools/list` /
+      `resources/list` return grant-scoped listings. The companion
+      `POST /_gauss/agent/v1/rooms/{roomId}/tool_result` closes the loop — the agent runtime
+      reports a completed call's result, posted in-band as `m.gauss.agent.tool_result` and
+      correlated by `call_id`. Built on the `Gateway` core in `src/agent`. Cross-signed
+      provisioning builds on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
 - [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
