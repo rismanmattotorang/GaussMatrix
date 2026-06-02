@@ -12,7 +12,7 @@
 use std::sync::Arc;
 
 use gaussmatrix_core::{
-	Result, implement,
+	Result, err, implement,
 	matrix::{Event, pdu::PduBuilder},
 };
 use gm_agent::{
@@ -121,6 +121,21 @@ pub async fn record_tool_result(
 	result: &ToolResult,
 ) -> Result<OwnedEventId> {
 	self.post_agent_event(agent, room_id, TOOL_RESULT_TYPE, &result.to_content()).await
+}
+
+/// Ingest a tool result reported over the wire (correlated to its call by
+/// `call_id`) and post it in-band — the result half of the gateway loop (§IV-B).
+#[implement(Service)]
+pub async fn ingest_tool_result(
+	&self,
+	agent: &UserId,
+	room_id: &RoomId,
+	content: &JsonValue,
+) -> Result<OwnedEventId> {
+	let result = ToolResult::from_content(content)
+		.ok_or_else(|| err!(Request(InvalidParam("tool result requires a call_id"))))?;
+
+	self.record_tool_result(agent, room_id, &result).await
 }
 
 /// Build and append a namespaced agent event to the room timeline.

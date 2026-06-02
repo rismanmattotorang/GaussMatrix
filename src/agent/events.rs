@@ -66,6 +66,21 @@ impl ToolResult {
 		Self { call_id: call_id.to_owned(), output: None, error: Some(error.to_owned()) }
 	}
 
+	/// Parse a tool result from `m.gauss.agent.tool_result`-style content.
+	///
+	/// `call_id` is required (it correlates the result with its [`ToolCall`]);
+	/// `output` and `error` are optional and a null `output` is treated as
+	/// absent. The inverse of [`to_content`](Self::to_content). Returns `None`
+	/// when no `call_id` is present.
+	#[must_use]
+	pub fn from_content(content: &Value) -> Option<Self> {
+		let call_id = content.get("call_id").and_then(Value::as_str)?;
+		let output = content.get("output").cloned().filter(|value| !value.is_null());
+		let error = content.get("error").and_then(Value::as_str).map(ToOwned::to_owned);
+
+		Some(Self { call_id: call_id.to_owned(), output, error })
+	}
+
 	/// The `m.gauss.agent.tool_result` event content.
 	#[must_use]
 	pub fn to_content(&self) -> Value {
