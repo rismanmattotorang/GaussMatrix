@@ -203,12 +203,14 @@ preserves auditability.
       `gm-agent` `Gateway`, records the decision to the tamper-evident `audit` log, and posts
       the in-band `m.gauss.agent.tool_call` / `m.gauss.agent.tool_result` events to the room
       timeline — all reachable through the MCP gateway endpoint.
-- [~] Human-in-the-loop approval. **Landed (server side)**: a `RequiresApproval` tool call
-      is gated by `POST /_gauss/agent/v1/rooms/{roomId}/approval`, where a human room member
-      (agent identities are refused — approval is human-in-the-loop by construction) approves
-      or rejects it; the decision is recorded in the audit log and posted in-band as
-      `m.gauss.agent.tool_approval`, correlated by `call_id`. Next: surfacing in GaussInteract
-      and E2EE-aware mediation.
+- [~] Human-in-the-loop approval, **enforced**. A `RequiresApproval` tool call is gated by
+      `POST /_gauss/agent/v1/rooms/{roomId}/approval`, where a human room member (agent
+      identities are refused — approval is human-in-the-loop by construction) approves or
+      rejects it; the decision is recorded in the audit log and posted in-band as
+      `m.gauss.agent.tool_approval`, correlated by `call_id`. **Execution is bound to the
+      decision**: a pending or rejected call's `tool_result` is refused (persisted per-call
+      in the `AgentApprovals` store domain) until a human approves. Next: surfacing in
+      GaussInteract and E2EE-aware mediation.
 - [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
       (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces
       audit-ready decision records.)

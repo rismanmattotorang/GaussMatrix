@@ -16,15 +16,33 @@ use gaussmatrix_core::{
 	matrix::{Event, pdu::PduBuilder},
 };
 use gm_agent::{
-	CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Gateway, Mediation,
+	CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision, Gateway, Mediation,
 	TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall, ToolResult,
 	handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
 };
+use gm_store::Domain;
 use ruma::{OwnedEventId, RoomId, UserId, events::StateEventType};
 use serde_json::{Value as JsonValue, value::to_raw_value};
 
+/// Approval state for a call awaiting a human decision (§IV-C).
+const APPROVAL_PENDING: &[u8] = b"P";
+/// Approval state for a call a human has approved.
+const APPROVAL_APPROVED: &[u8] = b"A";
+/// Approval state for a call a human has rejected.
+const APPROVAL_REJECTED: &[u8] = b"R";
+
 pub struct Service {
 	services: Arc<crate::services::OnceServices>,
+}
+
+/// The `AgentApprovals` store key for a call: `room_id \0 call_id`.
+fn approval_key(room_id: &RoomId, call_id: &str) -> Vec<u8> {
+	let room = room_id.as_str().as_bytes();
+	let mut key = Vec::with_capacity(room.len().saturating_add(1).saturating_add(call_id.len()));
+	key.extend_from_slice(room);
+	key.push(0);
+	key.extend_from_slice(call_id.as_bytes());
+	key
 }
 
 impl crate::Service for Service {
@@ -107,6 +125,11 @@ pub async fn handle_mcp_request(
 		if let Some(event) = &mediation.event {
 			self.post_agent_event(agent, room_id, TOOL_CALL_TYPE, event).await?;
 		}
+		// A call needing approval is gated: its result is refused until a human
+		// decides (§IV-C). Auto-executed calls leave no gate.
+		if mediation.decision == Decision::RequiresApproval {
+			self.set_approval_status(room_id, &call.call_id, APPROVAL_PENDING)?;
+		}
 		return Ok(Some(mcp_call_ack(&call, mediation.decision)));
 	}
 
@@ -136,6 +159,18 @@ pub async fn ingest_tool_result(
 	let result = ToolResult::from_content(content)
 		.ok_or_else(|| err!(Request(InvalidParam("tool result requires a call_id"))))?;
 
+	// Bind execution to approval: a call still awaiting (or refused by) a human
+	// reviewer cannot have its result accepted. Calls with no gate (auto-executed
+	// or never mediated here) pass through.
+	if let Some(status) = self.approval_status(room_id, &result.call_id)? {
+		if status.as_slice() == APPROVAL_PENDING {
+			return Err(err!(Request(Forbidden("Tool call is awaiting human approval."))));
+		}
+		if status.as_slice() == APPROVAL_REJECTED {
+			return Err(err!(Request(Forbidden("Tool call was rejected by a reviewer."))));
+		}
+	}
+
 	self.record_tool_result(agent, room_id, &result).await
 }
 
@@ -162,8 +197,30 @@ pub async fn record_approval(
 	let approval = ToolApproval::new(call_id, approved, reviewer.as_str(), reason);
 	self.services.audit.append(&approval.audit_record())?;
 
+	// Record the decision so the matching tool result is admitted or refused.
+	let status = if approved { APPROVAL_APPROVED } else { APPROVAL_REJECTED };
+	self.set_approval_status(room_id, call_id, status)?;
+
 	self.post_agent_event(reviewer, room_id, TOOL_APPROVAL_TYPE, &approval.to_content())
 		.await
+}
+
+/// Persist the approval `status` for a call (`AgentApprovals` domain).
+#[implement(Service)]
+fn set_approval_status(&self, room_id: &RoomId, call_id: &str, status: &[u8]) -> Result<()> {
+	self.services
+		.store
+		.put(Domain::AgentApprovals, approval_key(room_id, call_id), status.to_vec())
+		.map_err(|e| err!(Database("agent approval write failed: {e}")))
+}
+
+/// Read the persisted approval status for a call, if any.
+#[implement(Service)]
+fn approval_status(&self, room_id: &RoomId, call_id: &str) -> Result<Option<Vec<u8>>> {
+	self.services
+		.store
+		.get(Domain::AgentApprovals, &approval_key(room_id, call_id))
+		.map_err(|e| err!(Database("agent approval read failed: {e}")))
 }
 
 /// Build and append a namespaced agent event to the room timeline.
