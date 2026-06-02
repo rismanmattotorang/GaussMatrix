@@ -181,10 +181,11 @@ preserves auditability.
       in-flight marker per federation transaction and mirrors the outcome (drain + success, or
       backoff on failure), so `federation scheduler-status` shows a **live per-destination view**
       (pending shadow transactions and peers in backoff) while the durable send path stays
-      authoritative. Per-destination **health is durable** — persisted to the
-      `FederationHealth` gm-store column family and restored on startup, so the scheduler's view
-      survives restarts. Next: the full cutover that makes the scheduler drive delivery, plus
-      async transport, signing, and partial-state joins/backfill.
+      authoritative. Both the per-destination **health** and the **outbound queue** are durable
+      (gm-store `FederationHealth` / `FederationQueue` column families, queue keyed
+      `destination\0seq` for ordered, restart-safe resumption) — the basis for an authoritative
+      scheduler. Next: the full cutover that makes the scheduler drive delivery, plus async
+      transport, signing, and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer

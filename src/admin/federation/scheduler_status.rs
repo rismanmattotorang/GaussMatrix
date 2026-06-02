@@ -4,7 +4,7 @@ use crate::admin_command;
 
 #[admin_command]
 pub(super) async fn scheduler_status(&self) -> Result {
-	let depths = self.services.fed.queue_depths().await;
+	let depths = self.services.fed.queue_depths();
 	let failing = self.services.fed.failing().await;
 
 	write!(self, "Outbound scheduler (gm-fed):\n").await?;
