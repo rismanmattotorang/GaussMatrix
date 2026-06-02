@@ -8,6 +8,7 @@ mod grant_show;
 mod list;
 mod profile;
 mod provision;
+mod quota;
 
 use clap::Subcommand;
 use gaussmatrix_core::Result;
@@ -50,6 +51,15 @@ pub(crate) enum AgentCommand {
 	/// - Show the effective capability grant for a room
 	GrantShow {
 		/// The room whose `m.gauss.agent.capability` grant to read.
+		room_id: OwnedRoomId,
+	},
+
+	/// - Show an agent's live rate-limit quota in a room
+	Quota {
+		/// The agent's Matrix user id.
+		user_id: OwnedUserId,
+
+		/// The room to read quota for.
 		room_id: OwnedRoomId,
 	},
 
