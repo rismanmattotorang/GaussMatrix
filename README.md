@@ -224,6 +224,11 @@ preserves auditability.
       `deprovision` / `profile` / `list` for cross-signed agent identities, `grant-show` to
       inspect a room's effective capability grant, and `audit-verify` / `audit-count` to
       check the tamper-evident log — the agentic primitives made operable day-to-day.
+- [x] Capability grant lifecycle: grants are **versioned** (`version` in the
+      `m.gauss.agent.capability` content, monotonically bumped per edit), and edits go through
+      `agent::Service::set_grant`, which writes the room state and appends a grant-change record
+      to the audit log. `agent grant-set <room> --tool name:action --room <room>` sets a grant
+      from the console (auto-bumping the version).
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
