@@ -86,3 +86,25 @@ fn queue_depths_reports_nonempty_destinations() {
 	sender.take("a.example.org");
 	assert_eq!(sender.queue_depths(), vec![("b.example.org".to_owned(), 1)]);
 }
+
+#[test]
+fn backoff_state_reports_failing_destinations() {
+	let mut sender = FederationSender::new();
+	sender.queue("flaky.example.org", b"x".to_vec());
+
+	// Healthy: no backoff state.
+	assert!(sender.backoff_state(0).is_empty());
+
+	// After a failure at t=1000, the destination is in backoff (1s) at t=1000.
+	sender.mark_failure("flaky.example.org", 1_000);
+	let state = sender.backoff_state(1_000);
+	assert_eq!(state, vec![("flaky.example.org".to_owned(), 1, 2_000)]);
+
+	// Once the window elapses it is no longer reported as failing.
+	assert!(sender.backoff_state(2_000).is_empty());
+
+	// Success clears it entirely.
+	sender.mark_failure("flaky.example.org", 3_000);
+	sender.mark_success("flaky.example.org");
+	assert!(sender.backoff_state(3_000).is_empty());
+}
