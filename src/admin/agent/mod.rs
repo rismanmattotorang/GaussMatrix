@@ -1,5 +1,6 @@
 mod audit_count;
 mod audit_export;
+mod audit_sign;
 mod audit_tail;
 mod audit_verify;
 mod deprovision;
@@ -106,4 +107,7 @@ pub(crate) enum AgentCommand {
 
 	/// - Export the whole agent audit log as JSON Lines
 	AuditExport,
+
+	/// - Produce a server-signed manifest attesting to the audit log state
+	AuditSign,
 }

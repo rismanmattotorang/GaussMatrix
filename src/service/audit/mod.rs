@@ -121,6 +121,19 @@ pub fn export_jsonl(&self) -> Result<String> {
 #[implement(Service)]
 pub fn count(&self) -> Result<usize> { Ok(read_entries(&self.store)?.len()) }
 
+/// The current chain-head hash — `SHA-256` over the whole appended chain (or the
+/// genesis value when empty). Committing to this value attests to the entire
+/// log's contents.
+#[implement(Service)]
+pub fn head_hash(&self) -> Result<Vec<u8>> {
+	let head = self
+		.head
+		.lock()
+		.map_err(|_| err!(Database("audit log lock poisoned")))?;
+
+	Ok(head.hash.to_vec())
+}
+
 /// Verify the integrity of the hash chain.
 ///
 /// Returns an error identifying the first inconsistency: a sequence gap, a
