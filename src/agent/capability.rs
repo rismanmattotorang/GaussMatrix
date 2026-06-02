@@ -201,6 +201,11 @@ impl CapabilityGrant {
 		})
 	}
 
+	/// The tools that carry a rate limit, with their limits.
+	pub fn rate_limits(&self) -> impl Iterator<Item = (&str, RateLimit)> + '_ {
+		self.rate_limits.iter().map(|(tool, limit)| (tool.as_str(), *limit))
+	}
+
 	/// Serialise the grant into `m.gauss.agent.capability` state-event content.
 	#[must_use]
 	pub fn to_content(&self) -> Value {
