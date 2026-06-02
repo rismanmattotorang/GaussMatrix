@@ -220,6 +220,10 @@ preserves auditability.
 - [x] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
       `m.gauss.agent.tool_result`) for replayable, auditable interactions — posted to the
       room timeline by the live agent service as mediated calls proceed.
+- [x] Operator console for the agentic layer (admin room `agent` commands): `provision` /
+      `deprovision` / `profile` / `list` for cross-signed agent identities, `grant-show` to
+      inspect a room's effective capability grant, and `audit-verify` / `audit-count` to
+      check the tamper-evident log — the agentic primitives made operable day-to-day.
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
