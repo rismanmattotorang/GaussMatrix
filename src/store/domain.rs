@@ -52,12 +52,16 @@ pub enum Domain {
 	/// Per-(agent, room, tool) windowed counters enforcing tool rate limits
 	/// (§IV-C).
 	AgentRateLimits = 11,
+
+	/// Per-destination federation health (backoff state), so the outbound
+	/// scheduler's view survives restarts (§V).
+	FederationHealth = 12,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 12] = [
+	pub const ALL: [Self; 13] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -70,6 +74,7 @@ impl Domain {
 		Self::AgentApprovals,
 		Self::AgentRegistry,
 		Self::AgentRateLimits,
+		Self::FederationHealth,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -91,6 +96,7 @@ impl Domain {
 			| Self::AgentApprovals => "agent_approvals",
 			| Self::AgentRegistry => "agent_registry",
 			| Self::AgentRateLimits => "agent_rate_limits",
+			| Self::FederationHealth => "federation_health",
 		}
 	}
 
@@ -110,6 +116,7 @@ impl Domain {
 			| Self::AgentApprovals => 9,
 			| Self::AgentRegistry => 10,
 			| Self::AgentRateLimits => 11,
+			| Self::FederationHealth => 12,
 		}
 	}
 
