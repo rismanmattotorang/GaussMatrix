@@ -534,6 +534,32 @@ pub async fn quota(&self, agent: &UserId, room_id: &RoomId) -> Result<Vec<ToolQu
 	Ok(out)
 }
 
+/// Produce a server-signed manifest attesting to the audit log's current state
+/// (§IV-D): the chain-head hash and entry count, signed with the server's
+/// Ed25519 key. A compliance reviewer recomputes the chain from `audit-export`,
+/// checks the head hash matches, and verifies the signature with the server's
+/// published key — non-repudiable evidence of the log's contents and origin.
+#[implement(Service)]
+pub fn sign_audit_export(&self) -> Result<String> {
+	use base64::{Engine as _, engine::general_purpose::STANDARD};
+	use ruma::{CanonicalJsonObject, CanonicalJsonValue};
+
+	let count = self.services.audit.count()?;
+	let head = STANDARD.encode(self.services.audit.head_hash()?);
+	let server = self.services.globals.server_name().to_string();
+
+	let mut manifest = CanonicalJsonObject::new();
+	manifest.insert("algorithm".into(), CanonicalJsonValue::String("sha256-hash-chain".to_owned()));
+	manifest.insert("server_name".into(), CanonicalJsonValue::String(server));
+	manifest.insert("entry_count".into(), CanonicalJsonValue::String(count.to_string()));
+	manifest.insert("head_hash_base64".into(), CanonicalJsonValue::String(head));
+
+	self.services.server_keys.sign_json(&mut manifest)?;
+
+	serde_json::to_string_pretty(&CanonicalJsonValue::Object(manifest))
+		.map_err(|e| err!(Database("audit manifest serialization failed: {e}")))
+}
+
 /// Record a human-in-the-loop approval decision on a tool call that required
 /// approval (§IV-C): append it to the audit log and post it in-band as an
 /// `m.gauss.agent.tool_approval`, correlated to the call by `call_id`.
