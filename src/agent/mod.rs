@@ -38,7 +38,8 @@ mod tests;
 
 pub use self::{
 	capability::{
-		Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, Decision, DenyReason, mediation_record,
+		Action, CAPABILITY_GRANT_TYPE, CapabilityGrant, Decision, DenyReason, RateLimit,
+		mediation_record,
 	},
 	events::{
 		TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval, ToolCall, ToolResult,

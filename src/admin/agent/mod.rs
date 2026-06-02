@@ -66,6 +66,11 @@ pub(crate) enum AgentCommand {
 		#[arg(long = "room")]
 		rooms: Vec<String>,
 
+		/// A per-tool rate limit as `tool:max:window_secs`. Repeat for multiple
+		/// tools.
+		#[arg(long = "rate")]
+		rates: Vec<String>,
+
 		/// The action for permitted tools with no explicit classification.
 		#[arg(long)]
 		default_action: Option<String>,

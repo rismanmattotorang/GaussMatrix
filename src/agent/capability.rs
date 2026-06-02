@@ -58,6 +58,17 @@ pub enum DenyReason {
 	ToolNotGranted,
 	/// The tool is permitted but explicitly classified as forbidden.
 	ToolForbidden,
+	/// The tool's per-window rate limit has been exceeded.
+	RateLimited,
+}
+
+/// A per-tool rate limit: at most `max` invocations per `window_secs` window.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct RateLimit {
+	/// The maximum number of invocations permitted within a window.
+	pub max: u32,
+	/// The window length, in seconds.
+	pub window_secs: u64,
 }
 
 /// The outcome of mediating a tool invocation.
@@ -98,6 +109,7 @@ pub struct CapabilityGrant {
 	permitted_tools: BTreeSet<String>,
 	accessible_rooms: BTreeSet<String>,
 	tool_actions: BTreeMap<String, Action>,
+	rate_limits: BTreeMap<String, RateLimit>,
 	default_action: Action,
 	version: u64,
 }
@@ -140,6 +152,19 @@ impl CapabilityGrant {
 		self.permitted_tools.insert(tool.to_owned());
 		self.tool_actions.insert(tool.to_owned(), action);
 		self
+	}
+
+	/// Apply a rate limit to a tool: at most `max` invocations per `window_secs`.
+	#[must_use]
+	pub fn with_rate_limit(mut self, tool: &str, max: u32, window_secs: u64) -> Self {
+		self.rate_limits.insert(tool.to_owned(), RateLimit { max, window_secs });
+		self
+	}
+
+	/// The rate limit configured for `tool`, if any.
+	#[must_use]
+	pub fn rate_limit_for(&self, tool: &str) -> Option<RateLimit> {
+		self.rate_limits.get(tool).copied()
 	}
 
 	/// Mediate an invocation of `tool` in `room` against this grant.
@@ -191,9 +216,18 @@ impl CapabilityGrant {
 			tools.insert(tool.clone(), Value::from(action.label()));
 		}
 
+		let mut rate_limits = Map::new();
+		for (tool, limit) in &self.rate_limits {
+			rate_limits.insert(
+				tool.clone(),
+				json!({ "max": limit.max, "window_secs": limit.window_secs }),
+			);
+		}
+
 		json!({
 			"rooms": rooms,
 			"tools": Value::Object(tools),
+			"rate_limits": Value::Object(rate_limits),
 			"default_action": self.default_action.label(),
 			"version": self.version,
 		})
@@ -234,6 +268,17 @@ impl CapabilityGrant {
 			}
 		}
 
+		if let Some(limits) = content.get("rate_limits").and_then(Value::as_object) {
+			for (tool, limit) in limits {
+				let Some(max) = limit.get("max").and_then(Value::as_u64).and_then(|m| u32::try_from(m).ok())
+				else {
+					continue;
+				};
+				let window_secs = limit.get("window_secs").and_then(Value::as_u64).unwrap_or(0);
+				grant.rate_limits.insert(tool.clone(), RateLimit { max, window_secs });
+			}
+		}
+
 		grant
 	}
 }
@@ -258,5 +303,6 @@ fn reason_label(reason: DenyReason) -> &'static str {
 		| DenyReason::RoomNotInScope => "room_not_in_scope",
 		| DenyReason::ToolNotGranted => "tool_not_granted",
 		| DenyReason::ToolForbidden => "tool_forbidden",
+		| DenyReason::RateLimited => "rate_limited",
 	}
 }

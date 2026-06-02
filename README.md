@@ -229,6 +229,10 @@ preserves auditability.
       `agent::Service::set_grant`, which writes the room state and appends a grant-change record
       to the audit log. `agent grant-set <room> --tool name:action --room <room>` sets a grant
       from the console (auto-bumping the version).
+- [x] Per-tool rate limits: a grant may carry `tool → {max, window_secs}` limits, enforced at
+      mediation time with a fixed-window counter per `(agent, room, tool)` in the
+      `AgentRateLimits` store domain. Exceeding a limit yields a `denied:rate_limited` decision
+      (audited, no in-band event). Configure via `agent grant-set … --rate tool:max:window_secs`.
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
