@@ -41,12 +41,16 @@ pub enum Domain {
 
 	/// The tamper-evident, hash-chained audit log of agent actions (§IV-D).
 	AuditLog = 8,
+
+	/// Per-call agent approval state, binding a tool call's execution to its
+	/// human-in-the-loop decision (§IV-C).
+	AgentApprovals = 9,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 9] = [
+	pub const ALL: [Self; 10] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -56,6 +60,7 @@ impl Domain {
 		Self::KeyStore,
 		Self::AccountData,
 		Self::AuditLog,
+		Self::AgentApprovals,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -74,6 +79,7 @@ impl Domain {
 			| Self::KeyStore => "key_store",
 			| Self::AccountData => "account_data",
 			| Self::AuditLog => "audit_log",
+			| Self::AgentApprovals => "agent_approvals",
 		}
 	}
 
@@ -90,6 +96,7 @@ impl Domain {
 			| Self::KeyStore => 6,
 			| Self::AccountData => 7,
 			| Self::AuditLog => 8,
+			| Self::AgentApprovals => 9,
 		}
 	}
 
