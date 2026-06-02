@@ -90,6 +90,33 @@ pub fn append(&self, payload: &[u8]) -> Result<u64> {
 #[implement(Service)]
 pub fn entries(&self) -> Result<Vec<AuditEntry>> { read_entries(&self.store) }
 
+/// The most recent `n` audit entries, ascending by sequence number.
+#[implement(Service)]
+pub fn tail(&self, n: usize) -> Result<Vec<AuditEntry>> {
+	let mut all = read_entries(&self.store)?;
+	let start = all.len().saturating_sub(n);
+	Ok(all.split_off(start))
+}
+
+/// Export the whole audit log as JSON Lines — one `{"seq":N,"record":…}` object
+/// per entry — for compliance review and offline verification. A payload that
+/// is not valid JSON is exported as a string.
+#[implement(Service)]
+pub fn export_jsonl(&self) -> Result<String> {
+	use std::fmt::Write as _;
+
+	let mut out = String::new();
+	for (seq, payload) in read_entries(&self.store)? {
+		let record: serde_json::Value = serde_json::from_slice(&payload).unwrap_or_else(|_| {
+			serde_json::Value::String(String::from_utf8_lossy(&payload).into_owned())
+		});
+		let line = serde_json::json!({ "seq": seq, "record": record });
+		let _ = writeln!(out, "{line}");
+	}
+
+	Ok(out)
+}
+
 /// The number of entries currently recorded.
 #[implement(Service)]
 pub fn count(&self) -> Result<usize> { Ok(read_entries(&self.store)?.len()) }
