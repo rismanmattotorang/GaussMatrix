@@ -237,7 +237,9 @@ preserves auditability.
       mediation time with a fixed-window counter per `(agent, room, tool)` in the
       `AgentRateLimits` store domain. Exceeding a limit yields a `denied:rate_limited` decision
       (audited, no in-band event). Configure via `agent grant-set … --rate tool:max:window_secs`;
-      inspect live standing with `agent quota <user> <room>` (used / remaining / reset per tool).
+      inspect live standing with `agent quota <user> <room>` (used / remaining / reset per tool)
+      or, programmatically, `GET /_gauss/agent/v1/rooms/{roomId}/quota` (the calling agent's own
+      standing, for pre-flight checks).
 
 ### Phase 4 — Client parity (GaussInteract) & enterprise surface
 - [~] `gauss-core` shared Rust client core (sliding sync, timeline cache, `vodozemac` E2EE).
