@@ -311,6 +311,31 @@ fn capability_grant_version_round_trips() {
 }
 
 #[test]
+fn capability_rate_limit_round_trips() {
+	let grant = CapabilityGrant::new()
+		.allow_room("!room:example.org")
+		.allow_tool("send_message", Action::Auto)
+		.with_rate_limit("send_message", 5, 60);
+
+	// The limit is exposed and survives the state-content round-trip.
+	let limit = grant.rate_limit_for("send_message").unwrap();
+	assert_eq!(limit.max, 5);
+	assert_eq!(limit.window_secs, 60);
+
+	let restored = CapabilityGrant::from_content(&grant.to_content());
+	assert_eq!(restored.rate_limit_for("send_message"), Some(limit));
+
+	// Tools without a configured limit report none.
+	assert!(grant.rate_limit_for("other").is_none());
+
+	// The rate-limited deny reason has a stable label.
+	assert_eq!(
+		Decision::Denied(DenyReason::RateLimited).label(),
+		"denied:rate_limited"
+	);
+}
+
+#[test]
 fn capability_content_has_expected_shape() {
 	let content = grant().to_content();
 	assert_eq!(content["tools"]["read_messages"], "auto");

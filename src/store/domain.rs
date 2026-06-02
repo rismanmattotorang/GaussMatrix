@@ -48,12 +48,16 @@ pub enum Domain {
 
 	/// Provisioned agent identities keyed by user id (§IV-A).
 	AgentRegistry = 10,
+
+	/// Per-(agent, room, tool) windowed counters enforcing tool rate limits
+	/// (§IV-C).
+	AgentRateLimits = 11,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 11] = [
+	pub const ALL: [Self; 12] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -65,6 +69,7 @@ impl Domain {
 		Self::AuditLog,
 		Self::AgentApprovals,
 		Self::AgentRegistry,
+		Self::AgentRateLimits,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -85,6 +90,7 @@ impl Domain {
 			| Self::AuditLog => "audit_log",
 			| Self::AgentApprovals => "agent_approvals",
 			| Self::AgentRegistry => "agent_registry",
+			| Self::AgentRateLimits => "agent_rate_limits",
 		}
 	}
 
@@ -103,6 +109,7 @@ impl Domain {
 			| Self::AuditLog => 8,
 			| Self::AgentApprovals => 9,
 			| Self::AgentRegistry => 10,
+			| Self::AgentRateLimits => 11,
 		}
 	}
 

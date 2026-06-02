@@ -9,7 +9,10 @@
 //! gateway is the sole channel through which an agent acts: every call is
 //! scoped, mediated, auditable, and visible in-band.
 
-use std::sync::Arc;
+use std::{
+	sync::Arc,
+	time::{SystemTime, UNIX_EPOCH},
+};
 
 use gaussmatrix_core::{
 	Result, err, implement,
@@ -17,8 +20,9 @@ use gaussmatrix_core::{
 };
 use gm_agent::{
 	Action, AgentProfile, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision,
-	Gateway, Mediation, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval,
-	ToolCall, ToolResult, handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
+	DenyReason, Gateway, Mediation, RateLimit, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE,
+	ToolApproval, ToolCall, ToolResult, handle_mcp, is_agent_id, mcp_call_ack, mediation_record,
+	tool_call_from_mcp,
 };
 use gm_store::Domain;
 use ruma::{OwnedEventId, RoomId, UserId, events::StateEventType};
@@ -43,6 +47,37 @@ fn approval_key(room_id: &RoomId, call_id: &str) -> Vec<u8> {
 	key.push(0);
 	key.extend_from_slice(call_id.as_bytes());
 	key
+}
+
+/// The `AgentRateLimits` counter key: `agent \0 room \0 tool`.
+fn rate_limit_key(agent: &str, room: &str, tool: &str) -> Vec<u8> {
+	let mut key = Vec::new();
+	key.extend_from_slice(agent.as_bytes());
+	key.push(0);
+	key.extend_from_slice(room.as_bytes());
+	key.push(0);
+	key.extend_from_slice(tool.as_bytes());
+	key
+}
+
+/// Seconds since the Unix epoch (saturating; clock-before-epoch reads as 0).
+fn now_secs() -> u64 {
+	SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
+
+/// Encode a rate-limit window as `window_start_be(8) || count_be(4)`.
+fn encode_window(window_start: u64, count: u32) -> Vec<u8> {
+	let mut value = Vec::with_capacity(12);
+	value.extend_from_slice(&window_start.to_be_bytes());
+	value.extend_from_slice(&count.to_be_bytes());
+	value
+}
+
+/// Decode a rate-limit window written by [`encode_window`].
+fn decode_window(bytes: &[u8]) -> Option<(u64, u32)> {
+	let start = <[u8; 8]>::try_from(bytes.get(0..8)?).ok()?;
+	let count = <[u8; 4]>::try_from(bytes.get(8..12)?).ok()?;
+	Some((u64::from_be_bytes(start), u32::from_be_bytes(count)))
 }
 
 impl crate::Service for Service {
@@ -103,15 +138,17 @@ pub async fn set_grant(&self, room_id: &RoomId, grant: &CapabilityGrant) -> Resu
 
 /// Build a capability grant from operator-supplied specs and [`set_grant`] it.
 ///
-/// `tools` are `name:action` pairs; `default_action` and the explicit `version`
-/// are optional. With no version the current grant's version is bumped by one,
-/// keeping edits monotonically ordered. Returns the new version.
+/// `tools` are `name:action` pairs; `rates` are `tool:max:window_secs` triples;
+/// `default_action` and the explicit `version` are optional. With no version the
+/// current grant's version is bumped by one, keeping edits monotonically
+/// ordered. Returns the new version.
 #[implement(Service)]
 pub async fn set_grant_from_spec(
 	&self,
 	room_id: &RoomId,
 	rooms: &[String],
 	tools: &[String],
+	rates: &[String],
 	default_action: Option<&str>,
 	version: Option<u64>,
 ) -> Result<u64> {
@@ -137,6 +174,23 @@ pub async fn set_grant_from_spec(
 		})?;
 		grant = grant.allow_tool(name, action);
 	}
+	for spec in rates {
+		let mut parts = spec.split(':');
+		let (Some(tool), Some(max), Some(window), None) =
+			(parts.next(), parts.next(), parts.next(), parts.next())
+		else {
+			return Err(err!(Request(InvalidParam(
+				"rate must be given as tool:max:window_secs"
+			))));
+		};
+		let max: u32 = max
+			.parse()
+			.map_err(|_| err!(Request(InvalidParam("rate max must be a non-negative integer"))))?;
+		let window: u64 = window.parse().map_err(|_| {
+			err!(Request(InvalidParam("rate window_secs must be a non-negative integer")))
+		})?;
+		grant = grant.with_rate_limit(tool, max, window);
+	}
 
 	self.set_grant(room_id, &grant).await?;
 	Ok(next)
@@ -144,6 +198,10 @@ pub async fn set_grant_from_spec(
 
 /// Mediate a tool `call` in `room` against an explicit `grant`, recording the
 /// decision in the tamper-evident audit log and returning the mediation outcome.
+///
+/// A call that the grant would let proceed is additionally checked against the
+/// tool's per-window rate limit (§IV-C); exceeding it overrides the decision to
+/// a `RateLimited` denial, which is audited and posts no in-band event.
 #[implement(Service)]
 pub fn mediate_tool_call(
 	&self,
@@ -152,10 +210,64 @@ pub fn mediate_tool_call(
 	room: &str,
 	call: &ToolCall,
 ) -> Result<Mediation> {
-	let mediation = Gateway::new(agent, grant.clone()).process(call, room);
+	let mut mediation = Gateway::new(agent, grant.clone()).process(call, room);
+
+	if !mediation.decision.is_denied()
+		&& let Some(limit) = grant.rate_limit_for(&call.tool)
+		&& self.rate_limit_exceeded(agent, room, &call.tool, limit)?
+	{
+		let decision = Decision::Denied(DenyReason::RateLimited);
+		mediation = Mediation {
+			decision,
+			audit_record: mediation_record(agent, &call.tool, room, decision),
+			event: None,
+		};
+	}
+
 	self.services.audit.append(&mediation.audit_record)?;
 
 	Ok(mediation)
+}
+
+/// Whether invoking `tool` now exceeds its `limit` for `(agent, room)`.
+///
+/// Maintains a fixed-window counter in the `AgentRateLimits` domain: the window
+/// resets once `window_secs` have elapsed, and a permitted call increments the
+/// count. Returns `true` (and does not increment) once the window is full.
+#[implement(Service)]
+fn rate_limit_exceeded(
+	&self,
+	agent: &str,
+	room: &str,
+	tool: &str,
+	limit: RateLimit,
+) -> Result<bool> {
+	let now = now_secs();
+	let key = rate_limit_key(agent, room, tool);
+
+	let stored = self
+		.services
+		.store
+		.get(Domain::AgentRateLimits, &key)
+		.map_err(|e| err!(Database("rate-limit read failed: {e}")))?;
+
+	let (mut window_start, mut count) = stored.as_deref().and_then(decode_window).unwrap_or((now, 0));
+	if now.saturating_sub(window_start) >= limit.window_secs {
+		window_start = now;
+		count = 0;
+	}
+
+	if count >= limit.max {
+		return Ok(true);
+	}
+
+	let count = count.saturating_add(1);
+	self.services
+		.store
+		.put(Domain::AgentRateLimits, key, encode_window(window_start, count))
+		.map_err(|e| err!(Database("rate-limit write failed: {e}")))?;
+
+	Ok(false)
 }
 
 /// The full live loop for `agent`'s tool `call` in `room_id`: read the room's
