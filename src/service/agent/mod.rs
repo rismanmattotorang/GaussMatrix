@@ -16,7 +16,7 @@ use gaussmatrix_core::{
 	matrix::{Event, pdu::PduBuilder},
 };
 use gm_agent::{
-	AgentProfile, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision,
+	Action, AgentProfile, CAPABILITY_GRANT_TYPE, CapabilityGrant, DEFAULT_AGENT_NAMESPACE, Decision,
 	Gateway, Mediation, TOOL_APPROVAL_TYPE, TOOL_CALL_TYPE, TOOL_RESULT_TYPE, ToolApproval,
 	ToolCall, ToolResult, handle_mcp, is_agent_id, mcp_call_ack, tool_call_from_mcp,
 };
@@ -65,6 +65,81 @@ pub async fn grant_for(&self, room_id: &RoomId) -> CapabilityGrant {
 			.unwrap_or_default(),
 		| Err(_) => CapabilityGrant::default(),
 	}
+}
+
+/// Write a room's `m.gauss.agent.capability` grant as a state event (sent by the
+/// server user) and append a grant-change record to the audit log — the
+/// versioned, auditable edit of the capability lifecycle (§IV-C).
+#[implement(Service)]
+pub async fn set_grant(&self, room_id: &RoomId, grant: &CapabilityGrant) -> Result<OwnedEventId> {
+	let server_user = self.services.globals.server_user.as_ref();
+	let builder = PduBuilder {
+		event_type: CAPABILITY_GRANT_TYPE.into(),
+		content: to_raw_value(&grant.to_content())
+			.expect("capability grant content is valid JSON"),
+		state_key: Some(String::new().into()),
+		..PduBuilder::default()
+	};
+
+	let state_lock = self.services.state.mutex.lock(room_id).await;
+	let event_id = self
+		.services
+		.timeline
+		.build_and_append_pdu(builder, server_user, room_id, &state_lock)
+		.await?;
+	drop(state_lock);
+
+	let record = serde_json::to_vec(&serde_json::json!({
+		"editor": server_user.as_str(),
+		"room": room_id.as_str(),
+		"version": grant.version(),
+		"action": "grant_set",
+	}))
+	.unwrap_or_default();
+	self.services.audit.append(&record)?;
+
+	Ok(event_id)
+}
+
+/// Build a capability grant from operator-supplied specs and [`set_grant`] it.
+///
+/// `tools` are `name:action` pairs; `default_action` and the explicit `version`
+/// are optional. With no version the current grant's version is bumped by one,
+/// keeping edits monotonically ordered. Returns the new version.
+#[implement(Service)]
+pub async fn set_grant_from_spec(
+	&self,
+	room_id: &RoomId,
+	rooms: &[String],
+	tools: &[String],
+	default_action: Option<&str>,
+	version: Option<u64>,
+) -> Result<u64> {
+	let current = self.grant_for(room_id).await;
+	let next = version.unwrap_or_else(|| current.version().saturating_add(1));
+
+	let mut grant = CapabilityGrant::new().with_version(next);
+	if let Some(label) = default_action {
+		let action = Action::from_label(label).ok_or_else(|| {
+			err!(Request(InvalidParam("unknown default action; use auto|review|forbidden")))
+		})?;
+		grant = grant.with_default_action(action);
+	}
+	for room in rooms {
+		grant = grant.allow_room(room);
+	}
+	for spec in tools {
+		let (name, label) = spec
+			.split_once(':')
+			.ok_or_else(|| err!(Request(InvalidParam("tool must be given as name:action"))))?;
+		let action = Action::from_label(label).ok_or_else(|| {
+			err!(Request(InvalidParam("unknown tool action; use auto|review|forbidden")))
+		})?;
+		grant = grant.allow_tool(name, action);
+	}
+
+	self.set_grant(room_id, &grant).await?;
+	Ok(next)
 }
 
 /// Mediate a tool `call` in `room` against an explicit `grant`, recording the

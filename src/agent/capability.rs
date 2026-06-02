@@ -99,12 +99,33 @@ pub struct CapabilityGrant {
 	accessible_rooms: BTreeSet<String>,
 	tool_actions: BTreeMap<String, Action>,
 	default_action: Action,
+	version: u64,
 }
 
 impl CapabilityGrant {
 	/// An empty grant that permits nothing.
 	#[must_use]
 	pub fn new() -> Self { Self::default() }
+
+	/// Set the grant's monotonic version. Each edit to a room's grant bumps
+	/// this so changes are ordered and auditable (the lifecycle invariant).
+	#[must_use]
+	pub const fn with_version(mut self, version: u64) -> Self {
+		self.version = version;
+		self
+	}
+
+	/// This grant's version.
+	#[must_use]
+	pub const fn version(&self) -> u64 { self.version }
+
+	/// Set the action applied to permitted tools that carry no explicit
+	/// classification.
+	#[must_use]
+	pub const fn with_default_action(mut self, action: Action) -> Self {
+		self.default_action = action;
+		self
+	}
 
 	/// Grant access to a room.
 	#[must_use]
@@ -174,6 +195,7 @@ impl CapabilityGrant {
 			"rooms": rooms,
 			"tools": Value::Object(tools),
 			"default_action": self.default_action.label(),
+			"version": self.version,
 		})
 	}
 
@@ -184,6 +206,8 @@ impl CapabilityGrant {
 	#[must_use]
 	pub fn from_content(content: &Value) -> Self {
 		let mut grant = Self::new();
+
+		grant.version = content.get("version").and_then(Value::as_u64).unwrap_or(0);
 
 		if let Some(default) = content
 			.get("default_action")

@@ -288,6 +288,29 @@ fn capability_grant_round_trips_through_room_state_content() {
 }
 
 #[test]
+fn capability_grant_version_round_trips() {
+	// A fresh grant is version 0.
+	assert_eq!(CapabilityGrant::new().version(), 0);
+
+	// The version is carried through the state-content round-trip.
+	let grant = CapabilityGrant::new()
+		.with_version(7)
+		.with_default_action(Action::Forbidden)
+		.allow_room("!room:example.org")
+		.allow_tool("read_messages", Action::Auto);
+	let restored = CapabilityGrant::from_content(&grant.to_content());
+
+	assert_eq!(restored.version(), 7);
+	assert_eq!(grant.to_content()["version"], 7);
+	// The default action also survives, governing unclassified parse paths.
+	assert_eq!(restored.mediate("read_messages", "!room:example.org"), Decision::Execute);
+
+	// A grant with no version field defaults to 0.
+	let legacy = CapabilityGrant::from_content(&json!({ "rooms": [], "tools": {} }));
+	assert_eq!(legacy.version(), 0);
+}
+
+#[test]
 fn capability_content_has_expected_shape() {
 	let content = grant().to_content();
 	assert_eq!(content["tools"]["read_messages"], "auto");
