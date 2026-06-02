@@ -175,8 +175,11 @@ preserves auditability.
 - [~] Sharded federation sender (per-destination, no head-of-line blocking) and
       partial-state joins in `gm-fed`. **Sender core landed** (`src/fed`): `FederationSender`
       with per-destination outbound queues and independent exponential backoff, so a slow or
-      unreachable peer never blocks delivery to healthy peers. Next: the async transport,
-      signing, and partial-state joins/backfill.
+      unreachable peer never blocks delivery to healthy peers. **Wired into the running server**
+      as the additive `fed` service (a shared, async-mutex-guarded scheduler registered in
+      `Services`), inspectable via the `federation scheduler-status` admin command. Next: the
+      production cutover that routes the outbound path through it, plus async transport, signing,
+      and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer

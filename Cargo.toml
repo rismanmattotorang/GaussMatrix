@@ -713,6 +713,11 @@ package = "gm-shard"
 path = "src/shard"
 default-features = false
 
+[workspace.dependencies.gm-fed]
+package = "gm-fed"
+path = "src/fed"
+default-features = false
+
 ###############################################################################
 #
 # Release profiles
