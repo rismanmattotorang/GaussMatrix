@@ -190,7 +190,10 @@ preserves auditability.
       reports a completed call's result, posted in-band as `m.gauss.agent.tool_result` and
       correlated by `call_id`. Built on the `Gateway` core in `src/agent`. Cross-signed
       provisioning builds on it next. See [`AGENTIC-STRATEGY.md`](./AGENTIC-STRATEGY.md).
-- [ ] Agents as cross-signed Matrix identities provisioned via the Application Service API.
+- [~] Agents as cross-signed Matrix identities provisioned via the Application Service API.
+      **Namespace recognition landed**: `gm-agent` models the agent namespace (`@gauss.agent.`)
+      and the server distinguishes agent principals from humans (`agent::Service::is_agent`),
+      which the approval gate relies on. Next: Appservice registration and cross-signing.
 - [~] Capability scoping (least-privilege grants as versioned room state) with
       `auto` / `review` / `forbidden` action classification. **Landed**: `CapabilityGrant`
       (permitted tools + accessible rooms + per-tool classification) and `mediate`
@@ -200,7 +203,12 @@ preserves auditability.
       `gm-agent` `Gateway`, records the decision to the tamper-evident `audit` log, and posts
       the in-band `m.gauss.agent.tool_call` / `m.gauss.agent.tool_result` events to the room
       timeline — all reachable through the MCP gateway endpoint.
-- [ ] Human-in-the-loop approval surfaced in GaussInteract; E2EE-aware mediation.
+- [~] Human-in-the-loop approval. **Landed (server side)**: a `RequiresApproval` tool call
+      is gated by `POST /_gauss/agent/v1/rooms/{roomId}/approval`, where a human room member
+      (agent identities are refused — approval is human-in-the-loop by construction) approves
+      or rejects it; the decision is recorded in the audit log and posted in-band as
+      `m.gauss.agent.tool_approval`, correlated by `call_id`. Next: surfacing in GaussInteract
+      and E2EE-aware mediation.
 - [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
       (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces
       audit-ready decision records.)
