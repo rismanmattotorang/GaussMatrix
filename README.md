@@ -223,8 +223,9 @@ preserves auditability.
 - [x] Operator console for the agentic layer (admin room `agent` commands): `provision` /
       `deprovision` / `profile` / `list` for cross-signed agent identities, `grant-show` to
       inspect a room's effective capability grant (version, accessible rooms, tools, and
-      rate limits), and `audit-verify` / `audit-count` to check the tamper-evident log — the
-      agentic primitives made operable day-to-day.
+      rate limits), `audit-verify` / `audit-count` to check the tamper-evident log, and
+      `audit-tail [n]` / `audit-export` (JSON Lines) to review and export agent-action
+      history for compliance — the agentic primitives made operable day-to-day.
 - [x] Capability grant lifecycle: grants are **versioned** (`version` in the
       `m.gauss.agent.capability` content, monotonically bumped per edit), and edits go through
       `agent::Service::set_grant`, which writes the room state and appends a grant-change record

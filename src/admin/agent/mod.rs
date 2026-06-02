@@ -1,4 +1,6 @@
 mod audit_count;
+mod audit_export;
+mod audit_tail;
 mod audit_verify;
 mod deprovision;
 mod grant_set;
@@ -85,4 +87,13 @@ pub(crate) enum AgentCommand {
 
 	/// - Count the entries in the agent audit log
 	AuditCount,
+
+	/// - Show the most recent agent audit entries
+	AuditTail {
+		/// How many entries to show (default 20).
+		n: Option<usize>,
+	},
+
+	/// - Export the whole agent audit log as JSON Lines
+	AuditExport,
 }
