@@ -95,6 +95,27 @@ pub async fn ready(&self) -> Vec<Destination> {
 		.collect()
 }
 
+/// Drain every destination that is ready now, returning the batches due for
+/// delivery — the scheduling drive (queue → ready → take) composed in one step.
+///
+/// This is the core an authoritative sender calls each tick: it selects the
+/// ready destinations (queued and not in backoff) and atomically removes their
+/// items. Binding the returned batches to the federation transport is the
+/// remaining cutover; until then the production path delivers and this drains
+/// the shadow queue.
+#[implement(Service)]
+pub async fn tick(&self) -> Vec<(Destination, Vec<Vec<u8>>)> {
+	let backed_off: BTreeSet<Destination> = {
+		let sender = self.sender.lock().await;
+		sender.backoff_state(now_millis()).into_iter().map(|(dest, ..)| dest).collect()
+	};
+
+	due_batches(&self.store, &backed_off).unwrap_or_else(|e| {
+		warn!("federation scheduler tick failed: {e}");
+		Vec::new()
+	})
+}
+
 /// Record a successful delivery to `destination`, clearing its backoff (and its
 /// persisted health record).
 #[implement(Service)]
@@ -199,6 +220,25 @@ fn all_queue_depths(store: &DynStore) -> Result<Vec<(Destination, usize)>> {
 	Ok(depths.into_iter().collect())
 }
 
+/// The batches due for delivery now: each ready destination (queued and not in
+/// `backed_off`) drained in sequence order.
+fn due_batches(
+	store: &DynStore,
+	backed_off: &BTreeSet<Destination>,
+) -> Result<Vec<(Destination, Vec<Vec<u8>>)>> {
+	let mut batches = Vec::new();
+	for (destination, depth) in all_queue_depths(store)? {
+		if depth > 0 && !backed_off.contains(&destination) {
+			let items = drain_queue(store, &destination)?;
+			if !items.is_empty() {
+				batches.push((destination, items));
+			}
+		}
+	}
+
+	Ok(batches)
+}
+
 /// The greatest queue sequence currently persisted (0 if the queue is empty),
 /// so a restart resumes assigning monotonically-increasing keys.
 fn max_queue_seq(store: &DynStore) -> Result<u64> {
@@ -262,9 +302,13 @@ fn now_millis() -> u64 {
 
 #[cfg(test)]
 mod tests {
+	use std::collections::BTreeSet;
+
 	use gm_store::{DynStore, MemBackend};
 
-	use super::{Domain, all_queue_depths, drain_queue, max_queue_seq, queue_depth, queue_key};
+	use super::{
+		Domain, all_queue_depths, drain_queue, due_batches, max_queue_seq, queue_depth, queue_key,
+	};
 
 	fn mem_store() -> DynStore { DynStore::new(MemBackend::default()) }
 
@@ -299,5 +343,22 @@ mod tests {
 		// Seq seeding resumes past the greatest persisted key.
 		assert_eq!(max_queue_seq(&store).unwrap(), 7);
 		assert_eq!(max_queue_seq(&mem_store()).unwrap(), 0);
+	}
+
+	#[test]
+	fn tick_drains_only_ready_destinations() {
+		let store = mem_store();
+		store.put(Domain::FederationQueue, queue_key("ready.org", 0), b"r0".to_vec()).unwrap();
+		store.put(Domain::FederationQueue, queue_key("ready.org", 1), b"r1".to_vec()).unwrap();
+		store.put(Domain::FederationQueue, queue_key("backed.org", 0), b"b0".to_vec()).unwrap();
+
+		// backed.org is in backoff, so the tick skips it and drains only ready.org.
+		let backed_off: BTreeSet<_> = std::iter::once("backed.org".to_owned()).collect();
+		let batches = due_batches(&store, &backed_off).unwrap();
+		assert_eq!(batches, vec![("ready.org".to_owned(), vec![b"r0".to_vec(), b"r1".to_vec()])]);
+
+		// The drained destination is now empty; the backed-off one is intact.
+		assert_eq!(queue_depth(&store, "ready.org").unwrap(), 0);
+		assert_eq!(queue_depth(&store, "backed.org").unwrap(), 1);
 	}
 }
