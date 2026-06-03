@@ -1998,6 +1998,20 @@ pub struct Config {
 	#[serde(default)]
 	pub store_media_on_providers: BTreeSet<String>,
 
+	/// EXPERIMENTAL: back the media store with the content-addressed store (CAS).
+	///
+	/// When true, newly uploaded media bytes are written to the deduplicating
+	/// CAS (keyed by SHA-256 of the content) instead of the storage providers,
+	/// and a key -> content-id mapping is recorded. Reads transparently resolve
+	/// CAS-backed media regardless of this setting (so enabling it is additive
+	/// and safe; existing provider-backed media keeps working). Identical bytes
+	/// are stored once, deduplicating media across uploads.
+	///
+	/// reloadable: yes
+	/// default: false
+	#[serde(default)]
+	pub media_cas_backend: bool,
+
 	/// Vector list of regex patterns of server names that gaussmatrix will refuse
 	/// to download remote media from.
 	///

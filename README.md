@@ -188,15 +188,19 @@ preserves auditability.
       **config-gated cutover seam** is wired: with `gm_fed_authoritative_sender = true` the
       `federation scheduler-drive` admin command lets gm-fed schedule ready destinations and
       flush them through the existing sender's transport (gm-fed schedules, the proven sender
-      transports); default-off, so production is unaffected until validated with integration
-      tests. Next: a periodic drive loop and a native gm-fed transport (signing, partial-state
-      joins/backfill).
+      transports); default-off. A **gated periodic drive loop** also runs in the `fed` service
+      worker, driving one scheduling cycle on an interval when the flag is enabled (a no-op loop
+      otherwise), so production is unaffected until validated with integration tests. Next: a
+      native gm-fed transport (signing, partial-state joins/backfill).
 - [~] Shared object store for media addressed by content hash. **Content-addressed store
       landed** as the additive `cas` service: a blob is named by the SHA-256 of its bytes
       (`Domain::MediaBlobs`), so identical uploads deduplicate and a content id is a
       self-verifying integrity check (`store_blob` / `load_blob` / `has_blob`; `media
-      content-stats` reports distinct blobs). Next: migrating the production media path onto it
-      and a shared (multi-node) object-store backend.
+      content-stats` reports distinct blobs). The **production media path is wired onto it**
+      behind `media_cas_backend` (default off): when enabled, uploads write bytes to the
+      deduplicating CAS and record a key→content-id mapping; reads resolve CAS-backed media
+      regardless of the flag, so enabling it is additive and safe and existing provider-backed
+      media keeps working. Next: a shared (multi-node) object-store backend.
 
 ### Phase 3 — Agentic AI layer
 - [x] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge),
