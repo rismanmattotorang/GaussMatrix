@@ -192,15 +192,19 @@ preserves auditability.
       worker, driving one scheduling cycle on an interval when the flag is enabled (a no-op loop
       otherwise), so production is unaffected until validated with integration tests. Next: a
       native gm-fed transport (signing, partial-state joins/backfill).
-- [~] Shared object store for media addressed by content hash. **Content-addressed store
-      landed** as the additive `cas` service: a blob is named by the SHA-256 of its bytes
-      (`Domain::MediaBlobs`), so identical uploads deduplicate and a content id is a
-      self-verifying integrity check (`store_blob` / `load_blob` / `has_blob`; `media
-      content-stats` reports distinct blobs). The **production media path is wired onto it**
-      behind `media_cas_backend` (default off): when enabled, uploads write bytes to the
-      deduplicating CAS and record a key→content-id mapping; reads resolve CAS-backed media
-      regardless of the flag, so enabling it is additive and safe and existing provider-backed
-      media keeps working. Next: a shared (multi-node) object-store backend.
+- [x] Shared object store for media addressed by content hash. Landed as the additive `cas`
+      service: a blob is named by the SHA-256 of its bytes, so identical uploads deduplicate and
+      a content id is a self-verifying integrity check (`store_blob` / `load_blob` / `has_blob`;
+      `media content-stats` reports distinct blobs). The **production media path is wired onto
+      it** behind `media_cas_backend` (default off): uploads write bytes to the deduplicating CAS
+      and record a key→content-id mapping; reads resolve CAS-backed media regardless of the flag,
+      so enabling it is additive and safe and existing provider-backed media keeps working. The
+      CAS has **two interchangeable backends**: node-local gm-store (`Domain::MediaBlobs`,
+      default) or a **shared multi-node object store** (`media_cas_provider` → an S3/fs storage
+      provider, blobs under `media_cas/` keyed by content hash) — content-addressing makes every
+      write idempotent, so nodes share one deduplicated namespace with no conflicts. Both
+      backends are covered by tests (dedup + round-trip; the shared scheme is exercised against
+      a real `object_store`).
 
 ### Phase 3 — Agentic AI layer
 - [x] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge),

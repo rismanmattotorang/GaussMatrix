@@ -1767,6 +1767,22 @@
 #
 #media_cas_backend = false
 
+# EXPERIMENTAL: back the content-addressed media store (CAS) with a shared
+# object-store provider instead of the node-local gm-store column family.
+#
+# Set to the name of an entry in `media_storage_providers` (e.g. an S3
+# bucket). When set, CAS blobs are written to and read from that provider
+# under a `media_cas/` prefix, keyed by content hash — so multiple nodes
+# pointing at the same backend share one deduplicated blob namespace with
+# no write conflicts (content-addressing makes every write idempotent).
+# When empty (default), CAS uses the local gm-store backend (single node).
+#
+# Only takes effect together with `media_cas_backend = true`.
+#
+# reloadable: yes
+#
+#media_cas_provider = ""
+
 # Vector list of regex patterns of server names that gaussmatrix will refuse
 # to download remote media from.
 #
