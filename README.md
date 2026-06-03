@@ -184,8 +184,9 @@ preserves auditability.
       authoritative. Both the per-destination **health** and the **outbound queue** are durable
       (gm-store `FederationHealth` / `FederationQueue` column families, queue keyed
       `destination\0seq` for ordered, restart-safe resumption) — the basis for an authoritative
-      scheduler. Next: the full cutover that makes the scheduler drive delivery, plus async
-      transport, signing, and partial-state joins/backfill.
+      scheduler, with the drive primitive (`tick`: ready → drain due batches) in place. Next:
+      the full cutover that binds the drained batches to the federation transport (best paired
+      with integration tests), plus async transport, signing, and partial-state joins/backfill.
 - [ ] Shared object store for media addressed by content hash.
 
 ### Phase 3 — Agentic AI layer
