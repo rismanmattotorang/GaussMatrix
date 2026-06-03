@@ -25,14 +25,19 @@ use std::{
 		Arc,
 		atomic::{AtomicU64, Ordering},
 	},
-	time::{SystemTime, UNIX_EPOCH},
+	time::{Duration, SystemTime, UNIX_EPOCH},
 };
 
-use gaussmatrix_core::{Result, err, implement, warn};
+use async_trait::async_trait;
+use gaussmatrix_core::{Result, debug, err, implement, warn};
 use gm_fed::{Destination, FederationSender};
 use gm_store::{Domain, DynStore};
 use ruma::OwnedServerName;
 use tokio::sync::Mutex;
+
+/// How often the gated scheduler drive loop wakes to flush ready destinations.
+/// Only does work when `gm_fed_authoritative_sender` is enabled.
+const SCHEDULER_DRIVE_INTERVAL: Duration = Duration::from_secs(30);
 
 pub struct Service {
 	sender: Mutex<FederationSender>,
@@ -41,6 +46,7 @@ pub struct Service {
 	services: Arc<crate::services::OnceServices>,
 }
 
+#[async_trait]
 impl crate::Service for Service {
 	fn build(args: &crate::Args<'_>) -> Result<Arc<Self>> {
 		let store = args.store.clone();
@@ -54,6 +60,30 @@ impl crate::Service for Service {
 			seq: AtomicU64::new(next_seq),
 			services: args.services.clone(),
 		}))
+	}
+
+	/// Gated periodic drive loop. Sleeps between cycles and, only when
+	/// `gm_fed_authoritative_sender` is enabled, runs one [`drive_once`] cycle
+	/// per tick — gm-fed schedules ready destinations and the existing sender
+	/// transports them. Default-off, so this is a no-op loop in production until
+	/// explicitly enabled.
+	async fn worker(self: Arc<Self>) -> Result {
+		loop {
+			tokio::select! {
+				() = tokio::time::sleep(SCHEDULER_DRIVE_INTERVAL) => {},
+				() = self.services.server.until_shutdown() => return Ok(()),
+			}
+
+			if !self.services.server.config.gm_fed_authoritative_sender {
+				continue;
+			}
+
+			match self.drive_once().await {
+				| Ok(0) => {},
+				| Ok(count) => debug!("gm-fed scheduler drove {count} destination(s)"),
+				| Err(error) => warn!("gm-fed scheduler drive failed: {error}"),
+			}
+		}
 	}
 
 	fn name(&self) -> &str { crate::service::make_name(std::module_path!()) }

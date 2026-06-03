@@ -359,6 +359,17 @@ impl Service {
 			return Err!(Request(NotFound("Media not found.")));
 		};
 
+		// CAS-backed media: resolve the blob by content-id regardless of the
+		// `media_cas_backend` setting, so previously CAS-stored media always
+		// reads back. Falls through to the storage providers otherwise.
+		if let Ok(content_id) = self.db.get_cas_content_id(&key).await {
+			let Some(content) = self.services.cas.load_blob(&content_id)? else {
+				return Err!(Request(NotFound("Media not found.")));
+			};
+
+			return Ok(Media { content, content_type, content_disposition });
+		}
+
 		let path = self.get_media_name_sha256(&key);
 		let fetch = self
 			.storage_providers()
@@ -551,6 +562,10 @@ impl Service {
 	}
 
 	async fn remove_media_file(&self, key: &[u8]) -> Result {
+		// Drop any CAS mapping for this key (the deduplicated blob is retained,
+		// as other keys may still reference the same content).
+		self.db.remove_cas_content_id(key);
+
 		let path = self.get_media_name_sha256(key);
 		self.storage_providers()
 			.stream()
@@ -576,6 +591,16 @@ impl Service {
 	}
 
 	async fn create_media_file(&self, key: &[u8], file: &[u8]) -> Result {
+		// Content-addressed backend (experimental, gated): store the bytes once
+		// in the deduplicating CAS and record the key -> content-id mapping, so
+		// reads can resolve the blob. The storage providers are bypassed.
+		if self.services.config.media_cas_backend {
+			let content_id = self.services.cas.store_blob(file)?;
+			debug!(?key, content_id, len = file.len(), "Storing media in CAS");
+			self.db.set_cas_content_id(key, &content_id);
+			return Ok(());
+		}
+
 		self.storage_providers()
 			.try_stream()
 			.ready_try_filter(|provider| {

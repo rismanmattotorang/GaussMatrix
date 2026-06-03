@@ -18,6 +18,7 @@ pub(crate) struct Data {
 	mediaid_file: Arc<Map>,
 	mediaid_pending: Arc<Map>,
 	mediaid_user: Arc<Map>,
+	mediaid_cas: Arc<Map>,
 	url_previews: Arc<Map>,
 }
 
@@ -34,8 +35,30 @@ impl Data {
 			mediaid_file: db["mediaid_file"].clone(),
 			mediaid_pending: db["mediaid_pending"].clone(),
 			mediaid_user: db["mediaid_user"].clone(),
+			mediaid_cas: db["mediaid_cas"].clone(),
 			url_previews: db["url_previews"].clone(),
 		}
+	}
+
+	/// Record the content-addressed store id backing a media file key, so a
+	/// later read can resolve the (deduplicated) blob from the CAS.
+	pub(super) fn set_cas_content_id(&self, key: &[u8], content_id: &str) {
+		self.mediaid_cas.put_raw(key, content_id);
+	}
+
+	/// Look up the CAS content id backing a media file key, if the file's bytes
+	/// were stored in the content-addressed store.
+	pub(super) async fn get_cas_content_id(&self, key: &[u8]) -> Result<String> {
+		self.mediaid_cas
+			.get(key)
+			.await
+			.and_then(|handle| string_from_bytes(&handle))
+	}
+
+	/// Drop the CAS mapping for a media file key. The blob itself is left in the
+	/// CAS, since other keys may reference the same (deduplicated) content.
+	pub(super) fn remove_cas_content_id(&self, key: &[u8]) {
+		self.mediaid_cas.remove(key);
 	}
 
 	pub(super) fn create_file_metadata(
