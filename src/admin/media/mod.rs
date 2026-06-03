@@ -6,6 +6,7 @@ mod delete_by_event;
 mod delete_list;
 mod delete_range;
 mod get_file_info;
+mod content_stats;
 mod get_remote_file;
 mod get_remote_thumbnail;
 mod preview;
@@ -115,4 +116,7 @@ pub(super) enum MediaCommand {
 		#[arg(short, long)]
 		no_cache: bool,
 	},
+
+	/// - Show the content-addressed media store stats (distinct deduped blobs)
+	ContentStats,
 }
