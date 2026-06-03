@@ -3,6 +3,7 @@ mod enable_room;
 mod fetch_support_well_known;
 mod incoming_federation;
 mod remote_user_in_rooms;
+mod scheduler_drive;
 mod scheduler_status;
 
 use clap::Subcommand;
@@ -47,4 +48,8 @@ pub(super) enum FederationCommand {
 
 	/// - Show the per-destination outbound scheduler queue depths (gm-fed)
 	SchedulerStatus,
+
+	/// - Drive one gm-fed scheduling cycle through the transport (requires
+	///   gm_fed_authoritative_sender; experimental)
+	SchedulerDrive,
 }

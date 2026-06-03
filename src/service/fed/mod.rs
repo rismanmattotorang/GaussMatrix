@@ -31,12 +31,14 @@ use std::{
 use gaussmatrix_core::{Result, err, implement, warn};
 use gm_fed::{Destination, FederationSender};
 use gm_store::{Domain, DynStore};
+use ruma::OwnedServerName;
 use tokio::sync::Mutex;
 
 pub struct Service {
 	sender: Mutex<FederationSender>,
 	store: DynStore,
 	seq: AtomicU64,
+	services: Arc<crate::services::OnceServices>,
 }
 
 impl crate::Service for Service {
@@ -46,7 +48,12 @@ impl crate::Service for Service {
 		restore_health(&store, &mut sender)?;
 		let next_seq = max_queue_seq(&store)?.saturating_add(1);
 
-		Ok(Arc::new(Self { sender: Mutex::new(sender), store, seq: AtomicU64::new(next_seq) }))
+		Ok(Arc::new(Self {
+			sender: Mutex::new(sender),
+			store,
+			seq: AtomicU64::new(next_seq),
+			services: args.services.clone(),
+		}))
 	}
 
 	fn name(&self) -> &str { crate::service::make_name(std::module_path!()) }
@@ -114,6 +121,46 @@ pub async fn tick(&self) -> Vec<(Destination, Vec<Vec<u8>>)> {
 		warn!("federation scheduler tick failed: {e}");
 		Vec::new()
 	})
+}
+
+/// Drive one scheduling cycle through the real transport (config-gated): the
+/// gm-fed scheduler selects the ready destinations and flushes each through the
+/// existing sender's transport, then records the outcome. Returns the number of
+/// destinations driven.
+///
+/// Gated on `gm_fed_authoritative_sender` — disabled by default, gm-fed stays a
+/// shadow scheduler. This is the cutover seam: gm-fed schedules, the existing
+/// sender transports. Intended for integration testing.
+///
+/// # Errors
+///
+/// Returns an error if the feature is disabled, or if a flush fails.
+#[implement(Service)]
+pub async fn drive_once(&self) -> Result<usize> {
+	if !self.services.server.config.gm_fed_authoritative_sender {
+		return Err(err!(
+			"gm-fed authoritative sender is disabled; set gm_fed_authoritative_sender = true"
+		));
+	}
+
+	let batches = self.tick().await;
+	let destinations: Vec<OwnedServerName> = batches
+		.iter()
+		.filter_map(|(dest, _)| OwnedServerName::parse(dest).ok())
+		.collect();
+
+	if destinations.is_empty() {
+		return Ok(0);
+	}
+
+	let stream = futures::stream::iter(destinations.iter().map(AsRef::as_ref));
+	self.services.sending.flush_servers(stream).await?;
+
+	for destination in &destinations {
+		self.mark_success(destination.as_str()).await;
+	}
+
+	Ok(destinations.len())
 }
 
 /// Record a successful delivery to `destination`, clearing its backoff (and its

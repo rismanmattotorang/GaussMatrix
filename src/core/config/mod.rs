@@ -792,6 +792,19 @@ pub struct Config {
 	#[serde(default = "true_fn")]
 	pub allow_federation: bool,
 
+	/// EXPERIMENTAL: let the gm-fed scheduler drive outbound federation.
+	///
+	/// When false (default) gm-fed runs in shadow mode only and the legacy
+	/// sender remains authoritative. When true, the `federation
+	/// scheduler-drive` admin command may flush gm-fed's ready destinations
+	/// through the sender's transport. Intended for integration testing; do
+	/// not enable in production without validation.
+	///
+	/// reloadable: yes
+	/// default: false
+	#[serde(default)]
+	pub gm_fed_authoritative_sender: bool,
+
 	/// Sets the default `m.federate` property for newly created rooms when the
 	/// client does not request one. If `allow_federation` is set to false at
 	/// the same this value is set to false it then always overrides the client

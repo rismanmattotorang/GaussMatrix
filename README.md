@@ -184,9 +184,13 @@ preserves auditability.
       authoritative. Both the per-destination **health** and the **outbound queue** are durable
       (gm-store `FederationHealth` / `FederationQueue` column families, queue keyed
       `destination\0seq` for ordered, restart-safe resumption) — the basis for an authoritative
-      scheduler, with the drive primitive (`tick`: ready → drain due batches) in place. Next:
-      the full cutover that binds the drained batches to the federation transport (best paired
-      with integration tests), plus async transport, signing, and partial-state joins/backfill.
+      scheduler, with the drive primitive (`tick`: ready → drain due batches) in place. A
+      **config-gated cutover seam** is wired: with `gm_fed_authoritative_sender = true` the
+      `federation scheduler-drive` admin command lets gm-fed schedule ready destinations and
+      flush them through the existing sender's transport (gm-fed schedules, the proven sender
+      transports); default-off, so production is unaffected until validated with integration
+      tests. Next: a periodic drive loop and a native gm-fed transport (signing, partial-state
+      joins/backfill).
 - [~] Shared object store for media addressed by content hash. **Content-addressed store
       landed** as the additive `cas` service: a blob is named by the SHA-256 of its bytes
       (`Domain::MediaBlobs`), so identical uploads deduplicate and a content id is a
