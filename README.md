@@ -233,10 +233,12 @@ preserves auditability.
       GaussInteract and E2EE-aware mediation.
 - [x] Tamper-evident, hash-chained audit log in a dedicated storage column family.
       (`audit` service over `Domain::AuditLog`; `gm-agent::mediation_record` produces
-      audit-ready decision records.) `agent audit-sign` emits a **server-signed manifest**
-      (chain-head hash + entry count, signed with the server's Ed25519 key) — a reviewer
-      recomputes the chain from `audit-export`, checks the head hash, and verifies the
-      signature with the server's published key for non-repudiable compliance evidence.
+      audit-ready decision records.) `agent audit-sign` **verifies the chain and then emits a
+      server-signed manifest** (chain-head hash + entry count, signed with the server's Ed25519
+      key) — signing is refused if the chain is broken, so a valid signature always attests an
+      intact log. A reviewer recomputes the chain from `audit-export`, checks the head hash, and
+      verifies the signature with the server's published key for non-repudiable compliance
+      evidence.
 - [x] In-band, namespaced agent events (`m.gauss.agent.tool_call`,
       `m.gauss.agent.tool_result`) for replayable, auditable interactions — posted to the
       room timeline by the live agent service as mediated calls proceed.
