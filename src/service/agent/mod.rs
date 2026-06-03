@@ -539,10 +539,15 @@ pub async fn quota(&self, agent: &UserId, room_id: &RoomId) -> Result<Vec<ToolQu
 /// Ed25519 key. A compliance reviewer recomputes the chain from `audit-export`,
 /// checks the head hash matches, and verifies the signature with the server's
 /// published key — non-repudiable evidence of the log's contents and origin.
+///
+/// The chain is **verified before signing**: a broken or tampered log is
+/// refused, so a valid signature always attests an intact chain.
 #[implement(Service)]
 pub fn sign_audit_export(&self) -> Result<String> {
 	use base64::{Engine as _, engine::general_purpose::STANDARD};
 	use ruma::{CanonicalJsonObject, CanonicalJsonValue};
+
+	self.services.audit.verify()?;
 
 	let count = self.services.audit.count()?;
 	let head = STANDARD.encode(self.services.audit.head_hash()?);
