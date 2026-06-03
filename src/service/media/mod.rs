@@ -363,7 +363,7 @@ impl Service {
 		// `media_cas_backend` setting, so previously CAS-stored media always
 		// reads back. Falls through to the storage providers otherwise.
 		if let Ok(content_id) = self.db.get_cas_content_id(&key).await {
-			let Some(content) = self.services.cas.load_blob(&content_id)? else {
+			let Some(content) = self.services.cas.load_blob(&content_id).await? else {
 				return Err!(Request(NotFound("Media not found.")));
 			};
 
@@ -595,7 +595,7 @@ impl Service {
 		// in the deduplicating CAS and record the key -> content-id mapping, so
 		// reads can resolve the blob. The storage providers are bypassed.
 		if self.services.config.media_cas_backend {
-			let content_id = self.services.cas.store_blob(file)?;
+			let content_id = self.services.cas.store_blob(file).await?;
 			debug!(?key, content_id, len = file.len(), "Storing media in CAS");
 			self.db.set_cas_content_id(key, &content_id);
 			return Ok(());
