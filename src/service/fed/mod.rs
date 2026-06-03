@@ -29,10 +29,17 @@ use std::{
 };
 
 use async_trait::async_trait;
-use gaussmatrix_core::{Result, debug, err, implement, warn};
+use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
+use futures::FutureExt;
+use gaussmatrix_core::{Result, debug, err, implement, utils::calculate_hash, warn};
 use gm_fed::{Destination, FederationSender};
 use gm_store::{Domain, DynStore};
-use ruma::OwnedServerName;
+use ruma::{
+	CanonicalJsonObject, MilliSecondsSinceUnixEpoch, OwnedServerName, ServerName,
+	api::federation::transactions::{edu::Edu, send_transaction_message},
+	serde::Raw,
+};
+use serde_json::value::RawValue as RawJsonValue;
 use tokio::sync::Mutex;
 
 /// How often the gated scheduler drive loop wakes to flush ready destinations.
@@ -153,18 +160,25 @@ pub async fn tick(&self) -> Vec<(Destination, Vec<Vec<u8>>)> {
 	})
 }
 
-/// Drive one scheduling cycle through the real transport (config-gated): the
-/// gm-fed scheduler selects the ready destinations and flushes each through the
-/// existing sender's transport, then records the outcome. Returns the number of
-/// destinations driven.
+/// Drive one scheduling cycle through gm-fed's **native transport**
+/// (config-gated): select the ready destinations, drain their durable queue,
+/// and for each build a federation transaction and dispatch it ourselves —
+/// reusing the proven request signing and HTTP client via
+/// [`federation::execute_on`](crate::federation::Service::execute_on) — then
+/// record the real outcome (success clears backoff; failure schedules it).
+/// Returns the number of destinations driven.
 ///
-/// Gated on `gm_fed_authoritative_sender` — disabled by default, gm-fed stays a
-/// shadow scheduler. This is the cutover seam: gm-fed schedules, the existing
-/// sender transports. Intended for integration testing.
+/// gm-fed owns the construct → sign → send → record loop here, rather than
+/// delegating to the legacy sender's queue. The durable queue items are
+/// serialized PDU JSON; today the production path enqueues shadow markers, which
+/// parse to no PDUs and make each dispatch a safe no-op, so the native path is
+/// inert until gm-fed's queue is fed real outbound PDUs.
+///
+/// Gated on `gm_fed_authoritative_sender` — disabled by default.
 ///
 /// # Errors
 ///
-/// Returns an error if the feature is disabled, or if a flush fails.
+/// Returns an error if the feature is disabled.
 #[implement(Service)]
 pub async fn drive_once(&self) -> Result<usize> {
 	if !self.services.server.config.gm_fed_authoritative_sender {
@@ -174,23 +188,73 @@ pub async fn drive_once(&self) -> Result<usize> {
 	}
 
 	let batches = self.tick().await;
-	let destinations: Vec<OwnedServerName> = batches
-		.iter()
-		.filter_map(|(dest, _)| OwnedServerName::parse(dest).ok())
-		.collect();
+	let mut driven: usize = 0;
 
-	if destinations.is_empty() {
-		return Ok(0);
+	for (dest, items) in batches {
+		let Ok(server) = OwnedServerName::parse(&dest) else {
+			warn!("federation scheduler: skipping invalid destination {dest:?}");
+			continue;
+		};
+
+		// gm-fed's durable queue items are serialized PDU JSON. Shadow markers
+		// (empty or non-PDU bytes) parse to nothing, leaving an empty
+		// transaction that `dispatch_transaction` reports as a no-op.
+		let pdus: Vec<CanonicalJsonObject> = items
+			.iter()
+			.filter_map(|item| serde_json::from_slice(item).ok())
+			.collect();
+
+		match self.dispatch_transaction(&server, pdus).await {
+			| Ok(_) => self.mark_success(server.as_str()).await,
+			| Err(error) => {
+				warn!("federation scheduler: native dispatch to {server} failed: {error}");
+				self.mark_failure(server.as_str()).await;
+			},
+		}
+
+		driven = driven.saturating_add(1);
 	}
 
-	let stream = futures::stream::iter(destinations.iter().map(AsRef::as_ref));
-	self.services.sending.flush_servers(stream).await?;
+	Ok(driven)
+}
 
-	for destination in &destinations {
-		self.mark_success(destination.as_str()).await;
+/// Build a federation transaction from the resolved PDUs and dispatch it to
+/// `dest` over the proven federation transport (which signs the request with the
+/// server's Ed25519 key and sends it via the federation HTTP client). Returns
+/// `false` without a network call when there is nothing to send.
+#[implement(Service)]
+async fn dispatch_transaction(
+	&self,
+	dest: &ServerName,
+	pdu_jsons: Vec<CanonicalJsonObject>,
+) -> Result<bool> {
+	if pdu_jsons.is_empty() {
+		return Ok(false);
 	}
 
-	Ok(destinations.len())
+	let mut pdus: Vec<Box<RawJsonValue>> = Vec::with_capacity(pdu_jsons.len());
+	for pdu_json in pdu_jsons {
+		// `.boxed()` type-erases the deeply-nested federation futures; left
+		// inline their layout depth propagates up through the drive loop's
+		// `worker` async block and overflows the layout recursion limit (the
+		// same reason the legacy sender `.boxed()`s its send futures).
+		pdus.push(self.services.federation.format_pdu_into(pdu_json, None).boxed().await);
+	}
+	// EDU multiplexing stays with the legacy sender for now; the native path
+	// ships PDUs only.
+	let edus: Vec<Raw<Edu>> = Vec::new();
+
+	let request = build_transaction(self.services.server.name.clone(), pdus, edus);
+	let txn_id = request.transaction_id.clone();
+	debug!(%dest, %txn_id, pdus = request.pdus.len(), "Dispatching native federation transaction");
+
+	self.services
+		.federation
+		.execute_on(&self.services.client.sender, dest, request)
+		.boxed()
+		.await?;
+
+	Ok(true)
 }
 
 /// Record a successful delivery to `destination`, clearing its backoff (and its
@@ -377,6 +441,38 @@ fn now_millis() -> u64 {
 		.unwrap_or(0)
 }
 
+/// The federation transaction id for a batch: the URL-safe base64 of a hash over
+/// the (delimited) PDU and EDU bytes. Pure and content-addressed — the same
+/// contents always yield the same id, so a retransmission is idempotent on the
+/// receiving server. Mirrors the legacy sender's derivation.
+fn transaction_id(pdus: &[Box<RawJsonValue>], edus: &[Raw<Edu>]) -> String {
+	let preimage = pdus
+		.iter()
+		.map(|raw| raw.get().as_bytes())
+		.chain(edus.iter().map(|raw| raw.json().get().as_bytes()));
+
+	URL_SAFE_NO_PAD.encode(calculate_hash(preimage))
+}
+
+/// Assemble a `send_transaction_message` request from `origin` and the resolved
+/// PDUs/EDUs, stamping it with a content-addressed [`transaction_id`] and the
+/// current time. Pure but for the timestamp.
+fn build_transaction(
+	origin: OwnedServerName,
+	pdus: Vec<Box<RawJsonValue>>,
+	edus: Vec<Raw<Edu>>,
+) -> send_transaction_message::v1::Request {
+	let transaction_id = transaction_id(&pdus, &edus);
+
+	send_transaction_message::v1::Request {
+		transaction_id: transaction_id.as_str().into(),
+		origin,
+		origin_server_ts: MilliSecondsSinceUnixEpoch::now(),
+		pdus,
+		edus,
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use std::collections::BTreeSet;
@@ -384,10 +480,29 @@ mod tests {
 	use gm_store::{DynStore, MemBackend};
 
 	use super::{
-		Domain, all_queue_depths, drain_queue, due_batches, max_queue_seq, queue_depth, queue_key,
+		Domain, Edu, Raw, all_queue_depths, drain_queue, due_batches, max_queue_seq, queue_depth,
+		queue_key, transaction_id,
 	};
 
 	fn mem_store() -> DynStore { DynStore::new(MemBackend::default()) }
+
+	#[test]
+	fn transaction_id_is_content_addressed() {
+		let raw = |v: serde_json::Value| serde_json::value::to_raw_value(&v).unwrap();
+		let no_edus: Vec<Raw<Edu>> = Vec::new();
+
+		let id = transaction_id(&[raw(serde_json::json!({ "a": 1 }))], &no_edus);
+
+		// Stable, non-empty, and identical content yields the identical id (so a
+		// retransmission is idempotent on the receiver).
+		assert!(!id.is_empty());
+		assert_eq!(id, transaction_id(&[raw(serde_json::json!({ "a": 1 }))], &no_edus));
+
+		// Different PDU content yields a different id.
+		assert_ne!(id, transaction_id(&[raw(serde_json::json!({ "a": 2 }))], &no_edus));
+		// An empty batch is distinct from a populated one.
+		assert_ne!(id, transaction_id(&[], &no_edus));
+	}
 
 	#[test]
 	fn durable_queue_orders_and_drains_per_destination() {

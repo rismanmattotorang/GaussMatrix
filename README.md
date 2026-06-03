@@ -186,12 +186,16 @@ preserves auditability.
       `destination\0seq` for ordered, restart-safe resumption) — the basis for an authoritative
       scheduler, with the drive primitive (`tick`: ready → drain due batches) in place. A
       **config-gated cutover seam** is wired: with `gm_fed_authoritative_sender = true` the
-      `federation scheduler-drive` admin command lets gm-fed schedule ready destinations and
-      flush them through the existing sender's transport (gm-fed schedules, the proven sender
-      transports); default-off. A **gated periodic drive loop** also runs in the `fed` service
-      worker, driving one scheduling cycle on an interval when the flag is enabled (a no-op loop
-      otherwise), so production is unaffected until validated with integration tests. Next: a
-      native gm-fed transport (signing, partial-state joins/backfill).
+      `federation scheduler-drive` admin command and a **gated periodic drive loop** (in the
+      `fed` service worker) drive scheduling cycles when the flag is enabled (a no-op otherwise);
+      default-off. The drive uses gm-fed's **native transport**: it builds the
+      `send_transaction` request itself (content-addressed transaction id, so retransmits are
+      idempotent on the receiver) and dispatches it through the proven `federation.execute_on`
+      path — reusing the audited Ed25519 X-Matrix request signing and HTTP client rather than
+      reimplementing crypto. gm-fed now owns the construct→sign→send→record loop end to end.
+      (Partial-state joins — `omit_members` send_join with lazy member fetch — and backfill are
+      pull-side and already complete; they sit outside the sender.) Next: feeding gm-fed's queue
+      real outbound PDUs as the authoritative producer.
 - [x] Shared object store for media addressed by content hash. Landed as the additive `cas`
       service: a blob is named by the SHA-256 of its bytes, so identical uploads deduplicate and
       a content id is a self-verifying integrity check (`store_blob` / `load_blob` / `has_blob`;
