@@ -13,6 +13,7 @@ pub mod admin;
 pub mod agent;
 pub mod appservice;
 pub mod audit;
+pub mod cas;
 pub mod client;
 pub mod config;
 pub mod deactivate;

@@ -60,12 +60,16 @@ pub enum Domain {
 	/// Durable per-destination outbound federation queue, so queued traffic
 	/// survives restarts — the basis for an authoritative scheduler (§V).
 	FederationQueue = 13,
+
+	/// Content-addressed media blobs, keyed by the SHA-256 of their bytes, so
+	/// identical content is stored exactly once (§III-C).
+	MediaBlobs = 14,
 }
 
 impl Domain {
 	/// Every domain, in declaration order. Backends open one column family per
 	/// entry.
-	pub const ALL: [Self; 14] = [
+	pub const ALL: [Self; 15] = [
 		Self::Events,
 		Self::RoomState,
 		Self::AuthChainIndex,
@@ -80,6 +84,7 @@ impl Domain {
 		Self::AgentRateLimits,
 		Self::FederationHealth,
 		Self::FederationQueue,
+		Self::MediaBlobs,
 	];
 
 	/// The stable on-disk column-family name for this domain.
@@ -103,6 +108,7 @@ impl Domain {
 			| Self::AgentRateLimits => "agent_rate_limits",
 			| Self::FederationHealth => "federation_health",
 			| Self::FederationQueue => "federation_queue",
+			| Self::MediaBlobs => "media_blobs",
 		}
 	}
 
@@ -124,6 +130,7 @@ impl Domain {
 			| Self::AgentRateLimits => 11,
 			| Self::FederationHealth => 12,
 			| Self::FederationQueue => 13,
+			| Self::MediaBlobs => 14,
 		}
 	}
 

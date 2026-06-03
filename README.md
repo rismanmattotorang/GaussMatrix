@@ -187,7 +187,12 @@ preserves auditability.
       scheduler, with the drive primitive (`tick`: ready → drain due batches) in place. Next:
       the full cutover that binds the drained batches to the federation transport (best paired
       with integration tests), plus async transport, signing, and partial-state joins/backfill.
-- [ ] Shared object store for media addressed by content hash.
+- [~] Shared object store for media addressed by content hash. **Content-addressed store
+      landed** as the additive `cas` service: a blob is named by the SHA-256 of its bytes
+      (`Domain::MediaBlobs`), so identical uploads deduplicate and a content id is a
+      self-verifying integrity check (`store_blob` / `load_blob` / `has_blob`; `media
+      content-stats` reports distinct blobs). Next: migrating the production media path onto it
+      and a shared (multi-node) object-store backend.
 
 ### Phase 3 — Agentic AI layer
 - [x] `gm-agent` Model Context Protocol gateway (bidirectional Matrix ↔ MCP bridge),
