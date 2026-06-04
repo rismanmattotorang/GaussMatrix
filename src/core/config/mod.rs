@@ -805,6 +805,21 @@ pub struct Config {
 	#[serde(default)]
 	pub gm_fed_authoritative_sender: bool,
 
+	/// EXPERIMENTAL: run the gm-stateres engine in shadow mode over live state
+	/// resolution.
+	///
+	/// When true, every time the server resolves conflicting room state it also
+	/// runs the clean-room gm-stateres engine over the same forks and logs
+	/// whether the two engines agree. The authoritative result always comes from
+	/// the existing `rooms::state_res` path; the shadow run only observes and
+	/// never affects it. Intended for validation; adds latency to state
+	/// resolution while enabled.
+	///
+	/// reloadable: yes
+	/// default: false
+	#[serde(default)]
+	pub gm_stateres_shadow: bool,
+
 	/// Sets the default `m.federate` property for newly created rooms when the
 	/// client does not request one. If `allow_federation` is set to false at
 	/// the same this value is set to false it then always overrides the client

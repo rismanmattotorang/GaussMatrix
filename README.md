@@ -122,7 +122,11 @@ preserves auditability.
       the config env prefix (`TUWUNEL_ → GAUSSMATRIX_`, old prefixes retained as
       migration fallbacks), and all packaging units (systemd, Deb/RPM/Arch, Podman
       quadlets, install paths).
-- [ ] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
+- [~] CI supply-chain gates: `cargo audit` + `cargo deny`, reproducible builds.
+      **Both audit gates landed**: `cargo audit` (RustSec advisories) and a full
+      `cargo deny check` (advisories, source integrity — only crates.io + the
+      `matrix-construct` org, an allow-listed license set, and duplicate-dependency
+      surfacing) run as `lint` CI jobs. Remaining: reproducible-build verification.
 
 ### Phase 1 — Server core *(drop-in homeserver — in progress)*
 - [~] `gm-store` pluggable storage trait with per-domain column families, generalising
@@ -150,8 +154,14 @@ preserves auditability.
       endpoint (distinguishing 404/`M_UNRECOGNIZED` from 405), access-token extraction,
       and the `/versions` response. The `EventView` bridge + `StateEvent::from_view`, with a
       feature-gated (`core-bridge`) blanket adapter over the server's ruma-backed
-      `gaussmatrix_core::matrix::Event`, wires real PDUs into the engine. Next: driving
-      resolution over live PDUs in the service.
+      `gaussmatrix_core::matrix::Event`, wires real PDUs into the engine. **Now driving
+      resolution over live PDUs in shadow mode**: the production `state_res` path
+      (`event_handler::resolve_state`) optionally re-runs every conflicting-state
+      resolution through `gm-stateres` over the same forks/auth-chains and logs whether
+      the two engines agree (`gm_resolve::shadow_compare`, config-gated by
+      `gm_stateres_shadow`, default off; the legacy engine stays authoritative and the
+      shadow never affects its result). Next: a config-gated cutover seam, mirroring the
+      gm-fed adoption path.
 - [ ] Single-node profile with **on-disk compatibility** for drop-in migration from a
       Tuwunel/conduwuit data directory.
 - [ ] Full Client–Server / Server–Server conformance against the spec test suite.
