@@ -261,6 +261,7 @@ group "lints" {
         "audit",
         "check",
         "clippy",
+        "deny",
         "fmt",
         "lychee",
     ]
@@ -1389,6 +1390,24 @@ target "audit" {
     }
 }
 
+target "deny" {
+    name = elem("deny", [cargo_profile, rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target])
+    tags = [
+        elem_tag("deny", [cargo_profile, rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target], "latest"),
+    ]
+    labels = leaf_labels
+    target = "deny"
+    dockerfile = "${docker_dir}/Dockerfile.cargo.deny"
+    matrix = cargo_rust_feat_sys
+    inherits = [
+        elem("deps-base", [cargo_profile, rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target]),
+        elem("cargo", [cargo_profile, rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target]),
+    ]
+    contexts = {
+        input = elem("target:ingredients", [rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target])
+    }
+}
+
 target "typos" {
     name = elem("typos", [cargo_profile, rust_toolchain, rust_target, feat_set, sys_name, sys_version, sys_target])
     tags = [
@@ -1888,6 +1907,7 @@ cargo_installs = [
     #"cargo-arch",
     "cargo-chef",
     "cargo-deb",
+    "cargo-deny",
     "cargo-generate-rpm",
     "cargo-valgrind",
     "lychee",
