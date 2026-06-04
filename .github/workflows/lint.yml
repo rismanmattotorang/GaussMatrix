@@ -116,6 +116,31 @@ jobs:
       includes: ${{inputs.includes}}
       checkout: ${{inputs.checkout}}
 
+  deny:
+    if: >
+      !failure() && !cancelled()
+      && fromJSON(inputs.enable_audit)
+      && contains(fromJSON(inputs.cargo_profiles), fromJSON('["test"]')[0])
+      && contains(fromJSON(inputs.feat_sets), fromJSON('["all"]')[0])
+      && contains(fromJSON(inputs.rust_toolchains), fromJSON('["nightly"]')[0])
+      && contains(fromJSON(inputs.sys_targets), fromJSON('["x86_64-v1-linux-gnu"]')[0])
+
+    name: Deny
+    uses: ./.github/workflows/bake.yml
+    with:
+      bake_targets: '["deny"]'
+      cargo_profiles: '["test"]'
+      feat_sets: '["all"]'
+      rust_toolchains: '["nightly"]'
+      sys_names: ${{inputs.sys_names}}
+      sys_versions: ${{inputs.sys_versions}}
+      rust_targets: ${{inputs.rust_targets}}
+      sys_targets: '["x86_64-v1-linux-gnu"]'
+      machines: ${{inputs.machines}}
+      excludes: ${{inputs.excludes}}
+      includes: ${{inputs.includes}}
+      checkout: ${{inputs.checkout}}
+
   lychee:
     if: >
       !failure() && !cancelled()

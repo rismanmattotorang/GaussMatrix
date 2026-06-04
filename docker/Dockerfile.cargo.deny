@@ -1,0 +1,22 @@
+# syntax = docker/dockerfile:1.11-labs
+
+FROM input AS deny
+ARG rust_toolchain="nightly"
+ARG RUSTUP_HOME
+ARG CARGO_HOME
+ARG deny_args=""
+
+WORKDIR /usr/src/gaussmatrix
+RUN \
+--mount=type=cache,dst=${RUSTUP_HOME}/downloads,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/registry,sharing=shared \
+--mount=type=cache,dst=${CARGO_HOME}/git,sharing=shared \
+<<EOF
+    set -eux
+    rustup run ${rust_toolchain} \
+        cargo deny \
+            --all-features \
+            check \
+            --color=always \
+            ${deny_args}
+EOF
