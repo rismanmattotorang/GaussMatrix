@@ -7,8 +7,9 @@
 //! room-version authorisation rules.
 //!
 //! This is the adoption seam for the engine; the production cutover from the
-//! existing `rooms::state_res` path and the sender power-level derivation it
-//! needs are follow-ups (sender levels are supplied as zero here).
+//! existing `rooms::state_res` path is a follow-up. Each event's sender power
+//! level is derived here from the `m.room.power_levels` event in its own auth
+//! chain (see [`sender_power_level`]).
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -30,21 +31,32 @@ pub type LiveStateMap = BTreeMap<TypeStateKey, OwnedEventId>;
 ///
 /// `event_ids` are the events referenced by the forks and their auth chains;
 /// each is fetched from `timeline`, bridged into a [`StateEvent`], and used to
-/// build the resolution event store. The two-pass resolve then runs with the
-/// composed room-version auth rules. Events missing from the timeline are
-/// skipped.
+/// build the resolution event store. Every event's sender power level is then
+/// derived from the power-levels event in its own auth chain (see
+/// [`sender_power_level`]) before the two-pass resolve runs with the composed
+/// room-version auth rules. Events missing from the timeline are skipped.
 pub async fn resolve_forks(
 	timeline: &timeline::Service,
 	forks: &[StateMap],
 	auth_chains: &[BTreeSet<EventId>],
 	event_ids: &[OwnedEventId],
 ) -> StateMap {
-	let mut store = EventStore::<StateEvent>::new();
+	// Bridge every referenced event first, with the sender level unset: deriving
+	// it needs the power-levels events, which are themselves in this set.
+	let mut bridged = BTreeMap::<EventId, StateEvent>::new();
 	for id in event_ids {
 		if let Ok(pdu) = timeline.get_pdu(id).await {
 			let event = StateEvent::from_view(&pdu, 0);
-			store.insert(event.event_id().to_owned(), event);
+			bridged.insert(event.event_id().to_owned(), event);
 		}
+	}
+
+	// Derive each sender's effective power level from the power-levels event in
+	// the event's own auth chain, then assemble the resolution store.
+	let mut store = EventStore::<StateEvent>::new();
+	for (id, event) in &bridged {
+		let power_level = sender_power_level(event, &bridged);
+		store.insert(id.clone(), event.clone().with_power_level(power_level));
 	}
 
 	let components: [&dyn AuthRules<StateEvent>; 4] =
@@ -53,6 +65,29 @@ pub async fn resolve_forks(
 	let mut cache = ResolvedStateCache::new(256);
 
 	resolve(forks, auth_chains, &store, &rules, &mut cache)
+}
+
+/// The effective power level of `event`'s sender: their level (`users[sender]`,
+/// else `users_default`) in the `m.room.power_levels` event referenced by
+/// `event`'s auth events, or zero when no power-levels event is in scope — the
+/// create-room bootstrap, before any power-levels event exists, where the
+/// Matrix `users_default` default is itself zero.
+///
+/// This matches the common-case (room v1–v10) authoritative derivation in
+/// `rooms::state_res` (`resolve::power_sort::power_level_for_sender`). Room
+/// versions that privilege room creators absent a power-levels event are a
+/// follow-up (see `docs/development/gm-stateres-cutover.md`).
+fn sender_power_level(event: &StateEvent, events: &BTreeMap<EventId, StateEvent>) -> i64 {
+	event
+		.auth_event_ids()
+		.iter()
+		.find_map(|auth_id| {
+			let auth = events.get(auth_id)?;
+			(auth.event_type() == "m.room.power_levels")
+				.then(|| auth.power_levels())
+				.flatten()
+		})
+		.map_or(0, |levels| levels.for_user(event.sender()))
 }
 
 /// Project a live state map into the gm-stateres [`StateMap`] representation
@@ -141,9 +176,12 @@ fn diverging_keys<'a>(expected: &'a StateMap, shadow: &'a StateMap) -> Vec<&'a (
 mod tests {
 	use std::collections::BTreeMap;
 
+	use gm_api::StateEvent;
+	use gm_stateres::{Event, EventId};
 	use ruma::{OwnedEventId, owned_event_id};
+	use serde_json::json;
 
-	use super::{LiveStateMap, StateMap, diverging_keys, to_gm_statemap};
+	use super::{LiveStateMap, StateMap, diverging_keys, sender_power_level, to_gm_statemap};
 
 	fn key(ty: &str, sk: &str) -> (String, String) { (ty.to_owned(), sk.to_owned()) }
 
@@ -187,5 +225,52 @@ mod tests {
 
 		let diverged = diverging_keys(&expected, &shadow);
 		assert_eq!(diverged, vec![&key("m.room.member", "@a:x"), &key("m.room.topic", "")]);
+	}
+
+	/// Build an event store keyed by event id from `(id, event)` pairs.
+	fn store(events: Vec<StateEvent>) -> BTreeMap<EventId, StateEvent> {
+		events
+			.into_iter()
+			.map(|event| (event.event_id().to_owned(), event))
+			.collect()
+	}
+
+	/// A `m.room.power_levels` event granting `@admin:x` level 100.
+	fn power_levels_event() -> StateEvent {
+		StateEvent::new("$pl", "m.room.power_levels", "@admin:x")
+			.with_content(&json!({ "users": { "@admin:x": 100 }, "users_default": 0 }))
+	}
+
+	#[test]
+	fn sender_level_reads_listed_user_from_auth_power_levels() {
+		let member = StateEvent::new("$m", "m.room.member", "@admin:x")
+			.with_state_key("@admin:x")
+			.with_auth_events(&["$pl"]);
+		let events = store(vec![power_levels_event(), member.clone()]);
+
+		assert_eq!(sender_power_level(&member, &events), 100);
+	}
+
+	#[test]
+	fn sender_level_falls_back_to_users_default() {
+		// @bob:x is not listed in the power-levels event, so takes users_default.
+		let member = StateEvent::new("$m", "m.room.member", "@bob:x")
+			.with_state_key("@bob:x")
+			.with_auth_events(&["$pl"]);
+		let events = store(vec![power_levels_event(), member.clone()]);
+
+		assert_eq!(sender_power_level(&member, &events), 0);
+	}
+
+	#[test]
+	fn sender_level_is_zero_without_a_power_levels_event_in_auth() {
+		// Auth chain has only the create event: the create-room bootstrap.
+		let create = StateEvent::new("$c", "m.room.create", "@admin:x");
+		let member = StateEvent::new("$m", "m.room.member", "@admin:x")
+			.with_state_key("@admin:x")
+			.with_auth_events(&["$c"]);
+		let events = store(vec![create, member.clone()]);
+
+		assert_eq!(sender_power_level(&member, &events), 0);
 	}
 }
